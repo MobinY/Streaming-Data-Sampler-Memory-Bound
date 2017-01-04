@@ -71,6 +71,15 @@ Now we turn the previous protocol into a new one without any failure. Let \succe
   \end{align} 
 \end{lemma}
 
+\begin{remark}
+  Because the space lower bound in this note is proven via communication complexity under public random coin model, it also applies to non-uniform models of computation such as circuits and branching programs.  
+\end{remark}
+
+%Not known... most likely false
+%\begin{remark}
+%  The space lower bound still applies if the sampler is required to output an arbitrary item whose coordinate is non-zero instead of a uniformly random one. 
+%\end{remark}
+
 %=====================================================================
 \section{$\Omega(\log n \log {\frac{1}{\delta}})$ Bits Lower Bound}
 Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform random set $A\subseteq [n]$ of size $\frac{1}{2}\log\frac{1}{\delta}$ to Bob. Let $A=\{a_1,\ldots,a_m\}$ and $a_1<\ldots<a_m$. 
@@ -122,11 +131,11 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \end{proof}
 
 \begin{lemma}
-  $\s = \Omega(\log n \log \frac{1}{\delta}).$
+  $\s = \Omega(\log n \log \frac{1}{\delta})$ for $2^{-n^{0.9}}<\delta<\frac{1}{4}$.
 \end{lemma}
 
 \begin{proof}
-  It follows from Formula~\ref{formula:lb-meta}, where $\log {n \choose \frac{1}{2}\log \frac{1}{\delta}}=\Omega(\log n \log \frac{1}{\delta})$ and $\s'=0$. 
+  It follows from Formula~\ref{formula:lb-meta} in Lemma~\ref{lemma:lb-meta}, where $\log {n \choose \frac{1}{2}\log \frac{1}{\delta}}=\Omega(\log n \log \frac{1}{\delta})$ and $\s'=0$. 
 \end{proof}
 
 \begin{remark}
@@ -223,7 +232,7 @@ Alice wants to send random set $A$ to Bob where $|A|=m=n^{1/4}$. Similar to $\en
 Peeling off by chunks (instead of one by one). 
 
 %=====================================================================
-\section{$\Omega(\frac{\log^2 n\log{\frac{1}{\delta}}}{\log\log n+\log\log \frac{1}{\delta}})$ Bits Lower Bound}
+\section{A Fake $\Omega(\frac{\log^2 n\log{\frac{1}{\delta}}}{\log\log n+\log\log \frac{1}{\delta}})$ Bits Lower Bound. Oh no!!!}
 
 Let $m=n^{0.99}$, $K=\log n \cdot \log \frac{1}{\delta}$ and $R=\frac{1}{50}\log n$. Let $A_r = \{a\in A|a<\frac{n}{2^{r-1}}\}$. Let $A_r^{-}=A_{r+1}$ and $A_r^{+}=A_r \backslash A_r^{-}$. We partition each $A_r$ into $K$ chunks, where chunk $k$ ($k=1,\ldots,K$) $C_{r,k}=\{a\in A|\frac{k-1}{K} \le \frac{a}{n/2^{r-1}} < \frac{k}{K} \}$. Assume that $K$ is dividable by $2$ so that $A_r^{-}$ contains the first $\frac{K}{2}$ chunks and $A_r^{+}$ contains the last $\frac{K}{2}$ chunks. Let $n_r=\frac{1}{20} \cdot \frac{\log \frac{1}{\delta}}{\log K}$.
 All these parameters are shared by Alice's $\enc_4$ and Bob's $\dec_4$. 
@@ -301,7 +310,7 @@ Note that $\E(|C_{r,k}|)=m\cdot 2^{1-r}\cdot \frac{1}{K}$. By the setting of par
 \begin{proof}
   Let $Y_{r,k}$ ($r=1,\ldots, R$ and $k=\frac{K}{2}+1,\ldots, K$) denote the indicator random variable that on round $r$ the sampler returns a sample $s$ so that $s\in C_{r,k}$ and on that round $s\not\in C$ (or equivalently, $s\in A\backslash B$).  
   
-  The probability that on round $r$ the sampler return a sample $s$ so that $s\in C_{r,k}$ is at least $\frac{1-\eps}{1+\eps}\cdot \frac{n_r}{K}$. The probability that $s\in C$ is at most $\sum_{i=1}^{r-1}{\frac{1+\eps}{1-\eps}\cdot \frac{n_i}{K}}$. This two events are independent, so 
+  The probability that on round $r$ the sampler return a sample $s$ so that $s\in C_{r,k}$ is at least $\frac{1-\eps}{1+\eps}\cdot \frac{n_r}{K}$. The probability that $s\in C$ is at most $\sum_{i=1}^{r-1}{\frac{1+\eps}{1-\eps}\cdot \frac{n_i}{K}}$. {\color{red}\textbf{This two events are independent}}, so 
   
   $$\E(Y_{r,k})\ge \frac{1-\eps}{1+\eps}\cdot \frac{n_r}{K} \cdot (1-\sum_{i=1}^{r-1}{\frac{1+\eps}{1-\eps}\cdot \frac{n_i}{K}}) \ge \frac{n_r}{2K}=\frac{\log \frac{1}{\delta}}{40K\log K}=\frac{\log \frac{1}{\delta}}{40K(\log\log n + \log\log \frac{1}{\delta})}.$$
   
