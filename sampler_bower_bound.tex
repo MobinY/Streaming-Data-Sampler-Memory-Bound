@@ -49,7 +49,7 @@ We assume that
 \begin{align} \label{formula:delta-range}
 2^{-n^{c_1}}<\delta<(\log n)^{-c_2},
 \end{align}
-where $c_1=0.9$ and $c_2=1.1$. For other range of $\delta$ we will study later.
+where $c_1=0.01$ and $c_2=2$. For other range of $\delta$ we will study later.
 
 In this note, we show space lower bounds for maintaining a sampler for a {\em binary} vector. That is, at any time, we are guaranteed that $x\in \{0,1\}^n$. This makes our result strong in the sense that (1) the lower bound applies for any $p$; (2) the lower bound also works for strict turnstile streams.
 
@@ -232,10 +232,32 @@ Alice wants to send random set $A$ to Bob where $|A|=m=n^{1/4}$. Similar to $\en
 Peeling off by chunks (instead of one by one). 
 
 %=====================================================================
-\section{A Fake $\Omega(\frac{\log^2 n\log{\frac{1}{\delta}}}{\log\log n+\log\log \frac{1}{\delta}})$ Bits Lower Bound. Oh no!!!}
+\section{$\Omega(\frac{\log^2 n\log{\frac{1}{\delta}}}{(\log\log n+\log\log \frac{1}{\delta})^2})$ Bits Lower Bound}
 
-Let $m=n^{0.99}$, $K=\log n \cdot \log \frac{1}{\delta}$ and $R=\frac{1}{50}\log n$. Let $A_r = \{a\in A|a<\frac{n}{2^{r-1}}\}$. Let $A_r^{-}=A_{r+1}$ and $A_r^{+}=A_r \backslash A_r^{-}$. We partition each $A_r$ into $K$ chunks, where chunk $k$ ($k=1,\ldots,K$) $C_{r,k}=\{a\in A|\frac{k-1}{K} \le \frac{a}{n/2^{r-1}} < \frac{k}{K} \}$. Assume that $K$ is dividable by $2$ so that $A_r^{-}$ contains the first $\frac{K}{2}$ chunks and $A_r^{+}$ contains the last $\frac{K}{2}$ chunks. Let $n_r=\frac{1}{20} \cdot \frac{\log \frac{1}{\delta}}{\log K}$.
-All these parameters are shared by Alice's $\enc_4$ and Bob's $\dec_4$. 
+
+
+\begin{algorithm}[H]
+  \caption{Variables Shared by Alice's $\enc_4$ and Bob's $\dec_4$.}
+  \begin{algorithmic}[1]
+    \State $m\leftarrow n^{0.99}$
+    \State $K\leftarrow \log n \cdot \log \frac{1}{\delta}$
+    \State $R\leftarrow \frac{\log n}{50 \log K}$
+    \State $i_1\leftarrow 0$
+    \State $\Delta_1\leftarrow n$
+    \For {$r=1,\ldots, R-1$}
+      \State Let $k_r$ be a uniform sample from $\{1, \ldots, K\}$
+      \State $i_{r+1}\leftarrow i_r+\frac{k_r-1}{K}\Delta_r$
+      \State $\Delta_{r+1}\leftarrow \frac{\Delta_r}{K}$
+    \EndFor
+    \For {$r=1,\ldots, R$}
+      \State $n_r\leftarrow \frac{1}{2} \cdot \frac{\log \frac{1}{\delta}}{\log K}$
+      \State $I_r \leftarrow \{i\in \mathbb{N}|i_r\le i < i_r+\Delta_r\}$
+      \For {$k=1,\ldots, K$}
+        \State $I_{r,k}\leftarrow \{i\in \mathbb{N}|i_r+(k-1)\frac{\Delta_r}{K}\le i < i_r+k\frac{\Delta_r}{K}\}$
+      \EndFor
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
 
 \begin{algorithm}[H]
   \caption{Alice's Encoder.}
@@ -244,23 +266,22 @@ All these parameters are shared by Alice's $\enc_4$ and Bob's $\dec_4$.
     \State $\samp \leftarrow \emptyset$
     \State Insert all elements in $A$ into \samp
     \State $B\leftarrow A$
-    \State $C\leftarrow \emptyset$
     \For {$r=1,\ldots, R$}
       \State Let $\samp_r$ be a copy of \samp
-      \State Remove all elements in $A\backslash A_r$ from $\samp_r$
-      \State $S_r\leftarrow \emptyset$
+      \State Remove all elements in $A\backslash (A\cap I_r)$ from $\samp_r$
       \For {$i=1,\ldots, n_r$}
-        \State Obtain a sample $s$ from $\samp_r$
-        \State Find $k$ such that $s\in C_{r,k}$
-        \State Remove all elements in $C_{r,k}$ from $\samp_r$
-        \State $S_r\leftarrow S_r \cup \{s\}$
-        \If {$k\le \frac{K}{2}$}
-          \State $C\leftarrow C \cup C_{r,k}$
+        \State Obtain a sample $s$ from $\samp_r$ 
+        \If {$s$ is not valid} 
+          \State \Return ``\textbf{fail}'' \label{algo-enc_4:sampler-wrong}
         \EndIf
+        \State Find $k$ such that $s\in I_{r,k}$ 
+        \If {$k=k_r$} 
+          \State \Return ``\textbf{fail}'' \label{algo-enc_4:kill-wrong}
+        \EndIf
+        \State Remove all elements in $A\cap I_{r,k}$ from $\samp_r$
+        \State $B \leftarrow B \backslash \{s\}$
       \EndFor
-      \State $B \leftarrow B \backslash (A_r^{+}\cap S_r)$
     \EndFor
-    \State $B\leftarrow B \cup C$
     \State \Return $(\samp, B)$ 
     \EndProcedure
   \end{algorithmic}
@@ -274,12 +295,12 @@ All these parameters are shared by Alice's $\enc_4$ and Bob's $\dec_4$.
     \State $A\leftarrow B$
     \For {$r=1,2,\ldots,R$}
       \State Let $\samp_r$ be a copy of \samp 
-      \State Remove all the items in $\{a\in A|a\ge \frac{n}{2^{r-1}}\}$ from $\samp_r$
+      \State Remove all the items in $A\backslash (A\cap I_r)$ from $\samp_r$
       \For {$i=1,\ldots, n_r$}
       \State Obtain a sample $s$ from $\samp_r$
       \State $A\leftarrow A \cup \{s\}$
-      \State Find $k$ such that $\frac{k-1}{K} \le \frac{s}{n/2^{r-1}} < \frac{k}{K}$
-      \State Remove items in $\{a\in A|\frac{k-1}{K} \le \frac{a}{n/2^{r-1}} < \frac{k}{K} \}$ from $\samp_r$
+      \State Find $k$ such that $k\in I_{r,k}$
+      \State Remove items in $A\cap I_{r,k}$ from $\samp_r$
       \EndFor
     \EndFor
     \State \Return $A$ 
@@ -289,34 +310,32 @@ All these parameters are shared by Alice's $\enc_4$ and Bob's $\dec_4$.
 
 \subsection{Analysis} 
 
-Note that $\E(|C_{r,k}|)=m\cdot 2^{1-r}\cdot \frac{1}{K}$. By the setting of parameters we have $m=n^{0.99}$, $2^{1-r}\ge 2^{-R}=n^{-0.02}$ and $\frac{1}{K}=\frac{1}{\log n \log \frac{1}{\delta}}\ge n^{-0.91}$ (note that the range of $\delta$ is specified by Formula~\ref{formula:delta-range}). Therefore $\E(|C_{r,k}|) \ge n^{0.07}$, for $r=1,\ldots, R$ and $k=1,\ldots, K$. Let $\eps=0.01$. For any pair of $(r,k)$, because of the randomness in $A$, we can prove by Chernoff bound (and negative correlation) that the probability that $||C_{r,k}|-\E(|C_{r,k}|)|>\eps \E(|C_{r,k}|)$ is exponentially small. By union bound, with high probability, for all $C_{r,k}$, its size deviates its expectation by a factor of at most $\eps$. In the following, we will discuss conditioned on that.
+Note that $\E(|A\cap I_{r,k}|)=m\cdot K^{-r}$. By the choice of parameters we have $m=n^{0.99}$, $K^{-r}\ge K^{-R}=n^{-0.02}$ (note that the range of $\delta$ is specified by Formula~\ref{formula:delta-range}). Therefore $\E(|A\cap I_{r,k}|) \ge n^{0.97}$, for $r=1,\ldots, R$ and $k=1,\ldots, K$. For any pair of $(r,k)$, because of the randomness in $A$, we can prove the probability that $A\cap I_{r,k}$ is empty is exponentially small. By union bound, with high probability, all $A\cap I_{r,k}$ are not empty. In the following, we will discuss conditioned on that.
 
 \begin{lemma} \label{lemma:enc_4-sampler-work}
-  With probability at least $\frac{9}{10}$, all the queries to the samplers in $\enc_4$ are answered successfully. 
+  With probability at least $\frac{9}{10}$, $\enc_4$ does not return ``fail''. 
 \end{lemma}
 
 \begin{proof}
-  By union bound, the failure probability is at most $\sum_{i=1}^{R} K^{n_i}\cdot \delta = \frac{\delta^{19/20} \log n}{50} < \frac{1}{10}$. 
+  The probability that $ENC_4$ returns fail on line~\ref{algo-enc_4:sampler-wrong} is at most $\sum_{i=1}^{R} K^{n_i}\cdot \delta = \frac{\delta^{1/2} \log n}{50\log K} < \frac{1}{10}$. 
+  
+  The probability that $ENC_4$ returns fail on line~\ref{algo-enc_4:kill-wrong} is at most $\sum_{r=1}^{R}{\frac{n_r}{K}}=\frac{1}{100\log^2 K}$.
+  
 \end{proof}
 
 \begin{lemma}
-  Conditioned on the samplers answer all the queries successfully, we have $\dec_4(\enc_4(A))=A$.
+  If $\enc_4$ does not return ``fail'', we have $\dec_4(\enc_4(A))=A$.
 \end{lemma}
 
 \begin{lemma} \label{lemma:words-saving}
-  Conditioned on the samplers answer all the queries successfully, we have $\E(|A|-|B|)=\Omega(\frac{\log n \log \frac{1}{\delta}}{\log\log n + \log\log \frac{1}{\delta}})$, where $B$ is the set $\enc_4$ outputs.
+  If $\enc_4$ does not return ``fail'', we have $|A|-|B|=\Omega(\frac{\log n \log \frac{1}{\delta}}{(\log\log n + \log\log \frac{1}{\delta})^2})$, where $B$ is the set $\enc_4$ outputs.
 \end{lemma}
 
 \begin{proof}
-  Let $Y_{r,k}$ ($r=1,\ldots, R$ and $k=\frac{K}{2}+1,\ldots, K$) denote the indicator random variable that on round $r$ the sampler returns a sample $s$ so that $s\in C_{r,k}$ and on that round $s\not\in C$ (or equivalently, $s\in A\backslash B$).  
-  
-  The probability that on round $r$ the sampler return a sample $s$ so that $s\in C_{r,k}$ is at least $\frac{1-\eps}{1+\eps}\cdot \frac{n_r}{K}$. The probability that $s\in C$ is at most $\sum_{i=1}^{r-1}{\frac{1+\eps}{1-\eps}\cdot \frac{n_i}{K}}$. {\color{red}\textbf{This two events are independent}}, so 
-  
-  $$\E(Y_{r,k})\ge \frac{1-\eps}{1+\eps}\cdot \frac{n_r}{K} \cdot (1-\sum_{i=1}^{r-1}{\frac{1+\eps}{1-\eps}\cdot \frac{n_i}{K}}) \ge \frac{n_r}{2K}=\frac{\log \frac{1}{\delta}}{40K\log K}=\frac{\log \frac{1}{\delta}}{40K(\log\log n + \log\log \frac{1}{\delta})}.$$
-  
-   We have $|A|-|B|=\sum_{r=1}^{R}{\sum_{k=\frac{K}{2}+1}^{K}{Y_{r,k}}}$. Taking the expectation on both sides we get the desired bound.
-  
+  $|A|-|B|=\sum_{r=1}^{R}{n_r}= \frac{\log n}{50 \log K} \cdot \frac{1}{2}\cdot \frac{\log \frac{1}{\delta}}{\log K}
+  = \Omega(\frac{\log n \log \frac{1}{\delta}}{(\log\log n + \log\log \frac{1}{\delta})^2})$.
 \end{proof}
+
 
 \begin{lemma} \label{lemma:bits-saving}
   Let $m=n^{0.99}$. Let $X\in \mathbb{N}$ be a random variable, and $X\le m$. Moreover, $\E(X)\le m-d$. We have $\E(\log {n \choose m}-\log {n \choose X})=\Omega(d \log n)$.
@@ -335,16 +354,16 @@ Note that $\E(|C_{r,k}|)=m\cdot 2^{1-r}\cdot \frac{1}{K}$. By the setting of par
 \end{proof}
 
 \begin{theorem}
-  $\s = \Omega(\frac{\log^2 n\log{\frac{1}{\delta}}}{\log\log n+\log\log \frac{1}{\delta}})$ for $2^{-n^{0.9}}<\delta<(\log n)^{-1.1}$.
+  $\s = \Omega(\frac{\log^2 n\log{\frac{1}{\delta}}}{(\log\log n+\log\log \frac{1}{\delta})^2})$ for $2^{-n^{0.01}}<\delta<(\log n)^{-2}$.
 \end{theorem}
 
 \begin{proof}
   Let \success be the conjunction of the following events:
   \begin{enumerate}
-    \item For all $C_{r,k}$ ($r=1,\ldots, R, k=1,\ldots, K$), $||C_{r,k}|-\E(|C_{r,k}|)|\le \eps \E(|C_{r,k}|)$.
-    \item The samplers in $\enc_4$ answer all the queries successfully on input $A$.
+    \item All $A \cap I_{r,k}$ are non-empty ($r=1,\ldots, R, k=1,\ldots, K$).
+    \item $\enc_4$ does not return ``fail'' on input $A$.
   \end{enumerate}
-  By Lemma~\ref{lemma:enc_4-sampler-work}, we have $\Pr(\success)\ge \frac{1}{2}$. By Lemma~\ref{lemma:lb-meta}, we have $\s\ge \log (^n_m) - s' -2$. By definition, $s'=\log n + \E(\log (^n_{|B|})|\success)$. By Lemma~\ref{lemma:words-saving} and Lemma~\ref{lemma:bits-saving}, we get $\E(\log (^n_{|B|})|\success)=\log (^n_m)-\Omega(\frac{\log^2 n\log{\frac{1}{\delta}}}{\log\log n+\log\log \frac{1}{\delta}}))$. 
+  By Lemma~\ref{lemma:enc_4-sampler-work}, we have $\Pr(\success)\ge \frac{1}{2}$. By Lemma~\ref{lemma:lb-meta}, we have $\s\ge \log (^n_m) - s' -2$. By definition, $s'=\log n + \E(\log (^n_{|B|})|\success)$. By Lemma~\ref{lemma:words-saving} and Lemma~\ref{lemma:bits-saving}, we get $\E(\log (^n_{|B|})|\success)=\log (^n_m)-\Omega(\frac{\log^2 n\log{\frac{1}{\delta}}}{(\log\log n+\log\log \frac{1}{\delta})^2})$. 
 \end{proof}
 
 \bibliographystyle{alpha}
