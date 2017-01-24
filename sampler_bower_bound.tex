@@ -311,6 +311,68 @@ Note that $\E(|A\cap I_{r,k}|)=m\cdot K^{-r}$. By the choice of parameters we ha
   By Lemma~\ref{lemma:enc_4-sampler-work}, we have $\Pr(\success)\ge \frac{1}{2}$. By Lemma~\ref{lemma:lb-meta}, we have $\s\ge \log (^n_m) - s' -2$. By definition, $s'=\log n + \E(\log (^n_{|B|})|\success)$. By Lemma~\ref{lemma:words-saving} and Lemma~\ref{lemma:bits-saving}, we get $\E(\log (^n_{|B|})|\success)=\log (^n_m)-\Omega(\frac{\log^2 n\log{\frac{1}{\delta}}}{(\log\log n+\log\log \frac{1}{\delta})^2})$. 
 \end{proof}
 
+\section{$\Omega(\log^2 n \log \frac{1}{\delta})$ Bits Lower Bound}
+
+\begin{lemma}
+  Let function $f$: $\{0,1\}^n\times \{0,1\}^n\rightarrow \{0,1\}$. Let $X$ be a random variable in $\{0,1\}^n$. If for any $y\in \{0,1\}^n$ we have $\Pr(f(X,y)=1)\le \delta$, then for any random variable $Y$ in $\{0,1\}^n$, we have 
+  $$\Pr(f(X,Y)=1)\le 2^{I(X;Y)}\cdot \delta,$$ 
+  where $I(X;Y)$ is the mutual information (in bits) between $X$ and $Y$.
+\end{lemma}
+
+\begin{proof}
+  
+\end{proof}
+
+Let $R=\frac{1}{10}\log n \log \frac{1}{\delta}$ and let $K=\log \frac{1}{\delta}$. 
+
+\begin{algorithm}[H]
+  \caption{Alice's Encoder.}
+  \begin{algorithmic}[1]
+    \Procedure{$\enc$}{$A$}
+    \State $\samp \leftarrow \emptyset$
+    \State Insert items in $A$ into \samp
+    \State $A_1 \leftarrow A$
+    \State $S\leftarrow \emptyset$
+    \For {$r=1,\ldots,R$}
+      \State Let $\samp_r$ be a copy of $\samp$
+      \State Remove items in $A\backslash A_r$ from $\samp_r$ \Comment Now $\samp_r$ contains the elements in $A_r$
+      \State Let $s_r$ be a sample from $\samp_r$
+      \State $S\leftarrow S \cup \{s_r\}$
+      \State $A_{r+1}\leftarrow A_r \backslash \{s_r\}$
+      \For {$a\in A_{r+1}$}
+        \State With probability $\frac{1}{K}$, $A_{r+1}\leftarrow A_{r+1}\backslash \{a\}$ \Comment{Use the randomness that Alice and Bob share}
+      \EndFor
+    \EndFor
+    \State \Return ($A\backslash S$, \samp) 
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \caption{Bob's Decoder.}
+  \begin{algorithmic}[1]
+    \Procedure{$\dec$}{$B$, \samp}
+    \State $S\leftarrow \emptyset$
+    \State $C_1 \leftarrow \emptyset$
+    \For {$r=1,\ldots,R$}
+    \State Let $\samp_r$ be a copy of $\samp$
+    \State Remove items in $C_r$ from $\samp_r$
+    \State Let $s_r$ be a sample from $\samp_r$
+    \State $S\leftarrow S \cup \{s_r\}$
+    \State $C_{r+1}\leftarrow C_r \cup \{s_r\}$
+    \For {$a\in B\backslash C_{r+1}$}
+    \State With probability $\frac{1}{K}$, $C_{r+1}\leftarrow C_{r+1}\cup \{a\}$ \Comment{Use the randomness that Alice and Bob share,}
+    \EndFor \Comment{so that $C_r=A\backslash A_r$ ($A, A_r$ are defined in $\enc$)}
+    \EndFor
+    \State \Return $B\cup S$ 
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\subsection{Analysis}
+
+We do the analysis conditioned on $A$. Let $X$ denote the random source used by the sampler. The probability that the sampler fails is upper bounded by $\sum_{r=1}^{R}{2^{I(X;A_r)}\cdot \delta}$. 
+
 \bibliographystyle{alpha}
 \bibliography{shortbib}
 
