@@ -33,7 +33,7 @@
 \newcommand{\s}{\textsf{s}\xspace}
 
 \title{A Note on Space Lower Bound for Samplers}
-
+\author{Jelani Nelson, Jakub Pachocki, Zhengyu Wang}
 
 \begin{document}
 	
@@ -313,16 +313,6 @@ Note that $\E(|A\cap I_{r,k}|)=m\cdot K^{-r}$. By the choice of parameters we ha
 
 \section{$\Omega(\log^2 n \log \frac{1}{\delta})$ Bits Lower Bound}
 
-\begin{lemma}
-  Let function $f$: $\{0,1\}^n\times \{0,1\}^n\rightarrow \{0,1\}$. Let $X$ be a random variable in $\{0,1\}^n$. If for any $y\in \{0,1\}^n$ we have $\Pr(f(X,y)=1)\le \delta$, then for any random variable $Y$ in $\{0,1\}^n$, we have 
-  $$\Pr(f(X,Y)=1)\le 2^{I(X;Y)}\cdot \delta,$$ 
-  where $I(X;Y)$ is the mutual information (in bits) between $X$ and $Y$.
-\end{lemma}
-
-\begin{proof}
-  
-\end{proof}
-
 Let $R=\frac{1}{10}\log n \log \frac{1}{\delta}$ and let $K=\log \frac{1}{\delta}$. 
 
 \begin{algorithm}[H]
@@ -370,6 +360,17 @@ Let $R=\frac{1}{10}\log n \log \frac{1}{\delta}$ and let $K=\log \frac{1}{\delta
 \end{algorithm}
 
 \subsection{Analysis}
+
+\begin{lemma}
+  Let function $f$: $\{0,1\}^n\times \{0,1\}^m\rightarrow \{0,1\}$. Let $X$ be a uniformly random string in $\{0,1\}^n$. If for any $y\in \{0,1\}^m$ we have $\Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any random variable $Y$ in $\{0,1\}^m$, we have 
+  $$\Pr(f(X,Y)=1)\le \frac{I(X;Y)+1}{\log \frac{1}{\delta}},$$ 
+  where $I(X;Y)$ is the mutual information (in bits) between $X$ and $Y$.
+\end{lemma}
+
+\begin{proof}
+  It is equivalent to prove $I(X;Y)\ge \E(f(X,Y))\cdot \log\frac{1}{\delta}-1$. By definition of mutual entropy, $I(X;Y)=H(X)-H(X|Y)$ where $H(X)=n$ and $H(X|Y)\le 1+(1-\E(f(X,Y)))\cdot n+\E(f(X,Y))\cdot (n-\log\frac{1}{\delta})=n+1-\E(f(X,Y))\cdot \log\frac{1}{\delta}$.
+  The upper bound for $H(X|Y)$ is obtained by considering the following one-way communication problem: Alice obtains both $X$ and $Y$ while Bob only gets $Y$, what is the (minimum) expected number of bits that Alice sends to Bob so that Bob can recover $X$? Any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: first Alice sends Bob $f(X,Y)$ (taking $1$ bit); and then if $f(X,Y)=0$ Alice sends $X$ directly (taking $n$ bits), otherwise, $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^n)=n-\log\frac{1}{\delta}$ bits).  
+\end{proof}
 
 We do the analysis conditioned on $A$. Let $X$ denote the random source used by the sampler. The probability that the sampler fails is upper bounded by $\sum_{r=1}^{R}{2^{I(X;A_r)}\cdot \delta}$. 
 
