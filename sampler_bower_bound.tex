@@ -181,29 +181,6 @@ Alice wants to send random set $A$ to Bob where $|A|=m$. Similar to $\enc_1$, Al
 The parameters, encoder and decoder are given as follows. 
 
 
-\begin{algorithm}[H] \label{algo:para}
-  \caption{Variables Shared by Alice's $\enc_4$ and Bob's $\dec_4$.}
-  \begin{algorithmic}[1] 
-    \State $m\leftarrow n^{0.99}$
-    \State $K\leftarrow \log n \cdot \log \frac{1}{\delta}$
-    \State $R\leftarrow \frac{\log n}{50 \log K}$
-    \State $i_1\leftarrow 0$
-    \State $\Delta_1\leftarrow n$
-    \For {$r=1,\ldots, R-1$}
-      \State Let $k_r$ be a uniform sample from $\{1, \ldots, K\}$
-      \State $i_{r+1}\leftarrow i_r+\frac{k_r-1}{K}\Delta_r$
-      \State $\Delta_{r+1}\leftarrow \frac{\Delta_r}{K}$
-    \EndFor
-    \For {$r=1,\ldots, R$}
-      \State $n_r\leftarrow \frac{1}{2} \cdot \frac{\log \frac{1}{\delta}}{\log K}$
-      \State $I_r \leftarrow \{i\in \mathbb{N}|i_r\le i < i_r+\Delta_r\}$
-      \For {$k=1,\ldots, K$}
-        \State $I_{r,k}\leftarrow \{i\in \mathbb{N}|i_r+(k-1)\frac{\Delta_r}{K}\le i < i_r+k\frac{\Delta_r}{K}\}$
-      \EndFor
-    \EndFor
-  \end{algorithmic}
-\end{algorithm}
-
 \begin{algorithm}[H]
   \caption{Alice's Encoder.}
   \begin{algorithmic}[1]
@@ -315,25 +292,44 @@ Note that $\E(|A\cap I_{r,k}|)=m\cdot K^{-r}$. By the choice of parameters we ha
 
 Let $R=\frac{1}{10}\log n \log \frac{1}{\delta}$ and let $K=\log \frac{1}{\delta}$. 
 
+\begin{algorithm}[H] \label{algo:para}
+  \caption{Variables Shared by Alice's $\enc$ and Bob's $\dec$.}
+  \begin{algorithmic}[1] 
+    \State $m\leftarrow n^{0.99}$
+    \State $K\leftarrow \frac{1}{5}\log \frac{1}{\delta}$
+    \State $R\leftarrow \frac{1}{10}\log n \log \frac{1}{\delta}$
+        \For {$r = 0, \ldots, R$}
+    \State $n_r\leftarrow m \cdot 2^{-\frac{r}{K}}$
+    \EndFor
+    \For {$a\in [n]$}
+      \State Let $U_a$ be uniformly and independent sample from $[0,1]$
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
 \begin{algorithm}[H]
   \caption{Alice's Encoder.}
   \begin{algorithmic}[1]
     \Procedure{$\enc$}{$A$}
     \State $\samp \leftarrow \emptyset$
     \State Insert items in $A$ into \samp
-    \State $A_1 \leftarrow A$
+    \State $A_0 \leftarrow A$
     \State $S\leftarrow \emptyset$
     \For {$r=1,\ldots,R$}
       \State Let $\samp_r$ be a copy of $\samp$
-      \State Remove items in $A\backslash A_r$ from $\samp_r$ \Comment Now $\samp_r$ contains the elements in $A_r$
+      \State Remove items in $A\backslash A_{r-1}$ from $\samp_r$ \Comment So that $\samp_r$ contains the elements in $A_{r-1}$
       \State Let $s_r$ be a sample from $\samp_r$
-      \State $S\leftarrow S \cup \{s_r\}$
-      \State $A_{r+1}\leftarrow A_r \backslash \{s_r\}$
-      \For {$a\in A_{r+1}$}
-        \State With probability $\frac{1}{K}$, $A_{r+1}\leftarrow A_{r+1}\backslash \{a\}$ \Comment{Use the randomness that Alice and Bob share}
-      \EndFor
+      \State $A_r\leftarrow A_{r-1}$
+      \If {$s_r\in A_r$} \Comment{i.e. if $s_r$ is a valid sample}
+        \State $b_r\leftarrow 1$ \Comment{$b$ is a binary string of length $R$, indicating if sampler succeeds on round $r$}
+        \State $S\leftarrow S \cup \{s_r\}$
+        \State $A_r\leftarrow A_r \backslash \{s_r\}$
+      \Else 
+        \State $b_r\leftarrow 0$
+      \EndIf
+      \State Remove $|A_r|-n_r$ elements from $A_r$ with smallest $U_a$'s among $a\in A_r$ \Comment{So that $|A_r|=n_r$}
     \EndFor
-    \State \Return ($A\backslash S$, \samp) 
+    \State \Return ($A\backslash S$, $b$, \samp) 
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -341,18 +337,19 @@ Let $R=\frac{1}{10}\log n \log \frac{1}{\delta}$ and let $K=\log \frac{1}{\delta
 \begin{algorithm}[H]
   \caption{Bob's Decoder.}
   \begin{algorithmic}[1]
-    \Procedure{$\dec$}{$B$, \samp}
+    \Procedure{$\dec$}{$B$, $b$, \samp}
     \State $S\leftarrow \emptyset$
-    \State $C_1 \leftarrow \emptyset$
+    \State $C_0 \leftarrow \emptyset$
     \For {$r=1,\ldots,R$}
-    \State Let $\samp_r$ be a copy of $\samp$
-    \State Remove items in $C_r$ from $\samp_r$
-    \State Let $s_r$ be a sample from $\samp_r$
-    \State $S\leftarrow S \cup \{s_r\}$
-    \State $C_{r+1}\leftarrow C_r \cup \{s_r\}$
-    \For {$a\in B\backslash C_{r+1}$}
-    \State With probability $\frac{1}{K}$, $C_{r+1}\leftarrow C_{r+1}\cup \{a\}$ \Comment{Use the randomness that Alice and Bob share,}
-    \EndFor \Comment{so that $C_r=A\backslash A_r$ ($A, A_r$ are defined in $\enc$)}
+      \State $C_r\leftarrow C_{r-1}$
+      \If{$b_r=1$}
+        \State Let $\samp_r$ be a copy of $\samp$
+        \State Remove items in $C_{r-1}$ from $\samp_r$ \Comment{Invariant: $C_r=A\backslash A_r$ ($A_r$ is defined in $\enc$)}
+        \State Let $s_r$ be a sample from $\samp_r$
+        \State $S\leftarrow S \cup \{s_r\}$
+        \State $C_r\leftarrow C_r \cup \{s_r\}$
+      \EndIf
+       \State Insert $m-n_r-|C_r|$ elements into $C_r$ with smallest $U_a$'s among $a\in B\backslash C_r$
     \EndFor
     \State \Return $B\cup S$ 
     \EndProcedure
@@ -361,7 +358,7 @@ Let $R=\frac{1}{10}\log n \log \frac{1}{\delta}$ and let $K=\log \frac{1}{\delta
 
 \subsection{Analysis}
 
-\begin{lemma}
+\begin{lemma}\label{lemma:mutual-entropy}
   Let function $f$: $\{0,1\}^n\times \{0,1\}^m\rightarrow \{0,1\}$. Let $X$ be a uniformly random string in $\{0,1\}^n$. If for any $y\in \{0,1\}^m$ we have $\Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any random variable $Y$ in $\{0,1\}^m$, we have 
   $$\Pr(f(X,Y)=1)\le \frac{I(X;Y)+1}{\log \frac{1}{\delta}},$$ 
   where $I(X;Y)$ is the mutual information (in bits) between $X$ and $Y$.
@@ -372,7 +369,7 @@ Let $R=\frac{1}{10}\log n \log \frac{1}{\delta}$ and let $K=\log \frac{1}{\delta
   The upper bound for $H(X|Y)$ is obtained by considering the following one-way communication problem: Alice obtains both $X$ and $Y$ while Bob only gets $Y$, what is the (minimum) expected number of bits that Alice sends to Bob so that Bob can recover $X$? Any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: first Alice sends Bob $f(X,Y)$ (taking $1$ bit); and then if $f(X,Y)=0$ Alice sends $X$ directly (taking $n$ bits), otherwise, $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^n)=n-\log\frac{1}{\delta}$ bits).  
 \end{proof}
 
-We do the analysis conditioned on $A$. Let $X$ denote the random source used by the sampler. The probability that the sampler fails is upper bounded by $\sum_{r=1}^{R}{2^{I(X;A_r)}\cdot \delta}$. 
+We do the analysis conditioned on $A$. Let $X$ denote the random source used by the sampler. By Lemma~\ref{lemma:mutual-entropy}, the probability that the sampler fails on round $r$ is upper bounded by $\frac{I(X;A_r)+1}{\log \frac{1}{\delta}}$. Namely $\E(b_r)\ge 1-\frac{I(X;A_r)+1}{\log \frac{1}{\delta}}$. 
 
 \bibliographystyle{alpha}
 \bibliography{shortbib}
