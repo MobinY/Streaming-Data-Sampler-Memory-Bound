@@ -1,32 +1,18 @@
 \documentclass[10pt]{article}
 \usepackage{fullpage}
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
-\usepackage{hyperref}
-\usepackage{graphicx} 
-\usepackage{filecontents}
-\usepackage[usenames]{color}
 \usepackage{algorithm,algpseudocode,float}
 \usepackage{xspace}
-
-\newcommand{\EDIT}[1]{\textcolor{red}{\textit{#1}}}
-
-\DeclareMathOperator*{\E}{\mathbb{E}}
-\let\Pr\relax
-\DeclareMathOperator*{\Pr}{\mathbb{P}}
-\DeclareMathOperator*{\eps}{\varepsilon}
+%\usepackage{hyperref}
+%\usepackage[usenames]{color}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newtheorem{definition}{Definition}
 \newtheorem{remark}{Remark}
-
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{color}
-
-\usepackage{enumerate}
-
+\DeclareMathOperator*{\E}{\mathbb{E}}
+\let\Pr\relax
+\DeclareMathOperator*{\Pr}{\mathbb{P}}
 \newcommand{\samp}{\textsf{SAMP}\xspace}
 \newcommand{\success}{\textsf{SUCC}\xspace}
 \newcommand{\enc}{\textsf{ENC}\xspace}
@@ -44,26 +30,22 @@ We study the space lower bound for maintaining a sampler over a turnstile stream
 
 Note that updates are independent of the randomness used in the sampler. That is, for the purpose of proving a lower bound, we assume an oblivious adversary. 
 
-To the best of my knowledge, the best space upper bound for $\ell_0$ sampler is $O(\log^2 n \log \frac{1}{\delta})$ bits, while the previous best lower bound is $\Omega(\log^2 n +\log\frac{1}{\delta})$ bits (where $\Omega(\log^2 n)$ is shown in \cite{jowhari2011tight}). The bound is tight for constant $\delta$, while for example, when $\delta=\frac{1}{n}$, the gap is $\log n$. 
+To the best of our knowledge, the best space upper bound for $\ell_0$ sampler is $O(\log^2 n \log \frac{1}{\delta})$ bits, while the previous best lower bound is $\Omega(\log^2 n +\log\frac{1}{\delta})$ bits (where $\Omega(\log^2 n)$ is shown in \cite{jowhari2011tight}). The bound is tight for constant $\delta$, while for example, when $\delta=\frac{1}{n}$, the gap is $\log n$. 
 
-We assume that 
-\begin{align} \label{formula:delta-range}
-2^{-n^{c_1}}<\delta<(\log n)^{-c_2},
-\end{align}
-where $c_1=0.01$ and $c_2=2$. For other range of $\delta$ we will study later.
+We show space lower bounds for maintaining a sampler for a {\em binary} vector. That is, at any time, we are guaranteed that $x\in \{0,1\}^n$. This makes our result strong in the sense that (1) the lower bound applies for any $p$; (2) the lower bound also works for strict turnstile streams.
 
-In this note, we show space lower bounds for maintaining a sampler for a {\em binary} vector. That is, at any time, we are guaranteed that $x\in \{0,1\}^n$. This makes our result strong in the sense that (1) the lower bound applies for any $p$; (2) the lower bound also works for strict turnstile streams.
+The lower bounds are based on communication complexity in the public random coin model. Alice wants to send Bob a uniform random set $A\subseteq [n]$ of size $m$ (Bob knows $m$, but the random source generating $A$ is independent of the random source accessible to Bob). The one-way communication problem is: Alice sends some message to Bob, and Bob is required to recover $A$ completely. Since the randomness in $A$ contains $\log (^n_m)$ bits of information, any randomized protocol that works with probability $1$ requires at least $\log (^n_m)$ expected bits. 
 
-In the following sections, we give sequentially improved lower bounds. First, we give a lower bound of $\Omega(\log n \log \frac{1}{\delta})$ bits. Then, we improve it to $\Omega(\frac{\log^2 n \log \frac{1}{\delta}}{(\log\log n + \log\log \frac{1}{\delta})^2})$ bits. The lower bounds are based on communication complexity in the public random coin model. Alice wants to send Bob a uniform random set $A\subseteq [n]$ of size $m$ (Bob knows $m$, but the random source generating $A$ is independent of the random source accessible to Bob). The one-way communication problem is: Alice sends some message to Bob, and Bob is required to recover $A$ completely. Since the randomness in $A$ contains $\log (^n_m)$ bits of information, any randomized protocol that works with probability $1$ requires at least $\log (^n_m)$ expected bits. 
-
-Now Alice considers to attach (the memory of) a sampler \samp in the message. The sampler uses public random coins as its random source, so that the sampler will behave the same at Alice's and Bob's as long as the updates are all the same. Alice will insert all the items in $A$ into \samp and send \samp to Bob. In addition, Alice will send a subset $B\subseteq A$ to Bob, so that together with $B$ and \samp, Bob is able to recover $A$ with good probability based on some protocol they have agreed on. 
+We consider the following protocol. Alice attaches (the memory of) a sampler \samp in the message. The sampler uses public random coins as its random source, so that the sampler will behave the same at Alice's and Bob's as long as the updates are all the same. Alice will insert all the items in $A$ into \samp and send \samp to Bob. In addition, Alice will send a subset $B\subseteq A$ to Bob, so that together with $B$ and \samp, Bob is able to recover $A$ with good probability based on some protocol they have agreed on. 
  
 Now we turn the previous protocol into a new one without any failure. Let \success denote the event (or a subset of the event) that Bob successfully recovers $A$ (note that Alice can simulate Bob, so she knows exactly when \success happens). If \success happens Alice will send Bob a message starting with a $1$, followed by (the memory of) \samp, then followed by the native encoding (explained later) of $B$; otherwise, Alice will send a message starting with a $0$, followed by the native encoding of $A$. We say the native encoding of a set $S\subseteq [n]$ to be an integer (expressed in binary) in $[{n \choose |S|}]$ together with $|S|$ (taking $\log n$ bits). We drop the size of the set if it is known by the receiver.
 
 \begin{lemma} \label{lemma:lb-meta}
   Let $\s$ denote the space (in bits) used by a sampler with failure probability at most $\delta$. Let $\s'$ denote the expected number of bits to represent $B$ conditioned on \success (if we need to send some extra auxiliary information, we will also count it into $\s'$). We have 
   
-  $$(1+\s+\s')\cdot \Pr(\success)+(1+\log (^n_m)) \cdot (1-\Pr(\success)) \ge \log (^n_m).$$
+  \begin{align}
+  (1+\s+\s')\cdot \Pr(\success)+(1+\log (^n_m)) \cdot (1-\Pr(\success)) \ge \log (^n_m).
+  \end{align} 
   
   If $\Pr(\success)\ge 1/2$, we have 
   
@@ -72,24 +54,31 @@ Now we turn the previous protocol into a new one without any failure. Let \succe
   \end{align} 
 \end{lemma}
 
+We consider the range of $\delta$ to be 
+\begin{align} \label{formula:delta-range}
+2^{-n^{c_1}}<\delta<c_2,
+\end{align}
+where $c_1=0.9$ and $c_2=2^{-10}$. In fact, our lower bound applies for the range of $\delta$ where $c_1$ and $c_2$ are any constants smaller than $1$. 
+
+In Section~\ref{sec:simple-lb} we give a lower bound of $\Omega(\log n \log \frac{1}{\delta})$ bits. This illustrates some key ideas of our framework. Then we show a lower bound of $\Omega(\log^2 n \log \frac{1}{\delta})$ bits in Section~\ref{sec:optimal-lb}.
+
 \begin{remark}
   Because the space lower bound in this note is proven via communication complexity under public random coin model, it also applies to non-uniform models of computation such as circuits and branching programs.  
 \end{remark}
-
 
 \begin{remark}
   The space lower bound in this note still applies if the sampler is required to output an arbitrary item whose coordinate is non-zero instead of a uniformly random one. 
 \end{remark}
 
 %=====================================================================
-\section{$\Omega(\log n \log {\frac{1}{\delta}})$ Bits Lower Bound}
+\section{$\Omega(\log n \log {\frac{1}{\delta}})$ Bits Lower Bound}\label{sec:simple-lb}
 Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform random set $A\subseteq [n]$ of size $\frac{1}{2}\log\frac{1}{\delta}$ to Bob. Let $A=\{a_1,\ldots,a_m\}$ and $a_1<\ldots<a_m$. 
 
 \begin{algorithm}[H]
 \caption{Alice's Encoder.}
 \begin{algorithmic}[1]
 \Procedure{$\enc_1$}{$A$}
-  \State $\samp \leftarrow \emptyset$
+  \State $\samp \leftarrow \emptyset$ 
   \For {$i=1,2,\ldots,m$}
     \State Insert $a_i$ into \samp
   \EndFor
@@ -132,7 +121,7 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \end{proof}
 
 \begin{lemma}
-  $\s = \Omega(\log n \log \frac{1}{\delta})$ for $2^{-n^{0.99}}<\delta<\frac{1}{4}$.
+  $\s = \Omega(\log n \log \frac{1}{\delta})$.
 \end{lemma}
 
 \begin{proof}
@@ -161,7 +150,7 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 
 %=====================================================================
 
-\section{$\Omega(\log^2 n \log \frac{1}{\delta})$ Bits Lower Bound}
+\section{$\Omega(\log^2 n \log \frac{1}{\delta})$ Bits Lower Bound} \label{sec:optimal-lb}
 
 \begin{algorithm}[H] \label{algo:para}
   \caption{Variables Shared by Alice's $\enc$ and Bob's $\dec$.}
