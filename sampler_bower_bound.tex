@@ -167,8 +167,8 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
   \caption{Variables Shared by Alice's $\enc$ and Bob's $\dec$.}
   \begin{algorithmic}[1] 
     \State $m\leftarrow n^{0.99}$
-    \State $K\leftarrow \frac{1}{5}\log \frac{1}{\delta}$
-    \State $R\leftarrow \frac{1}{10}\log n \log \frac{1}{\delta}$
+    \State $K\leftarrow \frac{1}{10}\log \frac{1}{\delta}$
+    \State $R\leftarrow \frac{1}{20}\log n \log \frac{1}{\delta}$
         \For {$r = 0, \ldots, R$}
     \State $n_r\leftarrow m \cdot 2^{-\frac{r}{K}}$
     \EndFor
@@ -268,9 +268,21 @@ $$\prod_{i=1}^{r} \frac{n_{i-1}}{n_{i-1}-n_r}
 =\prod_{j=1}^{r} \frac{1}{1-2^{-j/K}}
 \le \prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}$$
 
-By \url{http://mathworld.wolfram.com/q-PochhammerSymbol.html} We have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{2K}$ ({\color{red} Need to give a more rigorous bound later}).
+%By \url{http://mathworld.wolfram.com/q-PochhammerSymbol.html} We have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$.
 
-Combine together we get $\E(b_r)\ge 1-\frac{2K+1}{\log \frac{1}{\delta}}\ge \frac{1}{2}$. 
+\begin{lemma}
+  Let $K\in \mathbb{N}$ and $K\ge 1$. We have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$.
+\end{lemma}
+
+\begin{proof}
+  First, we bound the product of first $2K$ terms. Note that $\frac{1}{1-2^{-x}}\le \frac{8}{3x}$ for $0<x\le 2$. Therefore, $\prod_{j=1}^{2K}\frac{1}{1-2^{-j/K}}\le (8/3)^{2K}\cdot \frac{K^{2K}}{(2K)!}\le (8/3)^{2K}\cdot \frac{K^{2K}}{(2K/e)^{2K}}= (4e/3)^{2K}< 2^{4K}$. 
+  
+  On the other hand, the product of the rest terms  $\prod_{j=2K+1}^{\infty}\frac{1}{1-2^{-j/K}} \le \prod_{j=2K+1}^{\infty}\frac{1}{1-2^{-\lfloor j/K \rfloor}} \le \prod_{i=2}^{\infty}\left( \frac{1}{1-2^{-i}}\right)^K \le \left( \frac{1}{1-\sum_{i=2}^{\infty}2^{-i}}\right)^K=2^K$.
+  
+  Multiplying two parts proves the lemma.
+\end{proof}
+
+Combine together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \frac{2}{5}$. 
 
 \begin{lemma} \label{lemma:bits-saving}
   Let $m=n^{0.99}$. Let $X\in \mathbb{N}$ be a random variable, and $X\le m$. Moreover, $\E(X)\le m-d$. We have $\E(\log {n \choose m}-\log {n \choose X})=\Omega(d \log n)$.
