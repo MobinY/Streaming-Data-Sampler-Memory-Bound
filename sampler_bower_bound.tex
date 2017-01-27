@@ -78,7 +78,7 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \caption{Alice's Encoder.}
 \begin{algorithmic}[1]
 \Procedure{$\enc_1$}{$A$}
-  \State $\samp \leftarrow \emptyset$ 
+  \State $\samp \leftarrow \emptyset$ \Comment{\samp uses the random source shared by Alice and Bob}
   \For {$i=1,2,\ldots,m$}
     \State Insert $a_i$ into \samp
   \EndFor
@@ -157,9 +157,9 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
   \begin{algorithmic}[1] 
     \State $m\leftarrow n^{0.99}$
     \State $K\leftarrow \frac{1}{10}\log \frac{1}{\delta}$
-    \State $R\leftarrow \frac{1}{20}\log n \log \frac{1}{\delta}$
-        \For {$r = 0, \ldots, R$}
-    \State $n_r\leftarrow m \cdot 2^{-\frac{r}{K}}$
+    \State $R\leftarrow \frac{1}{200}\log n \log \frac{1}{\delta}$
+    \For {$r = 0, \ldots, R$}
+      \State $n_r\leftarrow m \cdot 2^{-\frac{r}{K}}$ \Comment{By the setting of parameters we have $n_r-n_{r+1}\ge 2$}
     \EndFor
     \For {$a\in [n]$}
       \State Let $U_a$ be uniformly and independent sample from $[0,1]$
