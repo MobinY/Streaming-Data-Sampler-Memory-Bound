@@ -1,4 +1,7 @@
+sampler_bower_bound.pdf
+
 #### copy from https://github.com/github/gitignore/blob/master/TeX.gitignore
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
@@ -210,5 +213,3 @@ TSWLatexianTemp*
 
 # expex forward references with \gathertags
 *-tags.tex
-
-*.pdf
