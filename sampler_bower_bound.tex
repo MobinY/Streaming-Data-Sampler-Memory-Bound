@@ -112,12 +112,13 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \begin{proof}
   Let $E_S$ denote the event that after removing all the items in $S$ (in the order from smallest to biggest) from \samp, it gives a valid sample when queried. We have 
   
-  $$\Pr(\dec_1(\enc_1(A))=A)
+  \begin{align}
+  \Pr(\dec_1(\enc_1(A))=A)
   \ge \Pr(\bigcap_{S\subseteq A, S\ne \emptyset}{E_S})
   \ge 1 - \sum_{S\subseteq A, S\ne \emptyset}{\Pr({\overline {E_S}})} 
   \ge 1 - \delta \cdot 2^{\frac{1}{2}\log \frac{1}{\delta}}
   \ge 1/2.
-  $$  
+  \end{align}
 \end{proof}
 
 \begin{lemma}
@@ -167,14 +168,23 @@ Intuitively, the previous lower bound only extracts information from one single 
 
 \subsection{Protocol}
 
-Alice wants to send a uniformly random set $A$ to Bob where $|A|=m$. Similar to $\enc_1$, Alice constructs \samp by inserting all the items in $A$, and sends it to Bob. Moreover, Alice will send Bob a subset $B\subseteq A$ computed as follows. Initially $B=A$ and let $A_0=A$. Alice proceeds in $R$ rounds. On round $r$ ($r=1,\ldots, R$) Alice tries to obtain sample $s_r\in A_{r-1}$ from the sampler 
-(In more details, she will make a copy of \samp, denoted by $\samp_r$, remove all the items in $A\backslash A_{r-1}$ and query for a sample). 
+The parameters used by Alice and Bob are given in Algorithm~\ref{algo:para}.
+Alice wants to send a uniformly random set $A$ to Bob where $|A|=m$. Similar to $\enc_1$, Alice constructs \samp by inserting all the items in $A$, and sends it to Bob. Note that \samp uses the same random source that Alice and Bob share. Moreover, Alice will send Bob a subset $B\subseteq A$ computed as follows. Initially $B=A$ and let $A_0=A$. Alice proceeds in $R$ rounds. On round $r$ ($r=1,\ldots, R$) Alice tries to obtain sample $s_r\in A_{r-1}$ from the sampler 
+(In more detail, she will make a copy of \samp, denoted by $\samp_r$, remove all the items in $A\backslash A_{r-1}$ and query for a sample). 
 Let $b$ denote a binary string of length $R$, where $b_r$ records whether the sampler succeeds on round $r$. In the end, Alice will also send $b$ to Bob. If $s_r\in A_{r-1}$, i.e., the sampler returns a valid sample, Alice will set $b_r=1$, and remove $s_r$ from $B$ (since $s_r$ can be obtained from the sampler, Alice does not need to include it in $B$. In Algorithm~\ref{algo:enc} Alice uses $S$ to keep track of $A\backslash B$); otherwise Alice will set $b_r=0$.
-At the end of round $r$, Alice will choose a uniformly random set $A_r$, so that $A_r$ is a subset of $A_{r-1}\backslash \{s_r\}$ and $|A_r|=n_r$. 
+At the end of round $r$, Alice will generate a uniformly random set $A_r$, so that $A_r$ is a subset of $A_{r-1}\backslash \{s_r\}$ and $|A_r|=n_r$. 
+In particular, Alice uses shared random source to generate $A_r$, so that Bob can recover $A_{r-1}\backslash A_r$ on round $r$. 
+We present Alice's encoder in Algorithm~\ref{algo:enc}.
 
-The decoding process is symmetric. 
-
-The parameters, encoder and decoder are given as follows. 
+The decoding process is symmetric. Let $C_0=\emptyset$ and $S=\emptyset$. Bob proceeds in $R$ rounds. 
+On round $r$ ($r=1,\ldots,R$), Bob obtains sample $s_r\in A\backslash C_{r-1}$ (In more detail, he will make a copy of \samp, denoted by $\samp_r$, remove all the items in $C_{r-1}$ and query for a sample). 
+By the construction of $C_{r-1}$ that will be described later it is guaranteed that $A_{r-1}=A\backslash C_{r-1}$. 
+Therefore, Bob will get exactly the same $s_r$ as Alice. 
+Bob assigns initial value $C_{r-1}$ to $C_r$.
+If $b_r=1$, Bob will add $s_r$ to both $S$ and $C_r$.
+At the end of round $r$, Bob inserts a bunch of items to $C_r$ so that $C_r=A\backslash A_r$. Bob can achieve this because of the shared randomness when constructing $A_r$.
+In the end, Bob's decoder outputs $B\cup S$.
+We present the decoder in Algorithm~\ref{algo:dec}.
 
 \begin{algorithm}[H] 
   \caption{Variables Shared by Alice's $\enc$ and Bob's $\dec$.} \label{algo:para}
@@ -233,7 +243,7 @@ The parameters, encoder and decoder are given as follows.
         \State $S\leftarrow S \cup \{s_r\}$
         \State $C_r\leftarrow C_r \cup \{s_r\}$
       \EndIf
-       \State Insert $m-n_r-|C_r|$ elements into $C_r$ with smallest $U_a$'s among $a\in B\backslash C_r$
+       \State Insert $m-n_r-|C_r|$ items into $C_r$ with smallest $U_a$'s among $a\in B\backslash C_r$
     \EndFor
     \State \Return $B\cup S$ 
     \EndProcedure
@@ -244,7 +254,9 @@ The parameters, encoder and decoder are given as follows.
 
 \begin{lemma}\label{lemma:mutual-entropy}
   Let function $f$: $\{0,1\}^n\times \{0,1\}^m\rightarrow \{0,1\}$. Let $X$ be a uniformly random string in $\{0,1\}^n$. If for any $y\in \{0,1\}^m$ we have $\Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any random variable $Y$ in $\{0,1\}^m$, we have 
-  $$\Pr(f(X,Y)=1)\le \frac{I(X;Y)+1}{\log \frac{1}{\delta}},$$ 
+  \begin{align}
+  \Pr(f(X,Y)=1)\le \frac{I(X;Y)+1}{\log \frac{1}{\delta}},
+  \end{align}
   where $I(X;Y)$ is the mutual information (in bits) between $X$ and $Y$.
 \end{lemma}
 
@@ -257,29 +269,38 @@ We do the analysis conditioned on $A$. Let $X$ denote the random source used by 
 
 $I(X;A_r)=H(A_r)-H(A_r|X)$. Since $|A_r|=n_r$ and $A_r\subseteq A$ where $|A|=m$, $H(A_r)\le \log {m \choose n_r}$. Now we want to lower bound $H(A_r|X)$. By definition of conditional entropy, $H(A_r|X)=\sum_x{p_x\cdot H(A_r|X=x)}$. We fix an arbitrary $x$. If we can prove that for any $T\subseteq A$ where $|T|=n_r$, $\Pr(A_r=T|X=x)\le p$, then by definition of entropy we have $H(A_r|X=x)\ge\log\frac{1}{p}$. In fact, for any fixed $T$, we have
 
-$$H(A_r=T|X=x)\le \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}},$$
+\begin{align}
+H(A_r=T|X=x)\le \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}},
+\end{align}
 
 because on round $i$ ($1\le i \le r$), Alice removes $n_{i-1}-n_i$ elements from $A_{i-1}$ to get $A_i$. Conditioned on the event that $A_{i-1}\supseteq T$, the probability that $A_i\supseteq T$ is at most ${{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}/{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}$, where the equation achieves when $s_i\in A_{i-1}\backslash T$, and we take a uniformly random subset of $A_{i-1}\backslash \{s_i\}$ of size $n_{i-1}-n_i-1$, so that the subset does not intersect with $T$.
 
 For notation simplicity, let $n^{\underline{k}}$ denote $n\cdot (n-1)  \ldots (n-k+1)$. We have 
 
-$$\prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}}
+\begin{align}
+\prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}}
 =\prod_{i=1}^{r}\frac{(n_{i-1}-n_r-1)!n_i!}{(n_{i-1}-1)!(n_i-n_r)!}
 =\prod_{i=1}^{r}\frac{n_i^{\underline{n_r}}}{(n_{i-1}-1)^{\underline{n_r}}}
-=\prod_{i=1}^{r} \left( \frac{n_i^{\underline{n_r}}}{n_{i-1}^{\underline{n_r}}}\cdot \frac{n_{i-1}}{n_{i-1}-n_r} \right)$$ 
+=\prod_{i=1}^{r} \left( \frac{n_i^{\underline{n_r}}}{n_{i-1}^{\underline{n_r}}}\cdot \frac{n_{i-1}}{n_{i-1}-n_r} \right).
+\end{align}
 
 By telescoping 
 
-$$\prod_{i=1}^{r} \frac{n_i^{\underline{n_r}}}{n_{i-1}^{\underline{n_r}}}
+\begin{align}
+\prod_{i=1}^{r} \frac{n_i^{\underline{n_r}}}{n_{i-1}^{\underline{n_r}}}
 =\frac{n_r^{\underline{n_r}}}{n_0^{\underline{n_r}}}
-=\frac{n_r!(n_0-n_r)!}{n_0!}=\frac{1}{{n_0 \choose n_r}}$$
+=\frac{n_r!(n_0-n_r)!}{n_0!}=\frac{1}{{n_0 \choose n_r}}
+=\frac{1}{{m \choose n_r}}.
+\end{align}
 
 And 
 
-$$\prod_{i=1}^{r} \frac{n_{i-1}}{n_{i-1}-n_r}
+\begin{align}
+\prod_{i=1}^{r} \frac{n_{i-1}}{n_{i-1}-n_r}
 =\prod_{i=1}^{r} \frac{1}{1-2^{(i-1-r)/K}}
 =\prod_{j=1}^{r} \frac{1}{1-2^{-j/K}}
-\le \prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}$$
+\le \prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}
+\end{align}
 
 %By \url{http://mathworld.wolfram.com/q-PochhammerSymbol.html} We have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$.
 
@@ -302,17 +323,29 @@ Combine together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \fra
 \end{lemma}
 
 \begin{proof}
-  \begin{align*}
+  \begin{align}
   \log {n \choose m}-\log {n \choose X}
   &=   \log \frac{n!/(m!(n-m)!)}{n!/(X!(n-X)!)} \\
   &=   \sum_{i=1}^{m-X}\log \frac{n-X-i+1}{m-i+1} \\
   &\ge (m-X)\cdot \log \frac{n-X}{m} \\
   &\ge (m-X)\cdot \log n^{1/200}
-  \end{align*}
+  \end{align}
   
   Taking expectation on both sides, we get $\E(\log {n \choose m}-\log {n \choose X})\ge \frac{d}{200} \log n$. 
 \end{proof}
 
+\begin{theorem}
+  $\s = \Omega(\log^2 n\log{\frac{1}{\delta}})$.
+\end{theorem}
+
+\begin{proof}
+  Let \success be the conjunction of the following events:
+  \begin{enumerate}
+    \item All $A \cap I_{r,k}$ are non-empty ($r=1,\ldots, R, k=1,\ldots, K$).
+    \item $\enc_4$ does not return ``fail'' on input $A$.
+  \end{enumerate}
+  By Lemma~\ref{lemma:enc_4-sampler-work}, we have $\Pr(\success)\ge \frac{1}{2}$. By Lemma~\ref{lemma:lb-meta}, we have $\s\ge \log (^n_m) - s' -2$. By definition, $s'=\log n + \E(\log (^n_{|B|})|\success)$. By Lemma~\ref{lemma:words-saving} and Lemma~\ref{lemma:bits-saving}, we get $\E(\log (^n_{|B|})|\success)=\log (^n_m)-\Omega(\log^2 n\log{\frac{1}{\delta}})$. 
+\end{proof}
 
 \bibliographystyle{alpha}
 \bibliography{shortbib}
