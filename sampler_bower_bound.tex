@@ -169,16 +169,15 @@ Intuitively, the previous lower bound only extracts information from one single 
 
 Alice wants to send a uniformly random set $A$ to Bob where $|A|=m$. Similar to $\enc_1$, Alice constructs \samp by inserting all the items in $A$, and sends it to Bob. Moreover, Alice will send Bob a subset $B\subseteq A$ computed as follows. Initially $B=A$ and let $A_0=A$. Alice proceeds in $R$ rounds. On round $r$ ($r=1,\ldots, R$) Alice tries to obtain sample $s_r\in A_{r-1}$ from the sampler 
 (In more details, she will make a copy of \samp, denoted by $\samp_r$, remove all the items in $A\backslash A_{r-1}$ and query for a sample). 
-Let $b$ denote a binary string of length $R$, where $b_r$ records whether the sampler succeeds on round $r$. In the end, Alice will also send $b$ to Bob. If $s_r\in A_{r-1}$, i.e., the sampler returns a valid sample, Alice will set $b_r=1$, and remove $s_r$ from $B$ (since $s_r$ can be obtained from the sampler, Alice does not need to include it in $B$); otherwise $b_r=0$.
-
-At the end of round $r$, Alice will choose a uniformly random set $A_r$, so that $A_r$ is a subset of $A_{r-1}\backslash \{s_r\}$ and $|A_r|=n_r$. She will f
+Let $b$ denote a binary string of length $R$, where $b_r$ records whether the sampler succeeds on round $r$. In the end, Alice will also send $b$ to Bob. If $s_r\in A_{r-1}$, i.e., the sampler returns a valid sample, Alice will set $b_r=1$, and remove $s_r$ from $B$ (since $s_r$ can be obtained from the sampler, Alice does not need to include it in $B$. In Algorithm~\ref{algo:enc} Alice uses $S$ to keep track of $A\backslash B$); otherwise Alice will set $b_r=0$.
+At the end of round $r$, Alice will choose a uniformly random set $A_r$, so that $A_r$ is a subset of $A_{r-1}\backslash \{s_r\}$ and $|A_r|=n_r$. 
 
 The decoding process is symmetric. 
 
 The parameters, encoder and decoder are given as follows. 
 
-\begin{algorithm}[H] \label{algo:para}
-  \caption{Variables Shared by Alice's $\enc$ and Bob's $\dec$.}
+\begin{algorithm}[H] 
+  \caption{Variables Shared by Alice's $\enc$ and Bob's $\dec$.} \label{algo:para}
   \begin{algorithmic}[1] 
     \State $m\leftarrow n^{0.99}$
     \State $K\leftarrow \frac{1}{10}\log \frac{1}{\delta}$
@@ -187,13 +186,13 @@ The parameters, encoder and decoder are given as follows.
       \State $n_r\leftarrow m \cdot 2^{-\frac{r}{K}}$ \Comment{By the setting of parameters we have $n_r-n_{r+1}\ge 2$}
     \EndFor
     \For {$a\in [n]$}
-      \State Let $U_a$ be uniformly and independent sample from $[0,1]$
+      \State Let $U_a$ be uniformly and independent sample from $[0,1]$ \Comment{Used to generate $A_r$, $r=1,\ldots, R$}
     \EndFor
   \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}[H]
-  \caption{Alice's Encoder.}
+\begin{algorithm}[H] 
+  \caption{Alice's Encoder.} \label{algo:enc}
   \begin{algorithmic}[1]
     \Procedure{$\enc$}{$A$}
     \State $\samp \leftarrow \emptyset$
@@ -219,8 +218,8 @@ The parameters, encoder and decoder are given as follows.
   \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}[H]
-  \caption{Bob's Decoder.}
+\begin{algorithm}[H] 
+  \caption{Bob's Decoder.} \label{algo:dec}
   \begin{algorithmic}[1]
     \Procedure{$\dec$}{$B$, $b$, \samp}
     \State $S\leftarrow \emptyset$
