@@ -268,7 +268,16 @@ Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \f
 \end{lemma}
 
 \begin{proof}
-  We first prove by induction that $C_r=A\backslash A_r$ for $r=0,\ldots, R$.   
+  We claim that for $r=0,\ldots, R$, $\{A_r, C_r\}$ is a partition of $A$ ($A_r$ is in \enc, and $C_r$ is in \dec). We prove the claim by induction on $r$.
+  
+  The basis case is $r=0$. $A_0=A$ and $C_0=\emptyset$. So the claim is true.
+  
+  Assume by induction the claim holds for $r$ ($0\le r < R$), and we consider $r+1$. 
+  On round $r$, $\samp_r$ is \samp with items in $A\backslash A_{r-1}=C_{r-1}$ removed in both \enc and \dec. Therefore, the sample $s_r$ obtained from $\samp_r$ is the same. Initially $A_r=A_{r-1}$ and $C_r=C_{r-1}$, and so $\{A_r,C_r\}$ is a partition of $A$. If $s_r$ is a valid sample (i.e. $s_r\in A_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $A_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{A_r, C_r\}$ remains a partition of $A$. 
+  
+  After that, Alice's \enc repeats removing $a$ from $A_r$ with smallest $U_a$ until $|A_r|=n_r$. Symmetrically, Bob's \dec repeats inserting $a$ into $C_r$ with smallest $U_a$ among $a\in B\backslash C_r$, until $|C_r|=|A|-n_r$. In the end we have $|A_r|+|C_r|=|A|$, so \enc and \dec execute repetition the same number of times. Moreover, we can prove that during the same repetition the item removed from $A_r$ is exactly the same item inserted to $C_r$. This is because in the beginning of a repetition $\{A_r, C_r\}$ is a partition of $A$. We have $B\backslash C_r\subseteq A\backslash C_r=A_r$. Let $a^*$ denote  $a\in A_r$ that minimizes $U_a$. We can prove that $a^*\in B\backslash C_r\subseteq A_r$ (since $a^*$ will be removed from $A_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $U_{a^*}$ is also the smallest among $\{U_a|a\in B\backslash C_r\}$. Thus in the end of the repetition, both Alice and Bob will take $a^{*}$ to update (remove from $A_r$, insert into $C_r$). Therefore, $\{A_r, C_r\}$ remains a partition of $A$.
+  
+  Given the fact that $\{A_r, C_r\}$ is a partition of $A$, $s_r$ is the same in \enc and \dec. Furthermore, $S=\{s_r|b_r=1,r=1,\ldots, R\}$ is the same in \enc and \dec. We know $S\subseteq A$. Since \enc outputs $A\backslash S$, and \dec outputs $(A\backslash S)\cup S$, we have $\dec(\enc(A))=A$. 
 \end{proof}
 
 \begin{lemma} \label{lemma:bits-saving}
@@ -278,8 +287,8 @@ Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \f
 \begin{proof}
   \begin{align}
   \log {n \choose m}-\log {n \choose W}
-  &=   \log \frac{n!/(m!(n-m)!)}{n!/(W!(n-W)!)} \\
-  &=   \sum_{i=1}^{m-W}\log \frac{n-W-i+1}{m-i+1} \\
+  &= \log \frac{n!/(m!(n-m)!)}{n!/(W!(n-W)!)} \\
+  &= \sum_{i=1}^{m-W}\log \frac{n-W-i+1}{m-i+1} \\
   &\ge (m-W)\cdot \log \frac{n-W}{m} \\
   &\ge (m-W)\cdot \log n^{1/200}
   \end{align}
