@@ -260,8 +260,8 @@ We formalize this in Lemma~\ref{lemma:bits-saving}. Note that Alice also needs t
 
 We have $|A|-|B|=\sum_{r=1}^{R}b_r$. 
 In Lemma~\ref{lemma:mutual-entropy-vs-fail-prob}, we prove the probability that the sampler fails on round $r$ is upper bounded by $\frac{I(X;A_{r-1})+1}{\log \frac{1}{\delta}}$, where $I(X;A_{r-1})$ is the mutual information between $X$ and $A_{r-1}$. 
-Furthermore, we will show in Lemma~\ref{lemma:mutual-entropy-bound} that $I(X;A_{r-1})$ is bounded by $5K$.
-Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \frac{2}{5}$ and $\E(|A|-|B|)\ge \frac{2}{5}R=\Omega(\log n \log\frac{1}{\delta})$. 
+Furthermore, we will show in Lemma~\ref{lemma:mutual-entropy-bound} that $I(X;A_{r-1})$ is upper bounded by $5K$.
+Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \frac{2}{5}$ and thus $\E(|A|-|B|)\ge \frac{2}{5}R=\Omega(\log n \log\frac{1}{\delta})$. 
 
 \begin{lemma}\label{lemma:zero-fail-prob}
   $\dec(\enc(A))=A$.
@@ -270,10 +270,10 @@ Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \f
 \begin{proof}
   We claim that for $r=0,\ldots, R$, $\{A_r, C_r\}$ is a partition of $A$ ($A_r$ is in \enc, and $C_r$ is in \dec). We prove the claim by induction on $r$.
   
-  The basis case is $r=0$. $A_0=A$ and $C_0=\emptyset$. So the claim is true.
+  The basis case is $r=0$. $A_0=A$ and $C_0=\emptyset$. The claim is true.
   
   Assume by induction the claim holds for $r$ ($0\le r < R$), and we consider $r+1$. 
-  On round $r$, $\samp_r$ is \samp with items in $A\backslash A_{r-1}=C_{r-1}$ removed in both \enc and \dec. Therefore, the sample $s_r$ obtained from $\samp_r$ is the same. Initially $A_r=A_{r-1}$ and $C_r=C_{r-1}$, and so $\{A_r,C_r\}$ is a partition of $A$. If $s_r$ is a valid sample (i.e. $s_r\in A_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $A_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{A_r, C_r\}$ remains a partition of $A$. 
+  On round $r$, $\samp_r$ is \samp with items in $A\backslash A_{r-1}=C_{r-1}$ removed in both \enc and \dec. Therefore, the sample $s_r$ obtained from $\samp_r$ in both sides is the same. Initially $A_r=A_{r-1}$ and $C_r=C_{r-1}$, and so $\{A_r,C_r\}$ is a partition of $A$. If $s_r$ is a valid sample (i.e. $s_r\in A_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $A_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{A_r, C_r\}$ remains a partition of $A$. 
   
   After that, Alice's \enc repeats removing $a$ from $A_r$ with smallest $U_a$ until $|A_r|=n_r$. Symmetrically, Bob's \dec repeats inserting $a$ into $C_r$ with smallest $U_a$ among $a\in B\backslash C_r$, until $|C_r|=|A|-n_r$. In the end we have $|A_r|+|C_r|=|A|$, so \enc and \dec execute repetition the same number of times. Moreover, we can prove that during the same repetition the item removed from $A_r$ is exactly the same item inserted to $C_r$. This is because in the beginning of a repetition $\{A_r, C_r\}$ is a partition of $A$. We have $B\backslash C_r\subseteq A\backslash C_r=A_r$. Let $a^*$ denote  $a\in A_r$ that minimizes $U_a$. We can prove that $a^*\in B\backslash C_r\subseteq A_r$ (since $a^*$ will be removed from $A_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $U_{a^*}$ is also the smallest among $\{U_a|a\in B\backslash C_r\}$. Thus in the end of the repetition, both Alice and Bob will take $a^{*}$ to update (remove from $A_r$, insert into $C_r$). Therefore, $\{A_r, C_r\}$ remains a partition of $A$.
   
