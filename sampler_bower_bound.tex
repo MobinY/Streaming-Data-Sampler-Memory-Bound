@@ -19,14 +19,31 @@
 \newcommand{\enc}{\textsf{ENC}\xspace}
 \newcommand{\dec}{\textsf{DEC}\xspace}
 \newcommand{\s}{\textsf{s}\xspace}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\sk}{\mathsf{sk}}
 
-\title{A Note on Space Lower Bound for Samplers}
-\author{Jelani Nelson, Jakub Pachocki, Zhengyu Wang}
+\title{An optimal space lower bound for samplers}
+\author{Jelani Nelson\thanks{Harvard University. \texttt{minilek@seas.harvard.edu}. Supported by NSF grant IIS-1447471 and
+   CAREER award CCF-1350670, ONR Young Investigator award N00014-15-1-2388, and a Google Faculty Research Award.}
+  \and Jakub Pachocki\thanks{OpenAI. \texttt{jakub.pachocki@gmail.com}. Work done while affiliated with Harvard University, with the support of ONR grant N00014-15-1-2388.}
+  \and Zhengyu Wang\thanks{Harvard University. \texttt{zhengyuwang@g.harvard.edu}. Supported by NSF grant CCF-1350670.}}
 
 \begin{document}
-	
+
 \maketitle
 
+\begin{abstract}
+In the $\ell_0$-sampler sketching problem, the goal is to compress a high-dimensional vector $x\in\R^n$ into a low-dimensional {\em sketch} $\sk(x)\in\{0,1\}^S$ so that
+\begin{enumerate}
+\item $S$, the memory footprint of the sketch, is as small as possible,
+\item a third party given only $\sk(x), \sk(y)$, but not $x, y\in\R^n$, is able to form $\sk(x+y)$ for any $x,y\in\R^n$,
+\item given access to only $\sk(x)$, a third party can recover an index $i\in[n]$ such that with probability $1-\delta$, $i$ is a uniformly random element in the support of $x$ (i.e.\ $x_i\neq 0$).
+\end{enumerate}
+We prove that any such sketching mechanism requires $S = \Omega(\log^2 n\cdot \log(1/\delta))$ bits for any $2^{-n^{.99}} < \delta < .1$, which is nearly the full range of $\delta$ of interest and is optimal in this range \cite{jowhari2011tight}. Our lower bound holds even if the mechanism is allowed to output any element of the support, and not necessarily a uniformly random one. We prove our lower bound by showing that $\ell_0$-samplers which are {\em too} memory-efficient can be used to compress subsets of $[n]$ of certain sizes below the information theoretic minimum. Our compression scheme masks information by injecting noise, and is loosely motivated by ideas in differential privacy. Our correctness analysis involves understanding the ability of such mechanisms to correctly answer adaptive queries which have non-zero, but bounded, mutual information with the randomness of the mechanism, and may be of independent interest in the newly emerging area of adaptive data analysis with a theoretical computer science lens.
+\end{abstract}
+
+
+\section{Introduction}
 We study the space lower bound for maintaining a sampler over a turnstile stream. An $\ell_p$-sampler with failure probability at most $\delta$ is a randomized data structure for maintaining vector $x\in \mathbb{R}^n$ (initially 0) under a stream of updates in the form of $(i, \Delta)$ (meaning that $x_i \leftarrow x_i+\Delta$); in the end, with probability at least $1-\delta$, it gives an ``$\ell_p$-sample'' according to $x$: namely, item $i$ is sampled with probability $\frac{|x_i|^p}{\sum_{j\in [n]}{|x_j|^p}}$. 
 
 Note that updates are independent of the randomness used in the sampler. That is, for the purpose of proving a lower bound, we assume an oblivious adversary. 
