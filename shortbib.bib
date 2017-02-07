@@ -1,3 +1,5 @@
+% ========================
+%% papers on l0 sampling
 @inproceedings{JowhariST11,
   title={Tight bounds for lp samplers, finding duplicates in streams, and related problems},
   author={Jowhari, Hossein and Sa{\u{g}}lam, Mert and Tardos, G{\'a}bor},
@@ -18,7 +20,10 @@
   year      = {2014},
   note      = {Preliminary version in ALENEX 2013.}
 }
+% ========================
 
+% ========================
+%% papers that introduced lp sampling
 @inproceedings{MonemizadehW10,
   author    = {Morteza Monemizadeh and
                David P. Woodruff},
@@ -41,7 +46,23 @@
   year      = {2008},
   note      = {Preliminary version in SOCG 2005.}
 }
+% ========================
 
+% ========================
+%% survey on l0 sampling as a tool in graph algorithms
+@article{McGregor14,
+  author    = {Andrew McGregor},
+  title     = {Graph stream algorithms: a survey},
+  journal   = {{SIGMOD} Record},
+  volume    = {43},
+  number    = {1},
+  pages     = {9--20},
+  year      = {2014},
+}
+% ========================
+
+% ========================
+%% papers that use l0 sampling in streaming algorithms
 @inproceedings{AhnGM12,
   author    = {Kook Jin Ahn and
                Sudipto Guha and
@@ -70,8 +91,7 @@
                Mohammad Taghi Hajiaghayi and
                Morteza Monemizadeh},
   title     = {Parameterized Streaming: Maximal Matching and Vertex Cover},
-  booktitle = {Proceedings of the Twenty-Sixth Annual {ACM-SIAM} Symposium on Discrete
-               Algorithms (SODA)},
+  booktitle = {Proceedings of the Twenty-Sixth Annual {ACM-SIAM} Symposium on Discrete Algorithms (SODA)},
   pages     = {1234--1251},
   year      = {2015},
 }
@@ -86,8 +106,7 @@
                Sofya Vorotnikova},
   title     = {Kernelization via Sampling with Applications to Finding Matchings
                and Related Problems in Dynamic Graph Streams},
-  booktitle = {Proceedings of the Twenty-Seventh Annual {ACM-SIAM} Symposium on Discrete
-               Algorithms (SODA)},
+  booktitle = {Proceedings of the Twenty-Seventh Annual {ACM-SIAM} Symposium on Discrete Algorithms (SODA)},
   pages     = {1326--1344},
   year      = {2016},
 }
@@ -124,47 +143,11 @@
   year      = {2015},
 }
 
-@inproceedings{Pandurangan0S16,
-  author    = {Gopal Pandurangan and
-               Peter Robinson and
-               Michele Scquizzato},
-  title     = {Fast Distributed Algorithms for Connectivity and {MST} in Large Graphs},
-  booktitle = {Proceedings of the 28th {ACM} Symposium on Parallelism in Algorithms
-               and Architectures (SPAA)},
-  pages     = {429--438},
-  year      = {2016},
-}
-
-@article{McGregor14,
-  author    = {Andrew McGregor},
-  title     = {Graph stream algorithms: a survey},
-  journal   = {{SIGMOD} Record},
-  volume    = {43},
-  number    = {1},
-  pages     = {9--20},
-  year      = {2014},
-}
-
-@inproceedings{HegemanPPSS15,
-  author    = {James W. Hegeman and
-               Gopal Pandurangan and
-               Sriram V. Pemmaraju and
-               Vivek B. Sardeshmukh and
-               Michele Scquizzato},
-  title     = {Toward Optimal Bounds in the Congested Clique: Graph Connectivity
-               and {MST}},
-  booktitle = {Proceedings of the 2015 {ACM} Symposium on Principles of Distributed
-               Computing (PODC)},
-  pages     = {91--100},
-  year      = {2015},
-}
-
 @inproceedings{EsfandiariHW16,
   author    = {Hossein Esfandiari and
                MohammadTaghi Hajiaghayi and
                David P. Woodruff},
-  title     = {Brief Announcement: Applications of Uniform Sampling: Densest Subgraph
-               and Beyond},
+  title     = {Brief Announcement: Applications of Uniform Sampling: Densest Subgraph and Beyond},
   booktitle = {Proceedings of the 28th {ACM} Symposium on Parallelism in Algorithms
                and Architectures (SPAA)},
   pages     = {397--399},
@@ -176,10 +159,8 @@
                Monika Henzinger and
                Danupon Nanongkai and
                Charalampos E. Tsourakakis},
-  title     = {Space- and Time-Efficient Algorithm for Maintaining Dense Subgraphs
-               on One-Pass Dynamic Streams},
-  booktitle = {Proceedings of the Forty-Seventh Annual {ACM} on Symposium on Theory
-               of Computing (STOC)},
+  title     = {Space- and Time-Efficient Algorithm for Maintaining Dense Subgraphs on One-Pass Dynamic Streams},
+  booktitle = {Proceedings of the Forty-Seventh Annual {ACM} on Symposium on Theory of Computing (STOC)},
   pages     = {173--182},
   year      = {2015},
 }
@@ -206,10 +187,8 @@
                Sanjeev Khanna and
                Yang Li and
                Grigory Yaroslavtsev},
-  title     = {Maximum Matchings in Dynamic Graph Streams and the Simultaneous Communication
-               Model},
-  booktitle = {Proceedings of the Twenty-Seventh Annual {ACM-SIAM} Symposium on Discrete
-               Algorithms (SODA)},
+  title     = {Maximum Matchings in Dynamic Graph Streams and the Simultaneous Communication Model},
+  booktitle = {Proceedings of the Twenty-Seventh Annual {ACM-SIAM} Symposium on Discrete Algorithms (SODA)},
   pages     = {1345--1364},
   year      = {2016},
 }
@@ -219,8 +198,7 @@
                Sanjeev Khanna and
                Yang Li},
   title     = {On Estimating Maximum Matching Size in Graph Streams},
-  booktitle = {Proceedings of the Twenty-Eighth Annual {ACM-SIAM} Symposium on Discrete
-               Algorithms (SODA)},
+  booktitle = {Proceedings of the Twenty-Eighth Annual {ACM-SIAM} Symposium on Discrete Algorithms (SODA)},
   pages     = {1723--1742},
   year      = {2017},
 }
@@ -233,3 +211,63 @@
   pages     = {429--440},
   year      = {2016},
 }
+% ========================
+
+% ========================
+%% papers that use l0 samplers in distributed algorithms
+@inproceedings{HegemanPPSS15,
+  author    = {James W. Hegeman and
+               Gopal Pandurangan and
+               Sriram V. Pemmaraju and
+               Vivek B. Sardeshmukh and
+               Michele Scquizzato},
+  title     = {Toward Optimal Bounds in the Congested Clique: Graph Connectivity
+               and {MST}},
+  booktitle = {Proceedings of the 2015 {ACM} Symposium on Principles of Distributed Computing (PODC)},
+  pages     = {91--100},
+  year      = {2015},
+}
+
+@inproceedings{Pandurangan0S16,
+  author    = {Gopal Pandurangan and
+               Peter Robinson and
+               Michele Scquizzato},
+  title     = {Fast Distributed Algorithms for Connectivity and {MST} in Large Graphs},
+  booktitle = {Proceedings of the 28th {ACM} Symposium on Parallelism in Algorithms and Architectures (SPAA)},
+  pages     = {429--438},
+  year      = {2016},
+}
+% ========================
+
+% ========================
+%% papers that use l0 samplers for dynamic graph algorithms
+%% (specifically Monte Carlo data structures for dynamic connectivity)
+@inproceedings{KapronKM13,
+  author    = {Bruce M. Kapron and
+               Valerie King and
+               Ben Mountjoy},
+  title     = {Dynamic graph connectivity in polylogarithmic worst case time},
+  booktitle = {Proceedings of the Twenty-Fourth Annual {ACM-SIAM} Symposium on Discrete Algorithms (SODA)},
+  pages     = {1131--1142},
+  year      = {2013},
+}
+
+@article{Wang15,
+  author    = {Zhengyu Wang},
+  title     = {An Improved Randomized Data Structure for Dynamic Graph Connectivity},
+  journal   = {CoRR},
+  volume    = {abs/1510.04590},
+  year      = {2015},
+}
+
+@article{GibbKKT15,
+  author    = {David Gibb and
+               Bruce M. Kapron and
+               Valerie King and
+               Nolan Thorn},
+  title     = {Dynamic graph connectivity with improved worst case update time and sublinear space},
+  journal   = {CoRR},
+  volume    = {abs/1509.06464},
+  year      = {2015},
+}
+% ========================
