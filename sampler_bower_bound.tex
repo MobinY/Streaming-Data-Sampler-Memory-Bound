@@ -21,6 +21,7 @@
 \newcommand{\s}{\textsf{s}\xspace}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\sk}{\mathsf{sk}}
+\newcommand{\eps}{\varepsilon}
 
 \title{An optimal space lower bound for samplers}
 \author{Jelani Nelson\thanks{Harvard University. \texttt{minilek@seas.harvard.edu}. Supported by NSF grant IIS-1447471 and
@@ -39,7 +40,9 @@ In the $\ell_0$-sampler sketching problem, the goal is to compress a high-dimens
 \item a third party given only $\sk(x), \sk(y)$, but not $x, y\in\R^n$, is able to form $\sk(x+y)$ for any $x,y\in\R^n$,
 \item given access to only $\sk(x)$, a third party can recover an index $i\in[n]$ such that with probability $1-\delta$, $i$ is a uniformly random element in the support of $x$ (i.e.\ $x_i\neq 0$).
 \end{enumerate}
-We prove that any such sketching mechanism requires $S = \Omega(\log^2 n\cdot \log(1/\delta))$ bits for any $2^{-n^{.99}} < \delta < .1$, which is nearly the full range of $\delta$ of interest and is optimal in this range \cite{JowhariST11}. Our lower bound holds even if the mechanism is allowed to output any element of the support, and not necessarily a uniformly random one. We prove our lower bound by showing that $\ell_0$-samplers which are {\em too} memory-efficient can be used to compress subsets of $[n]$ of certain sizes below the information theoretic minimum. Our compression scheme masks information by injecting noise, and is loosely motivated by ideas in differential privacy. Our correctness analysis involves understanding the ability of such mechanisms to correctly answer adaptive queries which have non-zero, but bounded, mutual information with the randomness of the mechanism, and may be of independent interest in the newly emerging area of adaptive data analysis with a theoretical computer science lens.
+We prove that any such sketching mechanism requires $S = \Omega(\log^2 n\cdot \log(1/\delta))$ bits for any $2^{-n^{.99}} < \delta < .1$, which is nearly the full range of $\delta$ of interest and is optimal in this range \cite{JowhariST11}. Our lower bound holds even if the mechanism is allowed to output any element of the support, and not necessarily a uniformly random one, and thus the lower bound also holds against $\ell_p$-sampling for any $p$, and is optimal for $0<p<2$ for constant error parameter $\eps$ given the upper bound of \cite{JowhariST11}. 
+
+We prove our lower bound by showing that $\ell_0$-samplers which are {\em too} memory-efficient can be used to compress subsets of $[n]$ of certain sizes below the information theoretic minimum. Our encoding scheme makes adaptive queries to the sampler throughout its execution, but done carefully so as to not violate correctness. This is accomplished by injecting random noise into the encoder's queries to the sampler, and is loosely motivated by ideas in differential privacy. Our correctness analysis involves understanding the ability of the sampler to correctly answer adaptive queries which have non-zero, but bounded, mutual information with the randomness of the mechanism, and may be of independent interest in the newly emerging area of adaptive data analysis with a theoretical computer science lens.
 \end{abstract}
 
 
