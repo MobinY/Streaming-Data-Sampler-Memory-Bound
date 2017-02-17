@@ -3,8 +3,10 @@
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{algorithm,algpseudocode,float}
 \usepackage{xspace}
+\usepackage[usenames]{color}
 %\usepackage{hyperref}
-%\usepackage[usenames]{color}
+
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{todo:} \textit{#1}}}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -65,18 +67,18 @@ Now we turn the previous protocol into a new one without any failure. Let \succe
   Let $\s$ denote the space (in bits) used by a sampler with failure probability at most $\delta$. Let $\s'$ denote the expected number of bits to represent $B$ conditioned on \success (if we need to send some extra auxiliary information, we will also count it into $\s'$). We have 
   
   \begin{align}
-  (1+\s+\s')\cdot \Pr(\success)+(1+\log (^n_m)) \cdot (1-\Pr(\success)) \ge \log (^n_m).
+  (1+\s+\s')\cdot \Pr(\success)+(1+\log(^n_m) \cdot (1-\Pr(\success)) \ge \log (^n_m).
   \end{align} 
   
   If $\Pr(\success)\ge 1/2$, we have 
   
-  \begin{align} \label{formula:lb-meta}
+  \begin{align} \label{eqn:lb-meta}
   \s\ge \log (^n_m) - \s' - 2.
   \end{align} 
 \end{lemma}
 
 We consider the range of failure probability $\delta$ to be 
-\begin{align} \label{formula:delta-range}
+\begin{align} \label{eqn:delta-range}
 2^{-n^{c_1}}<\delta<c_2,
 \end{align}
 where $c_1=0.9$ and $c_2=2^{-10}$. In fact, our lower bound applies for the range of $\delta$ where $c_1$ and $c_2$ are any constants smaller than $1$. 
@@ -93,13 +95,13 @@ In Section~\ref{sec:simple-lb} we give a lower bound of $\Omega(\log n \log \fra
 
 %=====================================================================
 \section{$\Omega(\log n \log {\frac{1}{\delta}})$ Bits Lower Bound}\label{sec:simple-lb}
-Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform random set $A\subseteq [n]$ of size $\frac{1}{2}\log\frac{1}{\delta}$ to Bob. Let $A=\{a_1,\ldots,a_m\}$ and $a_1<\ldots<a_m$. 
+Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform random set $A\subseteq [n]$ of size $m$ to Bob. Let $A=\{a_1,\ldots,a_m\}$ and $a_1<\ldots<a_m$. 
 
 \begin{algorithm}[H]
 \caption{Alice's Encoder.}
 \begin{algorithmic}[1]
 \Procedure{$\enc_1$}{$A$}
-  \State $\samp \leftarrow \emptyset$ \Comment{\samp uses the random source shared by Alice and Bob}
+  \State Initialize an $\ell_0$-sampler $\samp$ \Comment{\samp uses the random source shared by Alice and Bob}
   \For {$i=1,2,\ldots,m$}
     \State Insert $a_i$ into \samp
   \EndFor
@@ -131,7 +133,7 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \end{lemma}
 
 \begin{proof}
-  Let $E_S$ denote the event that after removing all the items in $S$ (in the order from smallest to biggest) from \samp, it gives a valid sample when queried. We have 
+  Let $E_S$ denote the event that after removing all the items in $S$ from \samp in sorted order, the next query to \samp gives a valid sample. We have 
   
   \begin{align}
   \Pr(\dec_1(\enc_1(A))=A)
@@ -147,11 +149,11 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \end{lemma}
 
 \begin{proof}
-  It follows from Formula~\ref{formula:lb-meta} in Lemma~\ref{lemma:lb-meta}, where $\log {n \choose \frac{1}{2}\log \frac{1}{\delta}}=\Omega(\log n \log \frac{1}{\delta})$ and $\s'=0$. 
+  This follows from \eqref{eqn:lb-meta}, since $\log {n \choose \frac{1}{2}\log \frac{1}{\delta}}=\Omega(\log n \log \frac{1}{\delta})$ and $\s'=0$. 
 \end{proof}
 
 \begin{remark}
-  The following decoder $\dec_1'$ is similar to $\dec_1$, but we will lose a factor of $\log\log \frac{1}{\delta}$ in the lower bound because by doing so we have to union-bound $O(m!)$ events instead of $O(2^m)$ events (so that in turn we have to set $m$ to be $\frac{\log \frac{1}{\delta}}{\log\log\frac{1}{\delta}}$ in order to have good success probability). 
+  The following decoder $\dec_1'$ is similar to $\dec_1$, but we will lose a factor of $\log\log \frac{1}{\delta}$ in the lower bound because by doing so we have to union bound over $m!$ events instead of $2^m$ events (so that in turn we have to set $m$ to be $\frac{\log \frac{1}{\delta}}{\log\log\frac{1}{\delta}}$ in order to have good success probability). 
 \end{remark}
 
 \begin{algorithm}[H]
@@ -173,12 +175,9 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 %=====================================================================
 \section{$\Omega(\log^2 n \log \frac{1}{\delta})$ Bits Lower Bound} \label{sec:optimal-lb}
 
-In the previous section we have shown how to extract $\Theta(\log \frac{1}{\delta})$ words of information from a sampler. 
-Our goal is to extract more words. New observation comes from the upper bound for constructing an $\ell_0$ sampler. 
-When $\delta=\frac{1}{n}$, we have the following sampler algorithm that consumes $O(\log^3 n)$ bits. 
-The sampler consists of $\log n$ layers, and on layer $i=1,\ldots, \log n$ it maintains a separate $\log n$-sparse recover system for the sub-stream generated by sub-sampling the items from the universe $[n]$ with probability $2^{-i}$.
-Each sparse recovery system takes $O(\log^2 n)$ bits. 
-Its correctness comes from the fact that 
+In the previous section we have shown how to extract $\Theta(\log n\log \frac{1}{\delta})$ bits of information from a sampler. 
+Our goal now is to extract more words. Our improved lower bound is motivated by the best known $\ell_0$-sampler {\em upper} bound \cite{JowhariST11}, which uses $O(\log^2 n\log \frac 1{\delta})$ bits of memory. At a high level, this upper bound works as follows. The sampler consists of $\log n$ layers, and on layer $i=1,\ldots, \log n$ it maintains a separate $\log \frac 1{\delta}$-sparse recovery system for the sub-stream generated by sub-sampling the items from the universe $[n]$ with probability $2^{-i}$. 
+Each sparse recovery system takes $O(\log n\log \frac 1{\delta})$ bits.  Its correctness comes from the fact that 
 \begin{enumerate}
   \item With probability at least $1-n^{-c}$ there is some layer $i$ that contains at least $1$ and at most $\log n$ items whose coordinates are non-zero. 
   \item Conditioned on the event that on layer $i$ the number of items whose coordinates are non-zero is between $1$ and $\log n$, the sparse recovery system on layer $i$ works with failure probability at most $n^{-c}$. In this context, we say the sparse recovery system works if it could recover at least one item. 
@@ -225,7 +224,7 @@ We present the decoder in Algorithm~\ref{algo:dec}.
   \caption{Alice's Encoder.} \label{algo:enc}
   \begin{algorithmic}[1]
     \Procedure{$\enc$}{$A$}
-    \State $\samp \leftarrow \emptyset$
+    \State Initialize an $\ell_0$-sampler $\samp$
     \State Insert items in $A$ into \samp
     \State $A_0 \leftarrow A$
     \State $S\leftarrow \emptyset$
