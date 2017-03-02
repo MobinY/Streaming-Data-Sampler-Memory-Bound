@@ -1,0 +1,57 @@
+\section{Introduction}
+In turnstile $\ell_0$-sampling, a vector $x\in\R^n$ starts as the zero vector and receives coordinate-wise updates of the form ``$x_i \leftarrow x_i + \Delta$'' for some $\Delta\in\R$. During a query, one must return a uniformly random element from $\mathop{support}(x)$. Data structures solving this problem were first used as a subroutine to solve various dynamic graph streaming problems in \cite{AhnGM12a} and since then have been crucially used in seemingly every dynamic graph streaming problem studied across several papers: connectivity \cite{AhnGM12a}, $k$-connectivity \cite{AhnGM12a}, spanners \cite{AhnGM12b}, cut sparsifiers \cite{AhnGM12b}, spectral sparsifiers \cite{AhnGM13}, minimum spanning tree \cite{AhnGM12a}, maximal matching \cite{ChitnisCHM15}, maximum matching \cite{BuryS15,Konrad15,AssadiKLY16,ChitnisCEHMMV16,AssadiKL17}, vertex cover \cite{ChitnisCHM15,ChitnisCEHMMV16}, hitting set \cite{ChitnisCEHMMV16}, $b$-matching \cite{ChitnisCEHMMV16}, disjoint paths \cite{ChitnisCEHMMV16}, $k$-colorable subgraph \cite{ChitnisCEHMMV16}, several other maximum subgraph problems \cite{ChitnisCEHMMV16}, densest subgraph \cite{BhattacharyaHNT15,McGregorTVV15,EsfandiariHW16}, vertex and hyperedge connectivity \cite{GuhaMT15}, and approximating graph degeneracy \cite{FarachColtonT16}, to name a few.
+
+If $x$ is $n$-dimensional with integer coordinates bounded by $\mathop{poly}(n)$, the work of \cite{JowhariST11} gave an $\Omega(\log^2 n)$-bit space lower bound for data structures which fail with constant probability, and otherwise whose query responses are close to uniform in statistical distance. They also gave an upper bound with failure probability $\delta$, which in fact gave $\min\{|\mathop{support{(x)}}|, \Theta(\log(1/\delta))\}$ uniform samples from the support of $x$, with space $O(\log^2 n \log(1/\delta))$ bits. No lower bound was known in terms of $\delta$.
+
+We prove that for any $\ell_0$-sampling data structure, the required space complexity is $\Omega(t\cdot \log^2(n/t))$ bits, where $t = \max\{k, \log(1/\delta)\}$, to recover $k$ samples from $\mathop{support}(x)$ with failure probability $\delta$. This is optimal for all settings of $k, \delta, n$ (as long as, say, $t\cdot \log^2(n/t)\le n^{.99}$ --- there is always a trivial $O(n \log n)$-bit algorithm by storing $x$ in memory explicitly). Furthermore, our lower bound holds even if the data structure is only required to output {\em any} $k$ elements from the support, as opposed to nearly uniform ones. The previous lower bound did not hold against this weaker guarantee, despite that the fact that this weaker guarantee is actually all that is needed for most dynamic graph streaming applications mentioned above! Furthermore, since our lower bound holds regardless of which support elements the data structure finds, it holds against $\ell_p$ samplers for every $p$ (or even other distributions).
+
+
+%%%
+\bigskip
+\bigskip
+\bigskip
+
+We study the space lower bound for maintaining a sampler over a turnstile stream. An $\ell_p$-sampler with failure probability at most $\delta$ is a randomized data structure for maintaining vector $x\in \mathbb{R}^n$ (initially 0) under a stream of updates in the form of $(i, \Delta)$ (meaning that $x_i \leftarrow x_i+\Delta$); in the end, with probability at least $1-\delta$, it gives an ``$\ell_p$-sample'' according to $x$: namely, item $i$ is sampled with probability $\frac{|x_i|^p}{\sum_{j\in [n]}{|x_j|^p}}$. 
+
+Note that updates are independent of the randomness used in the sampler. That is, for the purpose of proving a lower bound, we assume an oblivious adversary. 
+
+To the best of our knowledge, the best space upper bound for $\ell_0$ sampler is $O(\log^2 n \log \frac{1}{\delta})$ bits, while the previous best lower bound is $\Omega(\log^2 n +\log\frac{1}{\delta})$ bits (where $\Omega(\log^2 n)$ is shown in \cite{JowhariST11}). The bound is tight for constant $\delta$, while for example, when $\delta=\frac{1}{n}$, the gap is $\log n$. 
+
+We show space lower bounds for maintaining a sampler for a {\em binary} vector. That is, at any time, we are guaranteed that $x\in \{0,1\}^n$. This makes our result strong in the sense that (1) the lower bound applies for any $p$; (2) the lower bound also works for strict turnstile streams.
+
+The lower bounds are based on communication complexity in the public random coin model. Alice wants to send Bob a uniform random set $A\subseteq [n]$ of size $m$ (Bob knows $m$, but the random source generating $A$ is independent of the random source accessible to Bob). The one-way communication problem is: Alice sends some message to Bob, and Bob is required to recover $A$ completely. Since the randomness in $A$ contains $\log (^n_m)$ bits of information, any randomized protocol that works with probability $1$ requires at least $\log (^n_m)$ expected bits. 
+
+We consider the following protocol. Alice attaches (the memory of) a sampler \samp in the message. The sampler uses public random coins as its random source, so that the sampler will behave the same at Alice's and Bob's as long as the updates are all the same. Alice will insert all the items in $A$ into \samp and send \samp to Bob. In addition, Alice will send a subset $B\subseteq A$ to Bob, so that together with $B$ and \samp, Bob is able to recover $A$ with good probability based on some protocol they have agreed on. 
+ 
+Now we turn the previous protocol into a new one without any failure. Let \success denote the event (or a subset of the event) that Bob successfully recovers $A$ (note that Alice can simulate Bob, so she knows exactly when \success happens). If \success happens Alice will send Bob a message starting with a $1$, followed by (the memory of) \samp, then followed by the native encoding (explained later) of $B$; otherwise, Alice will send a message starting with a $0$, followed by the native encoding of $A$. We say the native encoding of a set $S\subseteq [n]$ to be an integer (expressed in binary) in $[{n \choose |S|}]$ together with $|S|$ (taking $\log n$ bits). We drop the size of the set if it is known by the receiver.
+
+\begin{lemma} \label{lemma:lb-meta}
+  Let $\s$ denote the space (in bits) used by a sampler with failure probability at most $\delta$. Let $\s'$ denote the expected number of bits to represent $B$ conditioned on \success (if we need to send some extra auxiliary information, we will also count it into $\s'$). We have 
+  
+  \begin{align}
+  (1+\s+\s')\cdot \Pr(\success)+(1+\log(^n_m) \cdot (1-\Pr(\success)) \ge \log (^n_m).
+  \end{align} 
+  
+  If $\Pr(\success)\ge 1/2$, we have 
+  
+  \begin{align} \label{eqn:lb-meta}
+  \s\ge \log (^n_m) - \s' - 2.
+  \end{align} 
+\end{lemma}
+
+We consider the range of failure probability $\delta$ to be 
+\begin{align} \label{eqn:delta-range}
+2^{-n^{c_1}}<\delta<c_2,
+\end{align}
+where $c_1=0.9$ and $c_2=2^{-10}$. In fact, our lower bound applies for the range of $\delta$ where $c_1$ and $c_2$ are any constants smaller than $1$. 
+
+In Section~\ref{sec:simple-lb} we give a lower bound of $\Omega(\log n \log \frac{1}{\delta})$ bits. This illustrates some key ideas of our framework. Then we show a lower bound of $\Omega(\log^2 n \log \frac{1}{\delta})$ bits in Section~\ref{sec:optimal-lb}.
+We extend our results in Section~\ref{sec:k-samples-lb} for samplers that obtain $k$ samples with failure probability at most $\delta$, and get a lower bound of $\Omega((1-\delta)k\log^2 n)$ bits, where $1\le k \le n^{.99}$ and $0\le \delta \le 1-\frac{1}{k\log n}$.
+
+\begin{remark}
+  Because the space lower bound in this note is proven via communication complexity under public random coin model, it also applies to non-uniform models of computation such as circuits and branching programs.  
+\end{remark}
+
+\begin{remark}
+  The space lower bound in this note still applies if the sampler is required to output an arbitrary item whose coordinate is non-zero instead of a uniformly random one. 
+\end{remark}

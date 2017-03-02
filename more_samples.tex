@@ -1,0 +1,63 @@
+\section{Lower Bound for Obtaining Multiple Samples}\label{sec:k-samples-lb}
+
+\begin{algorithm}[H] 
+  \caption{Variables Shared by Alice's $\enc_4$ and Bob's $\dec_4$.} \label{algo:para4}
+  \begin{algorithmic}[1] 
+    \State $m\leftarrow n^{0.99}$
+    \State $R\leftarrow \frac{1}{2}\log (n/k)$
+    \State $T_0\leftarrow [n]$
+    \For {$r = 1, \ldots, R$}
+      \State $T_r\leftarrow \emptyset$
+      \State For each $a\in T_{r-1}$, $T_r\leftarrow T_r\cup \{a\}$ with probability $\frac{1}{2}$
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H] 
+  \caption{Alice's Encoder.} \label{algo:enc4}
+  \begin{algorithmic}[1]
+    \Procedure{$\enc_4$}{$A$}
+    \State Initialize an $\ell_0$-sampler $\samp$
+    \State Insert items in $A$ into \samp
+    \State $S\leftarrow \emptyset$
+    \For {$r=1,\ldots,R$}
+    \State Let $\samp_r$ be a copy of $\samp$
+    \State Remove items in $A\backslash (A\cap T_{r-1})$ from $\samp_r$ \Comment Now $\samp_r$ contains the elements in $A\cap T_{r-1}$
+    \State Let $S_r$ be $k$ samples obtained from $\samp_r$
+    \If {$S_r\subseteq A\cap T_{r-1}$} \Comment{i.e. if $S_r$ are valid samples}
+      \State $b_r\leftarrow 1$ \Comment{$b$ is a binary string of length $R$, indicating if sampler succeeds on round $r$}
+      \State $S\leftarrow S \cup (S_r\cap (T_{r-1}\backslash T_r))$
+    \Else 
+      \State $b_r\leftarrow 0$
+    \EndIf
+    \EndFor
+      \State \Return ($A\backslash S$, $b$, \samp) 
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H] 
+  \caption{Bob's Decoder.} \label{algo:dec4}
+  \begin{algorithmic}[1]
+    \Procedure{$\dec_4$}{$B$, $b$, \samp}
+    \State $S\leftarrow \emptyset$
+    \State $C_0 \leftarrow \emptyset$
+    \For {$r=1,\ldots,R$}
+      \State $C_r\leftarrow C_{r-1}$
+      \If {$b_r=1$}
+        \State Let $\samp_r$ be a copy of $\samp$
+        \State Remove items in $C_{r-1}$ from $\samp_r$ \Comment{Invariant: $C_r=A\backslash (A\cap T_r)$}
+        \State Let $S_r$ be $k$ samples from $\samp_r$
+        \State $S\leftarrow S \cup (S_r\cap (T_{r-1}\backslash T_r))$
+        \State $C_r\leftarrow C_r \cup (S_r\cap (T_{r-1}\backslash T_r))$
+      \EndIf
+      \State $C_r\leftarrow C_r \cup (B\cap (T_{r-1}\backslash T_r))$
+    \EndFor
+    \State \Return $B\cup S$ 
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\subsection{Analysis}
+
+To be continued...
