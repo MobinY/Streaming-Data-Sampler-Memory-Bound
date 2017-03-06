@@ -1,4 +1,4 @@
-\section{$\Omega(\log n \log {\frac{1}{\delta}})$ Bits Lower Bound}\label{sec:simple-lb}
+\section{$\Omega(\log \frac{1}{\delta} \log {\frac{n}{\log(1/\delta)}})$ Bits Lower Bound}\label{sec:simple-lb}
 Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform random set $A\subseteq [n]$ of size $m$ to Bob. Let $A=\{a_1,\ldots,a_m\}$ and $a_1<\ldots<a_m$. 
 
 \begin{algorithm}[H]
@@ -33,7 +33,7 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \end{algorithm}
 
 \begin{lemma}
-  For any $A\subseteq [n]$, where $|A|=m=\frac{1}{2}\log \frac{1}{\delta}$, $\Pr(\dec_1(\enc_1(A))=A)\ge 1/2$.
+  For any $A\subseteq [n]$, where $|A|=m=\frac{1}{2}\log \frac{1}{\delta}$ and $\delta\le \frac{1}{4}$, $\Pr(\dec_1(\enc_1(A))=A)\ge 1/2$.
 \end{lemma}
 
 \begin{proof}
@@ -49,11 +49,11 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \end{proof}
 
 \begin{lemma}
-  $\s = \Omega(\log n \log \frac{1}{\delta})$.
+  $\s = \Omega(\log \frac{1}{\delta} \log \frac{n}{\log (1/\delta)})$, for $2\le \log \frac{1}{\delta} \le n$.
 \end{lemma}
 
 \begin{proof}
-  This follows from \eqref{eqn:lb-meta}, since $\log {n \choose \frac{1}{2}\log \frac{1}{\delta}}=\Omega(\log n \log \frac{1}{\delta})$ and $\s'=0$. 
+  This follows from \eqref{eqn:lb-meta}, since $\log {n \choose \frac{1}{2}\log \frac{1}{\delta}}=\Omega(\log \frac{1}{\delta} \log \frac{n}{\log (1/\delta)})$ and $\s'=0$. 
 \end{proof}
 
 \begin{remark}
