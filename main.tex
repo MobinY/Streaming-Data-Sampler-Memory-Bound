@@ -34,11 +34,11 @@ We present the decoder in Algorithm~\ref{algo:dec}.
 \begin{algorithm}[H] 
   \caption{Variables Shared by Alice's $\enc$ and Bob's $\dec$.} \label{algo:para}
   \begin{algorithmic}[1] 
-    \State $m\leftarrow \sqrt{n \log\frac{1}{\delta}}$ \Comment{We take the floor whenever a parameter is supposed to be an integer}
-    \State $K\leftarrow \frac{1}{16}\log \frac{1}{\delta}$
-    \State $R\leftarrow K\log(m/4K)$
+    \State $m\leftarrow \lfloor \sqrt{n \log\frac{1}{\delta}} \rfloor$ \Comment{We take the floor whenever a parameter is supposed to be an integer}
+    \State $K\leftarrow \lfloor \frac{1}{16}\log \frac{1}{\delta} \rfloor$
+    \State $R\leftarrow \lfloor K\log(m/4K) \rfloor$
     \For {$r = 0, \ldots, R$}
-      \State $n_r\leftarrow m \cdot 2^{-\frac{r}{K}}$ \Comment{By the setting of parameters we have $n_r-n_{r+1}\ge 2$}
+      \State $n_r\leftarrow \lfloor m \cdot 2^{-\frac{r}{K}} \rfloor$ \Comment{By the setting of parameters we have $n_r-n_{r+1}\ge 2$}
     \EndFor
     \For {$a\in [n]$}
       \State Let $U_a$ be uniformly and independent sample from $[0,1]$ \Comment{Used to generate $A_r$, $r=1,\ldots, R$}

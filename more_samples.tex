@@ -16,8 +16,8 @@ Thus we have $\E(|A|-|B|)\ge \frac{k}{2}\cdot (1-\delta) \cdot R=\Omega(k\log\fr
 \begin{algorithm}[H] 
   \caption{Variables Shared by Alice's $\enc_4$ and Bob's $\dec_4$.} \label{algo:para4}
   \begin{algorithmic}[1] 
-    \State $m\leftarrow \sqrt{nk}$
-    \State $R\leftarrow \frac{1}{2}\log (n/k) - 2$ \Comment{Note that $R\ge 3$ because $k\le \frac{n}{2^{10}}$}
+    \State $m\leftarrow \lfloor \sqrt{nk} \rfloor$
+    \State $R\leftarrow \lfloor \frac{1}{2}\log (n/k) - 2 \rfloor$ \Comment{Note that $R\ge 3$ because $k\le \frac{n}{2^{10}}$}
     \State $T_0\leftarrow [n]$
     \For {$r = 1, \ldots, R$}
       \State $T_r\leftarrow \emptyset$
