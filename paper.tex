@@ -5,8 +5,10 @@
 \usepackage{xspace}
 \usepackage[usenames]{color}
 %\usepackage{hyperref}
-
 \newcommand{\TODO}[1]{\textcolor{red}{\textbf{todo:} \textit{#1}}}
+
+\newcommand{\supp}{\mathop{supp}}
+\newcommand{\suppfind}[1]{support-finding$_{{#1}}$}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -28,7 +30,7 @@
 \title{An optimal space lower bound for samplers}
 \author{Jelani Nelson\thanks{Harvard University. \texttt{minilek@seas.harvard.edu}. Supported by NSF grant IIS-1447471 and
    CAREER award CCF-1350670, ONR Young Investigator award N00014-15-1-2388, and a Google Faculty Research Award.}
-  \and Jakub Pachocki\thanks{OpenAI. \texttt{jakub.pachocki@gmail.com}. Work done while affiliated with Harvard University, with the support of ONR grant N00014-15-1-2388.}
+  \and Jakub Pachocki\thanks{OpenAI. \texttt{jakub.pachocki@gmail.com}. Work done while affiliated with Harvard University, under the support of ONR grant N00014-15-1-2388.}
   \and Zhengyu Wang\thanks{Harvard University. \texttt{zhengyuwang@g.harvard.edu}. Supported by NSF grant CCF-1350670.}}
 
 \begin{document}
@@ -36,21 +38,23 @@
 \maketitle
 
 \begin{abstract}
-In the $\ell_0$-sampler sketching problem, the goal is to compress a high-dimensional vector $x\in\R^n$ into a low-dimensional {\em sketch} $\sk(x)\in\{0,1\}^S$ so that
+In the $\ell_0$-sampler turnstile streaming problem, a high-dimensional vector $x\in\R^n$ receives coordinate-wise updates of the form ``$x_i\leftarrow x_i + \Delta$'', and we must  maintain a {\em sketch} $\sk(x)\in\{0,1\}^S$ so that
 \begin{enumerate}
-\item $S$, the memory footprint of the sketch, is as small as possible,
-\item a third party given only $\sk(x), \sk(y)$, but not $x, y\in\R^n$, is able to form $\sk(x+y)$ for any $x,y\in\R^n$,
-\item given access to only $\sk(x)$, a third party can recover an index $i\in[n]$ such that with probability $1-\delta$, $i$ is a uniformly random element in $\mathop{support}(x) = \{i : x_i\neq 0\}$.
+\item $S$, the memory footprint of the sketch in bits, is as small as possible, and
+\item given access to only $\sk(x)$, one can recover an index $i\in[n]$ such that with probability $1-\delta$, $i$ is a uniformly random element in $\supp(x) = \{i : x_i\neq 0\}$.
 \end{enumerate}
-We prove that any such sketching mechanism requires $S = \Omega(\log^2 n\cdot \log(1/\delta))$ bits for any $2^{-n^{.99}} < \delta < .1$, which is nearly the full range of $\delta$ of interest and is optimal in this range \cite{JowhariST11}. Our lower bound holds even if the mechanism is allowed to output any element of the support, and not necessarily a uniformly random one, and thus the lower bound also holds against $\ell_p$-sampling for any $p$, and is optimal for $0<p<2$ for constant error parameter $\eps$ given the upper bound of \cite{JowhariST11}. 
+We prove that any such sketching algorithm requires $S = \Omega(\log^2 n\cdot \log(1/\delta))$ bits for any $2^{-n^{.99}} < \delta < .1$, which is nearly the full range of $\delta$ of interest and is optimal in this range \cite{JowhariST11}. Our lower bound holds even if the algorithm is allowed to output {\em any} element of the support, and not necessarily a random one, which is actually all that is needed for almost all known applications of $\ell_0$-sampling to dynamic graph streams. This furthermore means that our lower bound also holds against $\ell_p$-sampling for any $p$, and is optimal for $0<p<2$ for constant error parameter $\eps$ given the upper bound of \cite{JowhariST11}. Also, our lower bound holds even in the strict turnstile model, in which it is promised that $x_i\ge 0$ for all $i$ at all times.
 
-We prove our lower bound by showing that $\ell_0$-samplers which are {\em too} memory-efficient can be used to compress subsets of $[n]$ of certain sizes below the information theoretic minimum. Our encoding scheme makes adaptive queries to the sampler throughout its execution, but done carefully so as to not violate correctness. This is accomplished by injecting random noise into the encoder's queries to the sampler, and is loosely motivated by ideas in differential privacy. Our correctness analysis involves understanding the ability of the sampler to correctly answer adaptive queries which have non-zero, but bounded, mutual information with the randomness of the mechanism, and may be of independent interest in the newly emerging area of adaptive data analysis with a theoretical computer science lens.
+We prove our lower bound by showing that $\ell_0$-samplers which are {\em too} memory-efficient can be used to compress subsets of $[n]$ of certain sizes below the information theoretic minimum. Our compression scheme makes adaptive queries to the sampler throughout its execution, but done carefully so as to not violate correctness. This is accomplished by injecting random noise into the encoder's queries to the sampler, which is loosely motivated by techniques in differential privacy. Our correctness analysis involves understanding the ability of the sampler to correctly answer adaptive queries which have non-zero, but bounded, mutual information with its internal randomness, and may be of independent interest in the newly emerging area of adaptive data analysis with a theoretical computer science lens.
 \end{abstract}
 
 \input{intro.tex}
 \input{warmup.tex}
 \input{main.tex}
 \input{more_samples.tex}
+
+% \section*{Acknowledgments}
+% We thank Vasileios Nakos for pointing out that a lower bound for strict turnstile $\ell_0$-samplers, such as ours, immediately implies the same lower bound for duplicate detection (Theorem~\ref{thm:duplicate}).
 
 \bibliographystyle{alpha}
 \bibliography{shortbib}
