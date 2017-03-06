@@ -18,12 +18,14 @@ The lower bound proven in \cite{JowhariST11} leaves four items to be better unde
 % \end{proof}
 
 \subsection{Related work}
-As mentioned above, $\ell_0$-sampling was first studied in 
+The question of whether $\ell_0$-sampling is possible in low memory in turnstile streams was first asked in \cite{CormodeMR05}. The first solution was given in \cite{FrahlingIS08}, where it was applied to approximate the cost of the Euclidean minimum spanning tree of a subset $S$ of a discrete geometric space subject to insertions and deletions. The algorithm given there used space $O(\log^3 n)$ bits to achieve failure probability $1/\mathop{poly}(n)$ (though it is likely that the space could be improved to $O(\log^2 n\log\log n)$ with a worse failure probability, by replacing a subroutine used there with a more recent $\ell_0$-estimation algorithm of \cite{KaneNW10}).
+
+For $\ell_p$-sampling as defined above, the first work to realize its importance came even earlier than for $\ell_0$-sampling: \cite{CoppersmithK04} showed that an $\ell_2$-sampler using small memory would lead to a nearly space-optimal streaming algorithm for multiplicatively estimating $\|x\|_3$ in the turnstile model, but did not know how to implement such a data structure. The first implementation was given in \cite{MonemizadehW10}, where they achieved space $\mathop{poly}(\eps^{-1}\log n)$ for failure probability $1/\mathop{poly}(n)$. For $1\le p\le 2$ the space was improved to $O(\eps^{-p}\log^3 n)$ bits for constant failure probability \cite{AndoniKO11}. In \cite{JowhariST11} this bound was improved to $O(\eps^{-\max\{1,p\}}\log(1/\delta)\log^2 n)$ bits for failure probability $\delta$ when $0<p<2$ and $p\neq 1$. For $p=1$ the space bound achieved by \cite{JowhariST11} was a $\log(1/\eps)$ factor worse: $O(\eps^{-1}\log(1/\eps)\log(1/\delta)\log^2 n)$ bits.
 
 \section{Overview of techniques}
-Note that updates are independent of the randomness used in the sampler. That is, for the purpose of proving a lower bound, we assume an oblivious adversary. 
+We assume the adversary creates all stream updates in advance, oblivious to the algorithm's random bits.
 
-As mentioned, we show space lower bounds for maintaining a \suppfind{} data structure for a {\em binary} vector. That is, at any time, we are guaranteed that $x\in \{0,1\}^n$. Our lower bounds are based on communication complexity in the public random coin model. Alice wants to send Bob a uniform random set $A\subseteq [n]$ of size $m$ (Bob knows $m$, but the random source generating $A$ is independent of the random source accessible to Bob). The one-way communication problem is: Alice sends some message to Bob, and Bob is required to recover $A$ completely. Since the randomness in $A$ contains $\log (^n_m)$ bits of information, any randomized protocol that succeeds with probability $1$ requires at least $\log (^n_m)$ expected bits. 
+As mentioned, we show space lower bounds for maintaining a \suppfind{} data structure for a {\em binary} vector. That is, our lower bound holds even if at all times in the stream we are guaranteed $x\in \{0,1\}^n$. Our lower bounds are based on communication complexity in the public random coin model. Alice wants to send Bob a uniform random set $A\subseteq [n]$ of size $m$ (Bob knows $m$, but the random source generating $A$ is independent of the random source accessible to Bob). The one-way communication problem is: Alice sends some message to Bob, and Bob is required to recover $A$ completely. Any randomized protocol that succeeds with probability $1$ requires Alice to send at least $\log (^n_m)$ bits in expectation.
 
 We consider the following protocol. Alice attaches (the memory of) a support-finder \samp in the message. The support-finder uses public random coins as its random source, so that \samp will behave the same for Alice and for Bob as long as the updates are all the same. Alice will insert all the items in $A$ into \samp and send the memory footprint of \samp to Bob as a message. In addition, Alice will send a subset $B\subseteq A$ to Bob, so that together with $B$ and \samp, Bob is able to recover $A$ with good probability based on some protocol they have agreed on. 
  
@@ -53,5 +55,7 @@ In Section~\ref{sec:simple-lb} we give a lower bound of $\Omega(\log(\frac n{\lo
 We extend our results in Section~\ref{sec:k-samples-lb} to \suppfind{k} for $k\ge 1$ proving a lower bound of $\Omega(k\log^2(n/k))$ bits for constant failure probability.
 
 \begin{remark}
-  Because the space lower bound in this note is proven via communication complexity under public random coin model, it also applies to non-uniform models of computation such as circuits and branching programs.  \TODO{what does this mean?}
+\textup{
+  Because our space lower bound is proven under the public coin model, it holds even against algorithms which are allowed to store hash functions (or any arbitrary number of random bits) for free.
+}
 \end{remark}
