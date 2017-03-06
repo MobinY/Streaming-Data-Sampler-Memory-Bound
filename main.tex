@@ -101,14 +101,14 @@ We have three random objects here: (1) Set $A$, which is a uniform random set of
 
 First, we can prove that $\dec(\enc(A))=A$. That is, no matter the randomness in $X$ and $U$, Bob will always decode $A$ successfully. It is because Alice's $\enc$ and Bob's $\dec$ share $X$ and $U$, so that Bob essentially simulates Alice. We formally prove this by induction in Lemma~\ref{lemma:zero-fail-prob}. 
 
-Now our goal is to prove that by using \samp, the number of bits that Alice saves is $\Omega(\log^2 n \log\frac{1}{\delta})$. Intuitively, it is equivalent to prove the number of words that Alice saves is $\Omega(\log n \log\frac{1}{\delta})$.
-We formalize this in Lemma~\ref{lemma:bits-saving}. Note that Alice also needs to send $b$ (i.e., whether the sampler succeeds on $R$ rounds) to Bob, but it takes only $O(\log n \log\frac{1}{\delta})$ bits, which is negligible. Thus it is sufficient to prove $\E(|B|)=|A|-\Omega(\log n \log\frac{1}{\delta})$. 
+Now our goal is to prove that by using \samp, the number of bits that Alice saves is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$. Intuitively, it is equivalent to prove the number of items that Alice saves is $\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)} )$.
+We formalize this in Lemma~\ref{lemma:bits-saving}. Note that Alice also needs to send $b$ (i.e., whether the sampler succeeds on $R$ rounds) to Bob, which takes $R$ bits. By setting of parameters we can afford the loss of $R$ bits. Thus it is sufficient to prove $\E(|B|)=|A|-\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$. 
 
 We have $|A|-|B|=\sum_{r=1}^{R}b_r$. 
 In Lemma~\ref{lemma:mutual-entropy-vs-fail-prob}, we prove the probability that the sampler fails on round $r$ is upper bounded by $\frac{I(X;A_{r-1})+1}{\log \frac{1}{\delta}}$, where $I(X;A_{r-1})$ is the mutual information between $X$ and $A_{r-1}$. 
 Furthermore, we will show in Lemma~\ref{lemma:mutual-entropy-bound} that $I(X;A_{r-1})$ is upper bounded by $5K$.
-Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \frac{2}{5}$ and thus $\E(|A|-|B|)\ge \frac{2}{5}R=\Omega(\log n \log\frac{1}{\delta})$. 
-
+Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \frac{5}{8}$ and thus $\E(|A|-|B|)\ge \frac{5}{8}R=\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$.
+ 
 \begin{lemma}\label{lemma:zero-fail-prob}
   $\dec(\enc(A))=A$.
 \end{lemma}
@@ -228,7 +228,7 @@ Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \f
 \end{proof}
 
 \begin{theorem}
-  $\s = \Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$, given that $2^{10} \le \log \frac{1}{\delta} \le \frac{n}{2^{10}}$.
+  $\s = \Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$, given that $64 \le \log \frac{1}{\delta} \le \frac{n}{64}$.
 \end{theorem}
 
 \begin{proof}
@@ -237,7 +237,8 @@ Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \f
   The size of $B$ is $|B|=|A|-\sum_{r=1}^{R}{b_r}$.
   By Corollary~\ref{corollary:sampler-failure}, and because conditioned on $A$, the randomness of updates to $\samp_r$ comes from $A_{r-1}$ (for $r=1, \ldots, R$), we get $\Pr(b_r=0)\le \frac{I(X;A_{r-1})+1}{\log\frac{1}{\delta}}$ and thus $\E(b_r)\ge 1-\frac{I(X;A_{r-1})+1}{\log\frac{1}{\delta}}$. 
   By Lemma~\ref{lemma:mutual-entropy-bound}, $I(X;A_{r-1})\le 5K$ (Note that when $r=1$, $I(X;A_0)=0\le 5K$). Therefore, $\E(b_r)\ge 1-\frac{5K+1}{\log\frac{1}{\delta}}$.
-  By the setting of parameters (see Algorithm~\ref{algo:para}) we have $\E(b_r)\ge \frac{2}{5}$. Therefore, $\E(|B|)\le |A|-\frac{2}{5}R$. 
-  By Lemma~\ref{lemma:bits-saving}, $\log (^n_m)-\E(\log (^n_{|B|}))\ge \frac{2}{5}R\cdot \log (\frac{n}{m}-1) \ge \frac{1}{6}R\log (\frac{n}{\log(1/\delta)})$. 
-  Combining together we get $\s=\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$.
+  By the setting of parameters (see Algorithm~\ref{algo:para}) we have $\E(b_r)\ge \frac{5}{8}$. Therefore, $\E(|B|)\le |A|-\frac{5}{8}R$. 
+  By Lemma~\ref{lemma:bits-saving}, $\log (^n_m)-\E(\log (^n_{|B|}))\ge \frac{5}{8}R\cdot \log (\frac{n}{m}-1) \ge \frac{1}{2}R\log (\frac{n}{\log(1/\delta)})$. 
+  Furthermore, $\frac{1}{6}R\log \frac{n}{\log (1/\delta)} \ge R$.
+  Combining together we get $\s \ge \frac{R}{3}\log \frac{n}{\log(1/\delta)} -(\log n + 2)  =\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$.
 \end{proof}
