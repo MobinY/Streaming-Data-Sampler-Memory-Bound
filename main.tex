@@ -1,10 +1,10 @@
 \section{$\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$ Bits Lower Bound} \label{sec:optimal-lb}
 
-In the previous section we have shown how to extract $\Theta(\log \frac{1}{\delta})$ words of information from a sampler by sequentially peeling off samples. 
-Because the number of bad events we need to union-bound increases exponentially, the approach cannot obtain more samples. 
-Let us consider sampler's failure probability in terms of information leak, which is defined as the mutual information between sampler's random source and the set of items remained in the sampler. 
+In the previous section we have shown how to extract $\Theta(\log \frac{1}{\delta})$ words of information from the sketch by sequentially peeling off elements. 
+Because the number of bad events we need to union-bound increases exponentially, the approach cannot obtain more elements. 
+Let us consider failure probability of $\query(\sketch(\chi_A), \chi_S)$ where $S\subset A$ in terms of information leak, which is defined as the mutual information between $S$ and randomness in $\query(\sketch(\chi_A), \cdot)$. 
 We show in this section that the failure probability is upper-bounded by information leak divided by $\log \frac{1}{\delta}$. 
-Therefore, in order to obtain samples with good probability, it is sufficient to control information leak.
+Therefore, in order to $\query$ with good probability, it is sufficient to control information leak.
 
 Our key technique is random removal: after obtaining a sample from the sampler, we not only peel off the sample, but also randomly remove $1/K$ fraction of items remaining in the sampler. 
 We prove that no matter how many peeling rounds we proceed, the information leak is always bounded by $O(K)$. 
@@ -50,16 +50,13 @@ We present the decoder in Algorithm~\ref{algo:dec}.
   \caption{Alice's Encoder.} \label{algo:enc}
   \begin{algorithmic}[1]
     \Procedure{$\enc$}{$A$}
-    \State Initialize an $\ell_0$-sampler $\samp$
-    \State Insert items in $A$ into \samp
+    \State $\sk\leftarrow \sketch(\chi_A)$
     \State $A_0 \leftarrow A$
     \State $S\leftarrow \emptyset$
     \For {$r=1,\ldots,R$}
-      \State Let $\samp_r$ be a copy of $\samp$
-      \State Remove items in $A\backslash A_{r-1}$ from $\samp_r$ \Comment So that $\samp_r$ contains the elements in $A_{r-1}$
-      \State Let $s_r$ be a sample from $\samp_r$
+      \State $s_r\leftarrow \query(\sk, \chi_{A\backslash A_{r-1}})$
       \State $A_r\leftarrow A_{r-1}$
-      \If {$s_r\in A_r$} \Comment{i.e. if $s_r$ is a valid sample}
+      \If {$s_r\in A_{r-1}$} \Comment{i.e. if $s_r$ is a valid sample}
         \State $b_r\leftarrow 1$ \Comment{$b$ is a binary string of length $R$, indicating if sampler succeeds on round $r$}
         \State $S\leftarrow S \cup \{s_r\}$
         \State $A_r\leftarrow A_r \backslash \{s_r\}$
@@ -68,7 +65,7 @@ We present the decoder in Algorithm~\ref{algo:dec}.
       \EndIf
       \State Remove $|A_r|-n_r$ elements from $A_r$ with smallest $U_a$'s among $a\in A_r$ \Comment{So that $|A_r|=n_r$}
     \EndFor
-    \State \Return ($A\backslash S$, $b$, \samp) 
+    \State \Return ($\sk$, $A\backslash S$, $b$) 
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -76,15 +73,13 @@ We present the decoder in Algorithm~\ref{algo:dec}.
 \begin{algorithm}[H] 
   \caption{Bob's Decoder.} \label{algo:dec}
   \begin{algorithmic}[1]
-    \Procedure{$\dec$}{$B$, $b$, \samp}
+    \Procedure{$\dec$}{$\sk$, $B$, $b$}
     \State $S\leftarrow \emptyset$
     \State $C_0 \leftarrow \emptyset$
     \For {$r=1,\ldots,R$}
       \State $C_r\leftarrow C_{r-1}$
       \If{$b_r=1$}
-        \State Let $\samp_r$ be a copy of $\samp$
-        \State Remove items in $C_{r-1}$ from $\samp_r$ \Comment{Invariant: $C_r=A\backslash A_r$ ($A_r$ is defined in $\enc$)}
-        \State Let $s_r$ be a sample from $\samp_r$
+        \State $s_r\leftarrow \query(\sk, \chi_{C_{r-1}})$ \Comment{Invariant: $C_r=A\backslash A_r$ ($A_r$ is defined in $\enc$)}
         \State $S\leftarrow S \cup \{s_r\}$
         \State $C_r\leftarrow C_r \cup \{s_r\}$
       \EndIf

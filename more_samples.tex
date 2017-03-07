@@ -30,21 +30,18 @@ Thus we have $\E(|A|-|B|)\ge \frac{k}{2}\cdot (1-\delta) \cdot R=\Omega(k\log\fr
   \caption{Alice's Encoder.} \label{algo:enc4}
   \begin{algorithmic}[1]
     \Procedure{$\enc_4$}{$A$}
-    \State Initialize an $\ell_0$-sampler $\samp$
-    \State Insert items in $A$ into \samp
+    \State $\sk \leftarrow \sketch(\chi_A)$
     \State $S\leftarrow \emptyset$
     \For {$r=1,\ldots,R$}
-    \State Let $\samp_r$ be a copy of $\samp$
-    \State Remove items in $A\backslash (A\cap T_{r-1})$ from $\samp_r$ \Comment Now $\samp_r$ contains the elements in $A\cap T_{r-1}$
-    \State Let $S_r$ be $k$ samples obtained from $\samp_r$
-    \If {$S_r\subseteq A\cap T_{r-1}$} \Comment{i.e. if $S_r$ are valid samples}
+    \State $S_r\leftarrow \query_k(\sk, \chi_{A\backslash (A\cap T_{r-1})})$
+    \If {$S_r\subseteq A\cap T_{r-1}$} \Comment{i.e. if $S_r$ are valid}
       \State $b_r\leftarrow 1$ \Comment{$b$ is a binary string of length $R$, indicating if sampler succeeds on round $r$}
       \State $S\leftarrow S \cup (S_r\cap (T_{r-1}\backslash T_r))$
     \Else 
       \State $b_r\leftarrow 0$
     \EndIf
     \EndFor
-      \State \Return ($A\backslash S$, $b$, \samp) 
+      \State \Return ($\sk$, $A\backslash S$, $b$) 
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -52,15 +49,13 @@ Thus we have $\E(|A|-|B|)\ge \frac{k}{2}\cdot (1-\delta) \cdot R=\Omega(k\log\fr
 \begin{algorithm}[H] 
   \caption{Bob's Decoder.} \label{algo:dec4}
   \begin{algorithmic}[1]
-    \Procedure{$\dec_4$}{$B$, $b$, \samp}
+    \Procedure{$\dec_4$}{$\sk$, $B$, $b$}
     \State $S\leftarrow \emptyset$
     \State $C_0 \leftarrow \emptyset$
     \For {$r=1,\ldots,R$}
       \State $C_r\leftarrow C_{r-1}$
       \If {$b_r=1$}
-        \State Let $\samp_r$ be a copy of $\samp$
-        \State Remove items in $C_{r-1}$ from $\samp_r$ \Comment{Invariant: $C_r=A\backslash (A\cap T_r)$}
-        \State Let $S_r$ be $k$ samples from $\samp_r$
+        \State $S_r\leftarrow \query_k(\sk, \chi_{C_{r-1}})$ \Comment{Invariant: $C_r=A\backslash (A\cap T_r)$}
         \State $S\leftarrow S \cup (S_r\cap (T_{r-1}\backslash T_r))$
         \State $C_r\leftarrow C_r \cup (S_r\cap (T_{r-1}\backslash T_r))$
       \EndIf
