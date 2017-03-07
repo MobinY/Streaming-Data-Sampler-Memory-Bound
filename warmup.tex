@@ -1,15 +1,11 @@
 \section{$\Omega(\log \frac{1}{\delta} \log {\frac{n}{\log(1/\delta)}})$ Bits Lower Bound}\label{sec:simple-lb}
-Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform random set $A\subseteq [n]$ of size $m$ to Bob. Let $A=\{a_1,\ldots,a_m\}$ and $a_1<\ldots<a_m$. 
+Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform random set $A\subseteq [n]$ of size $m$ to Bob.
 
 \begin{algorithm}[H]
 \caption{Alice's Encoder.}
 \begin{algorithmic}[1]
 \Procedure{$\enc_1$}{$A$}
-  \State Initialize an $\ell_0$-sampler $\samp$ \Comment{\samp uses the random source shared by Alice and Bob}
-  \For {$i=1,2,\ldots,m$}
-    \State Insert $a_i$ into \samp
-  \EndFor
-  \State \Return \samp 
+  \State \Return $\sketch(\chi_A)$ 
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -17,14 +13,10 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \begin{algorithm}[H]
 \caption{Bob's Decoder.}
 \begin{algorithmic}[1]
-\Procedure{$\dec_1$}{\samp}
+\Procedure{$\dec_1$}{$\sk$}
   \State $S\leftarrow \emptyset$
   \For {$i=1,2,\ldots,m$}
-    \State Let $\samp_i$ be a copy of \samp \Comment{So that $\samp_i$ can behave as if it is \samp}
-    \For {$s \in S$} \Comment{Enumerate the elements in $S$ from smallest to biggest}
-      \State Remove $s$ from $\samp_i$
-    \EndFor
-    \State Obtain a sample $s_i$ from $\samp_i$
+    \State $s_i\leftarrow \query(\sk, \chi_S)$
     \State $S \leftarrow S \cup \{s_i\}$
   \EndFor
   \State \Return $S$ 
@@ -37,12 +29,12 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \end{lemma}
 
 \begin{proof}
-  Let $E_S$ denote the event that after removing all the items in $S$ from \samp in sorted order, the next query to \samp gives a valid sample. We have 
+  Let $E_S$ where $S\subset A$ denote the event that $\query(\sketch(\chi_A), \chi_S)\in A\backslash S$. We have 
   
   \begin{align}
   \Pr(\dec_1(\enc_1(A))=A)
-  \ge \Pr(\bigcap_{S\subseteq A, S\ne \emptyset}{E_S})
-  \ge 1 - \sum_{S\subseteq A, S\ne \emptyset}{\Pr({\overline {E_S}})} 
+  \ge \Pr(\bigcap_{S\subset A}{E_S})
+  \ge 1 - \sum_{S\subset A}{\Pr({\overline {E_S}})} 
   \ge 1 - \delta \cdot 2^{\frac{1}{2}\log \frac{1}{\delta}}
   \ge 1/2.
   \end{align}
@@ -55,22 +47,3 @@ Let $m=\frac{1}{2}\log \frac{1}{\delta}$, namely, Alice wants to send a uniform 
 \begin{proof}
   This follows from \eqref{eqn:lb-meta}, since $\log {n \choose \frac{1}{2}\log \frac{1}{\delta}}=\Omega(\log \frac{1}{\delta} \log \frac{n}{\log (1/\delta)})$ and $\s'=0$. 
 \end{proof}
-
-\begin{remark}
-  The following decoder $\dec_1'$ is similar to $\dec_1$, but we will lose a factor of $\log\log \frac{1}{\delta}$ in the lower bound because by doing so we have to union bound over $m!$ events instead of $2^m$ events (so that in turn we have to set $m$ to be $\frac{\log \frac{1}{\delta}}{\log\log\frac{1}{\delta}}$ in order to have good success probability). 
-\end{remark}
-
-\begin{algorithm}[H]
-\caption{A Worse Decoder.}
-\begin{algorithmic}[1]
-\Procedure{$\dec_1'$}{\samp}
-\State $S\leftarrow \emptyset$
-\For {$i=1,2,\ldots,m$}
-\State Obtain a sample $s_i$ from $\samp$
-\State Remove $s_i$ from $\samp$
-\State $S \leftarrow S \cup \{s_i\}$
-\EndFor
-\State \Return $S$ 
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
