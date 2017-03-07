@@ -1,28 +1,29 @@
-\section{$\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$ Bits Lower Bound} \label{sec:optimal-lb}
+\section{Communication Lower Bound for UR} \label{sec:optimal-lb}
 
 In the previous section we have shown how to extract $\Theta(\log \frac{1}{\delta})$ words of information from the sketch by sequentially peeling off elements. 
 Because the number of bad events we need to union-bound increases exponentially, the approach cannot obtain more elements. 
-Let us consider failure probability of $\query(\sketch(\chi_A), \chi_S)$ where $S\subset A$ in terms of information leak, which is defined as the mutual information between $S$ and randomness in $\query(\sketch(\chi_A), \cdot)$. 
+Let us consider failure probability of $\query(\sketch(\chi_A), \chi_S)$ where $S\subset A$ in terms of information leak, which is defined as the mutual informatio (conditioned on $A$) between $S$ and randomness in the UR-protocol. 
 We show in this section that the failure probability is upper-bounded by information leak divided by $\log \frac{1}{\delta}$. 
-Therefore, in order to $\query$ with good probability, it is sufficient to control information leak.
+Therefore, in order to invoke $\query$ with good success probability, it is sufficient to control information leak.
 
-Our key technique is random removal: after obtaining a sample from the sampler, we not only peel off the sample, but also randomly remove $1/K$ fraction of items remaining in the sampler. 
+Our key technique is noise injection: after obtaining an element from $A\backslash S$, we not only peel off the element, but also randomly remove $1/K$ fraction of items remaining in $A\backslash S$. 
 We prove that no matter how many peeling rounds we proceed, the information leak is always bounded by $O(K)$. 
 By setting $K=\Theta(\log \frac{1}{\delta})$ and $m=\sqrt{n\log\frac{1}{\delta}}$, we can proceed in $\Theta(\frac{\log (m/K)}{\log (1 +1/K)}) = \Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ rounds, and thus in expectation obtain $\Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ samples.
-Moreover, each sample contains $\Theta(\log(n/m))=\Theta(\log \frac{n}{\log (1/\delta)})$ bits of information, so we get $\Theta(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)}) $ bits of information from the sampler. 
+Moreover, each sample contains $\Theta(\log(n/m))=\Theta(\log \frac{n}{\log (1/\delta)})$ bits of information, so we get $\Theta(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)}) $ bits of information from the sketch. 
 
 \subsection{Protocol}
 
 The parameters used by Alice and Bob are given in Algorithm~\ref{algo:para}.
-Alice wants to send a uniformly random set $A$ to Bob where $|A|=m$. Similar to $\enc_1$, Alice constructs \samp by inserting all the items in $A$, and sends it to Bob. Note that \samp uses the same random source that Alice and Bob share. Moreover, Alice will send Bob a subset $B\subseteq A$ computed as follows. Initially $B=A$ and let $A_0=A$. Alice proceeds in $R$ rounds. On round $r$ ($r=1,\ldots, R$) Alice tries to obtain sample $s_r\in A_{r-1}$ from the sampler 
-(In more detail, she will make a copy of \samp, denoted by $\samp_r$, remove all the items in $A\backslash A_{r-1}$ and query for a sample). 
-Let $b$ denote a binary string of length $R$, where $b_r$ records whether the sampler succeeds on round $r$. In the end, Alice will also send $b$ to Bob. If $s_r\in A_{r-1}$, i.e., the sampler returns a valid sample, Alice will set $b_r=1$, and remove $s_r$ from $B$ (since $s_r$ can be obtained from the sampler, Alice does not need to include it in $B$. In Algorithm~\ref{algo:enc} Alice uses $S$ to keep track of $A\backslash B$); otherwise Alice will set $b_r=0$.
+Alice wants to send a uniformly random set $A$ to Bob where $|A|=m$. Similar to $\enc_1$, Alice computes $\sk \leftarrow \sketch(\chi_A)$, and sends it to Bob. Moreover, Alice will send Bob a subset $B\subseteq A$ computed as follows. Initially $B=A$ and let $A_0=A$. Alice proceeds in $R$ rounds. On round $r$ ($r=1,\ldots, R$), Alice computes $s_r\leftarrow \query(\sk, \chi_{A\backslash A_{r-1}})$. 
+Let $b$ denote a binary string of length $R$, where $b_r$ records whether $\query$ succeeds on round $r$. Alice will also send $b$ to Bob in the end.
+ 
+If $s_r\in A_{r-1}$, i.e. $\query(\sk, \chi_{A\backslash A_{r-1}})$ succeeds, Alice will set $b_r=1$, and remove $s_r$ from $B$ (since $s_r$ can be obtained from the sampler, Alice does not need to include it in $B$. In Algorithm~\ref{algo:enc} Alice uses $S$ to keep track of $A\backslash B$); otherwise Alice will set $b_r=0$.
 At the end of round $r$, Alice will generate a uniformly random set $A_r$, so that $A_r$ is a subset of $A_{r-1}\backslash \{s_r\}$ and $|A_r|=n_r$. 
 In particular, Alice uses shared random source to generate $A_r$, so that Bob can recover $A_{r-1}\backslash A_r$ on round $r$. 
 We present Alice's encoder in Algorithm~\ref{algo:enc}.
 
 The decoding process is symmetric. Let $C_0=\emptyset$ and $S=\emptyset$. Bob proceeds in $R$ rounds. 
-On round $r$ ($r=1,\ldots,R$), Bob obtains sample $s_r\in A\backslash C_{r-1}$ (In more detail, he will make a copy of \samp, denoted by $\samp_r$, remove all the items in $C_{r-1}$ and query for a sample). 
+On round $r$ ($r=1,\ldots,R$), Bob obtains sample $s_r\in A\backslash C_{r-1}$ by invoking $\query(\sk, \chi_{C_{r-1}})$. 
 By the construction of $C_{r-1}$ that will be described later it is guaranteed that $A_{r-1}=A\backslash C_{r-1}$. 
 Therefore, Bob will get exactly the same $s_r$ as Alice. 
 Bob assigns initial value $C_{r-1}$ to $C_r$.
@@ -92,11 +93,11 @@ We present the decoder in Algorithm~\ref{algo:dec}.
 
 \subsection{Analysis}
 
-We have three random objects here: (1) Set $A$, which is a uniform random set of size $m$; (2) The random source used by the sampler, denoted by $X$; (3) The collection of random variables $U_a$ where $a\in [n]$, denoted by $U$. They are independent. We do the analysis conditioned on $A$. Namely, the following arguments apply for any fixed $A$. 
+We have three random objects here: (1) Set $A$, which is a uniform random set of size $m$; (2) The random source used by the UR-protocol, denoted by $X$; (3) The collection of random variables $U_a$ where $a\in [n]$, denoted by $U$. They are independent. We do the analysis conditioned on $A$. Namely, the following arguments apply for any fixed $A$. 
 
 First, we can prove that $\dec(\enc(A))=A$. That is, no matter the randomness in $X$ and $U$, Bob will always decode $A$ successfully. It is because Alice's $\enc$ and Bob's $\dec$ share $X$ and $U$, so that Bob essentially simulates Alice. We formally prove this by induction in Lemma~\ref{lemma:zero-fail-prob}. 
 
-Now our goal is to prove that by using \samp, the number of bits that Alice saves is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$. Intuitively, it is equivalent to prove the number of items that Alice saves is $\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)} )$.
+Now our goal is to prove that by using UR-protocol, the number of bits that Alice saves is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$. Intuitively, it is equivalent to prove the number of items that Alice saves is $\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)} )$.
 We formalize this in Lemma~\ref{lemma:bits-saving}. Note that Alice also needs to send $b$ (i.e., whether the sampler succeeds on $R$ rounds) to Bob, which takes $R$ bits. By setting of parameters we can afford the loss of $R$ bits. Thus it is sufficient to prove $\E(|B|)=|A|-\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$. 
 
 We have $|A|-|B|=\sum_{r=1}^{R}b_r$. 
