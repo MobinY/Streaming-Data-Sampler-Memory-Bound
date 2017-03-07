@@ -17,7 +17,7 @@ The parameters used by Alice and Bob are given in Algorithm~\ref{algo:para}.
 Alice wants to send a uniformly random set $A$ to Bob where $|A|=m$. Similar to $\enc_1$, Alice computes $\sk \leftarrow \sketch(\chi_A)$, and sends it to Bob. Moreover, Alice will send Bob a subset $B\subseteq A$ computed as follows. Initially $B=A$ and let $A_0=A$. Alice proceeds in $R$ rounds. On round $r$ ($r=1,\ldots, R$), Alice computes $s_r\leftarrow \query(\sk, \chi_{A\backslash A_{r-1}})$. 
 Let $b$ denote a binary string of length $R$, where $b_r$ records whether $\query$ succeeds on round $r$. Alice will also send $b$ to Bob in the end.
  
-If $s_r\in A_{r-1}$, i.e. $\query(\sk, \chi_{A\backslash A_{r-1}})$ succeeds, Alice will set $b_r=1$, and remove $s_r$ from $B$ (since $s_r$ can be obtained from the sampler, Alice does not need to include it in $B$. In Algorithm~\ref{algo:enc} Alice uses $S$ to keep track of $A\backslash B$); otherwise Alice will set $b_r=0$.
+If $s_r\in A_{r-1}$, i.e. $\query(\sk, \chi_{A\backslash A_{r-1}})$ succeeds, Alice will set $b_r=1$, and remove $s_r$ from $B$ (since $s_r$ can be obtained from the UR-protocol, Alice does not need to include it in $B$. In Algorithm~\ref{algo:enc} Alice uses $S$ to keep track of $A\backslash B$); otherwise Alice will set $b_r=0$.
 At the end of round $r$, Alice will generate a uniformly random set $A_r$, so that $A_r$ is a subset of $A_{r-1}\backslash \{s_r\}$ and $|A_r|=n_r$. 
 In particular, Alice uses shared random source to generate $A_r$, so that Bob can recover $A_{r-1}\backslash A_r$ on round $r$. 
 We present Alice's encoder in Algorithm~\ref{algo:enc}.
@@ -58,7 +58,7 @@ We present the decoder in Algorithm~\ref{algo:dec}.
       \State $s_r\leftarrow \query(\sk, \chi_{A\backslash A_{r-1}})$
       \State $A_r\leftarrow A_{r-1}$
       \If {$s_r\in A_{r-1}$} \Comment{i.e. if $s_r$ is a valid sample}
-        \State $b_r\leftarrow 1$ \Comment{$b$ is a binary string of length $R$, indicating if sampler succeeds on round $r$}
+        \State $b_r\leftarrow 1$ \Comment{$b$ is a binary string of length $R$, indicating if $\query$ succeeds on round $r$}
         \State $S\leftarrow S \cup \{s_r\}$
         \State $A_r\leftarrow A_r \backslash \{s_r\}$
       \Else 
@@ -98,10 +98,10 @@ We have three random objects here: (1) Set $A$, which is a uniform random set of
 First, we can prove that $\dec(\enc(A))=A$. That is, no matter the randomness in $X$ and $U$, Bob will always decode $A$ successfully. It is because Alice's $\enc$ and Bob's $\dec$ share $X$ and $U$, so that Bob essentially simulates Alice. We formally prove this by induction in Lemma~\ref{lemma:zero-fail-prob}. 
 
 Now our goal is to prove that by using UR-protocol, the number of bits that Alice saves is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$. Intuitively, it is equivalent to prove the number of items that Alice saves is $\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)} )$.
-We formalize this in Lemma~\ref{lemma:bits-saving}. Note that Alice also needs to send $b$ (i.e., whether the sampler succeeds on $R$ rounds) to Bob, which takes $R$ bits. By setting of parameters we can afford the loss of $R$ bits. Thus it is sufficient to prove $\E(|B|)=|A|-\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$. 
+We formalize this in Lemma~\ref{lemma:bits-saving}. Note that Alice also needs to send $b$ (i.e., whether the $\query$ succeeds on $R$ rounds) to Bob, which takes $R$ bits. By setting of parameters we can afford the loss of $R$ bits. Thus it is sufficient to prove $\E(|B|)=|A|-\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$. 
 
 We have $|A|-|B|=\sum_{r=1}^{R}b_r$. 
-In Lemma~\ref{lemma:mutual-entropy-vs-fail-prob}, we prove the probability that the sampler fails on round $r$ is upper bounded by $\frac{I(X;A_{r-1})+1}{\log \frac{1}{\delta}}$, where $I(X;A_{r-1})$ is the mutual information between $X$ and $A_{r-1}$. 
+In Lemma~\ref{lemma:mutual-entropy-vs-fail-prob}, we prove the probability that $\query$ fails on round $r$ is upper bounded by $\frac{I(X;A_{r-1})+1}{\log \frac{1}{\delta}}$, where $I(X;A_{r-1})$ is the mutual information between $X$ and $A_{r-1}$. 
 Furthermore, we will show in Lemma~\ref{lemma:mutual-entropy-bound} that $I(X;A_{r-1})$ is upper bounded by $5K$.
 Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \frac{5}{8}$ and thus $\E(|A|-|B|)\ge \frac{5}{8}R=\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$.
  
