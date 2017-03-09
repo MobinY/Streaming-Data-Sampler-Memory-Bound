@@ -14,6 +14,7 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{definition}{Definition}
 \newtheorem{corollary}{Corollary}
+\newtheorem{claim}{Claim}
 \newtheorem{remark}{Remark}
 \DeclareMathOperator*{\E}{\mathbb{E}}
 \let\Pr\relax
@@ -30,6 +31,8 @@
 \newcommand{\eps}{\varepsilon}
 \newcommand{\ur}{\mathbf{UR}\xspace}
 \newcommand{\randcom}{\mathbf{R}}
+\newcommand{\findup}[1]{\textsf{FindDuplicate}$({#1})$\xspace}
+\newcommand{\findupk}[1]{\textsf{FindDuplicate}$_k({#1})$\xspace}
 
 \title{Optimal lower bounds for samplers and finding duplicates via universal relation}
 \author{Jelani Nelson\thanks{Harvard University. \texttt{minilek@seas.harvard.edu}. Supported by NSF grant IIS-1447471 and
@@ -39,7 +42,11 @@
 
 \begin{document}
 
+\setcounter{page}{0}
+
 \maketitle
+
+\thispagestyle{empty}
 
 \begin{abstract}
 In the communication problem $\ur$ ({\em universal relation}) \cite{KarchmerRW95}, Alice and Bob respectively receive $x$ and $y$ in $\{0,1\}^n$ with the promise that $x\neq y$. The last player to receive a message must output an index $i$ such that $x_i\neq y_i$. We prove that the randomized one-way communication complexity of this problem in the public coin model is exactly $\Theta(\min\{n, \log(1/\delta)\log^2(\frac{n}{\log(1/\delta)})\})$ bits for failure probability $\delta$.  We also show that for a more general problem $\ur_k$, in which the output must be $\min\{k, |\supp(x-y)|\}$ distinct indices $i$ such that $x_i\neq y_i$, the optimal randomized one-way communication complexity is $\Theta(\min\{n, t\log^2(n/t)\})$ bits where $t = \max\{k, \log(1/\delta)\}$. Our lower bounds hold even if promised $\supp(y)\subset \supp(x)$.
@@ -56,6 +63,8 @@ As an immediate corollary, we obtain optimal lower bounds for sampling problems 
 
 More easily explained in the language of the above support-finding turnstile streaming problem, our lower bound operates by showing that any algorithm $\mathcal{A}$ solving that problem in low memory can be used to encode subsets of $[n]$ of certain sizes into a number of bits below the information theoretic minimum. Our encoder makes adaptive queries to $\mathcal{A}$ throughout its execution, but done carefully so as to not violate correctness. This is accomplished by injecting random noise into the encoder's interactions with $\mathcal{A}$, which is loosely motivated by techniques in differential privacy. Our correctness analysis involves understanding the ability of $\mathcal{A}$ to correctly answer adaptive queries which have positive but bounded mutual information with $\mathcal{A}$'s internal randomness, and may be of independent interest in the newly emerging area of adaptive data analysis with a theoretical computer science lens.
 \end{abstract}
+
+\newpage
 
 \input{intro.tex}
 \input{warmup.tex}
