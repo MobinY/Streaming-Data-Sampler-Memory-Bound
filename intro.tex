@@ -66,24 +66,20 @@ For $\ell_p$-sampling as defined above, the first work to realize its importance
 \TODO{cite more previous work, like \cite{GopalanR09} on finding duplicates}
 
 \section{Overview of techniques}
-We here describe our approach to prove Theorem~\ref{thm:main}. For the upper bound, \cite{JowhariST11} achieved $O(t\log^2n)$, but we show that slight modifications to their approach yield $O(\min\{n,t\log^2(n/t)\})$ bits, in the appendix. The bulk of our contribution is in proving our new lower bound.
-
-For simplicity in this overview, we assume $t < n^{.99}$ so that $\log(n/t) = \Theta(\log n)$. Our lower bound proof is split into two parts: we show $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\log(1/\delta)\log^2 n)$ and $\randcom^{\rightarrow,pub}_{\frac 12}(\ur_k^\subset)=\Omega(k\log^2n)$ separately. We first describe the former, which is the more technically challenging half.
+We describe our proof of Theorem~\ref{thm:main}. For the upper bound, \cite{JowhariST11} achieved $O(t\log^2n)$, but in the appendix we show that slight modifications to their approach yield $O(\min\{n,t\log^2(n/t)\})$ bits. Our main contribution is in proving an improved lower bound. Our lower bound proof is split into two parts: we show $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\log(1/\delta)\log^2 n)$ and $\randcom^{\rightarrow,pub}_{\frac 12}(\ur_k^\subset)=\Omega(k\log^2n)$ separately. We first describe the former, which is the more technically challenging half.
 
 We prove the lower bound via an encoding argument. Fix $m$. A randomized encoder is given a set $S\subset[n]$ with $|S| = m$ and must output an encoding $\enc(S)$, and a decoder sharing public randomness with the encoder must then be able to recover $S$ given access only to $\enc(S)$. We consider such schemes in which the decoder must succeed with probability $1$, and the encoding length is a random variable. Clearly any such encoding must use $\Omega(\log(^n_m)) = \Omega(m\log n)$ bits in expectation for some $S$ (we will choose $m < n^{.99}$).
 
-There is a natural (but incorrect) approach to using a public-coin one-way protocol $\mathcal{A}$ for $\ur^\subset$ to devise such an encoding/decoding scheme.  The encoder pretends to be Alice with input $x$ being the indicator set of $S$, then lets $\enc(S)$ be the message $M$ Alice would have sent to Bob. The decoder attempts to recover $S$ by iteratively pretending to be Bob $m$ times, initially pretending to have input $y=0\in\{0,1\}^n$, then iteratively adding elements found in $S$ to $y$'s support.
+There is a natural, but sub-optimal approach to using a public-coin one-way protocol $\mathcal{A}$ for $\ur^\subset$ to devise such an encoding/decoding scheme.  The encoder pretends to be Alice with input $x$ being the indicator set of $S$, then lets $\enc(S)$ be the message $M$ Alice would have sent to Bob. The decoder attempts to recover $S$ by iteratively pretending to be Bob $m$ times, initially pretending to have input $y=0\in\{0,1\}^n$, then iteratively adding elements found in $S$ to $y$'s support. Henceforth let $\mathbf{1}_T\in\{0,1\}^n$ denote the indicator vector of a set $T\subset[n]$.
 
 \begin{algorithm}[H] 
-  \caption{Wrong Decoder.} \label{algo:wrong}
+  \caption{Simple Decoder.} \label{algo:wrong}
   \begin{algorithmic}[1]
     \Procedure{$\dec$}{$M$}
-    \State $y\leftarrow 0\in\{0,1\}^n$
-    \State $S\leftarrow \emptyset$
+    \State $T\leftarrow \emptyset$
     \For {$r=1,\ldots,m$} 
-      \State Let $i$ be Bob's output upon receiving message $M$ from Alice when Bob's input is $y$
-      \State $y_i\leftarrow 1$
-      \State $S \leftarrow S \cup\{i\}$
+      \State Let $i$ be Bob's output upon receiving message $M$ from Alice when Bob's input is $\mathbf{1}_T$
+      \State $T \leftarrow S \cup\{i\}$
     \EndFor
     \State \Return $S$
     \EndProcedure
@@ -94,41 +90,34 @@ One might hope to say that if the original failure probability were $\delta < 1/
 \begin{equation}
 \forall x,y\in\{0,1\}^n,\ \Pr_s(\mathcal{A}\text{ is correct on inputs }x,y) \ge 1-\delta , \label{eqn:correct}
 \end{equation}
-where $s$ is the public random string that both Alice and Bob have access to. The issue is that even in the second iteration (when $r=2$), Bob's ``input'' $y$ {\em depends on $s$}, since it depends on the outcome of the first iteration! Thus the guarantee of \eqref{eqn:correct} does not apply.
+where $s$ is the public random string that both Alice and Bob have access to. The issue is that even in the second iteration (when $r=2$), Bob's ``input'' $\mathbf{1}_T$ {\em depends on $s$}, since $T$ depends on the outcome of the first iteration! Thus the guarantee of \eqref{eqn:correct} does not apply.
 
-The key observation, and our saving grace, is as follows. Assuming that every iteration of the decoder succeeds, $y$ will only ever take on one of $2^m$ values (it will always be the indicator vector of some subset of $S$). Now observe \eqref{eqn:correct} {\em does} imply that for any $x$, the average public random string $s$ does cause the protocol to succeed on most of these possibilities for $y$ (namely at least a $1-\delta$ fraction).
+One way around the above issue is to realize that as long as every iteration succeeds, $T$ is always a subset of $S$. Thus it suffices for the following event $\mathcal{E}$ to occur: $\forall T\subset S,\ \mathcal{A}\text{ is correct on inputs }\mathbf{1}_S, \mathbf{1}_T$. Then $\Pr_s(\neg \mathcal{E}) \le 2^m\delta$ by a union bound, which is at most $1/2$ for $m = \lfloor \log_2(1/\delta)\rfloor - 1$. We have thus just shown that $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\min\{n, \log(^n_m)\}) = \Omega(\min\{n, \log(1/\delta)\log \frac n{\log(1/\delta)}\})$.
+
+The key observation for improvement is as follows. Assume that every iteration of the decoder succeeds, so $T\subseteq S$ always. Now observe Eq.~\eqref{eqn:correct} {\em does} imply that for any $x$, the average public random string $s$ does cause the protocol to succeed on most of these possibilities for $y$ (namely at least a $1-\delta$ fraction).
  % If one then performs wishful thinking to hope that a $(1-\delta)$-fraction of {\em iterations} actually succeed, one could proceed as follows: since the encoder and decoder share a common random string, the encoder can simulate the decoder and know exactly which iterations would fail (say, $q\ll m$ iterations). The encoder could then include in the encoding a description of which iterations those are, using $\lceil\log_2 q\rceil + \lceil\log(^m_q) \rceil$ bits, and also include $q$ random elements from $S$ as part of its message, for the decoder to use instead of Bob's output in the failed iterations. The extra overhead would be $O(q\log n) \ll m\log n$ bits, and thus minor.
-Thus our actual decoder roughly proceeds as follows. The decoder will again iteratively try to recover elements of $S$ as before. We will give up though on having $m$ iterations and hoping for most of them to succeed. Instead, we will only have $R = \Theta(\log(1/\delta)\log n)$ iterations, and our aim is for the decoder to succeed in finding a new element in $S$ for at least a constant fraction of these $R$ iterations. Simplifying things for a moment for the sake of this overview, let us pretend for now that all $R$ iterations will succeed. $\enc(S)$ will then be Alice's message $M$, together with a random subset $B$ of $m-R$ elements of $S$, explicitly written down. If the decoder can then recover these $R$ remaining elements, this then implies the decoder has recovered $S$, and thus we must have $|M| = \Omega(R\log n)$ as desired. The decoder proceeds as follows. Just as before, initially the decoder starts with $y = 0$ and lets $i$ be the output of Bob and adds it to his recovery for $S$. Then in iteration $r$, before proceeding to the next iteration, the encoder randomly picks some number $n_r$ elements from $B$ and adds them into $S$ and $y$ as well! The idea is that along every step of the way, $y$ will almost look like a random subset of $x$ (of a certain size), and thus we expect most iterations to succeed. The way we capture this intuition is via the following lemma:
-\begin{lemma}
-  Let function $f$: $\{0,1\}^q\times \{0,1\}^n\rightarrow \{0,1\}$. Let $X$ be a uniformly random string in $\{0,1\}^n$. If for any $y\in \{0,1\}^m$ we have $\Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any random variable $Y$ in $\{0,1\}^m$, we have 
+Our improved decoder roughly proceeds as follows. The decoder will again iteratively try to recover elements of $S$ as before. We will give up though on having $m$ iterations and hoping for all (or even most) of them to succeed. Instead, we will only have $R = \Theta(\log(1/\delta)\log n)$ iterations, and our aim is for the decoder to succeed in finding a new element in $S$ for at least a constant fraction of these $R$ iterations. Simplifying things for a moment, let us pretend for now that all $R$ iterations do succeed in finding a new element. $\enc(S)$ will then be Alice's message $M$, together with a random subset $B$ of $m-R$ elements of $S$, explicitly written down. If the decoder can then recover these $R$ remaining elements, this then implies the decoder has recovered $S$, and thus we must have $|M| = \Omega(R\log \frac nm)$ as desired. The decoder proceeds as follows. Just as before, initially the decoder starts with $T = \emptyset$ and lets $i$ be the output of Bob and adds it to $T$. Then in iteration $r$, before proceeding to the next iteration, the decoder randomly picks some number $n_r$ elements from $B$ and adds them into $T$! These extra elements being added to $T$ should be viewed ``random noise'' to mask information about the random string $s$ used by $\mathcal{A}$. For intuition, as an extreme example, suppose the iteration $r=1$ succeeds in finding some $i\in S$. If the decoder were then to add $i$ to $T$, as well as $\approx m/2$ random elements from $B$ to $T$, then the resulting $T$ reveals only $\approx 1$ bit of information about $i$ (and hence about $s$). This is as opposed to the $\log n$ bits about $i$ that $T$ would have revealed if the masking were not performed. Thus the next query in round $r=2$, although correlated with $s$, has very weak correlation after masking and we thus might hope for it to succeed. This intuition is captured in the following lemma, which we prove in Section~\ref{sec:optimal-lb}:
+\begin{lemma}\label{lem:information}
+  Consider $f$: $\{0,1\}^b\times \{0,1\}^q\rightarrow \{0,1\}$ and $X\in\{0,1\}^b$ uniformly random. If $\forall y\in \{0,1\}^m,\ \Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any random variable $Y$ supported on $\{0,1\}^q$,
   \begin{align}
     \Pr(f(X,Y)=1)\le \frac{I(X;Y)+1}{\log \frac{1}{\delta}},
   \end{align}
   where $I(X;Y)$ is the mutual information (in bits) between $X$ and $Y$.
 \end{lemma}
-Fix some $x$. One should imagine here that $f(X,y)$ is $1$ iff the $\ur^\subset$ protocol fails when Alice has input $x$, Bob has input $y$, and the public random string is $X$. Then the lemma states that if $y=Y$ is not arbitrary, but rather random (and correlated with $X$), then the failure probability of the protocol is still bounded as long as the mutual information between $X$ and $Y$ is bounded. It is also not hard to see that this lemma is sharp as written. Consider the case $x,y\in[n]$, and $f(x,y) = 1$ iff $x = y$. Then if $X$ is uniform, for all $y$ we have $\Pr(f(X,y) = 1) = 1/n$. Now consider the case where $Y$ is random and equal to $X$ with probability $t/\log n$ and is uniform in $[n]$ with probability $1 - t/\log n$. Then in expectation $Y$ reveals $t$ bits of $X$, so that $I(X;Y) = t$. It is also not hard to see that $\Pr(f(X,Y) = 1) \approx t/\log n$.
+Fix some $x\in\{0,1\}^n$. One should imagine here that $f(X,y)$ is $1$ iff $\mathcal{A}$ fails when Alice has input $x$ and Bob has input $y$ in a $\ur^\subset$ instance, and the public random string is $X=s$. Then the lemma states that if $y=Y$ is not arbitrary, but rather random (and correlated with $X$), then the failure probability of the protocol is still bounded as long as the mutual information between $X$ and $Y$ is bounded. It is also not hard to see that this lemma is sharp as written. Consider the case $x,y\in[n]$, and $f(x,y) = 1$ iff $x = y$. Then if $X$ is uniform, for all $y$ we have $\Pr(f(X,y) = 1) = 1/n$. Now consider the case where $Y$ is random and equal to $X$ with probability $t/\log n$ and is uniform in $[n]$ with probability $1 - t/\log n$. Then in expectation $Y$ reveals $t$ bits of $X$, so that $I(X;Y) = t$. It is also not hard to see that $\Pr(f(X,Y) = 1) \approx t/\log n$.
 
-\TODO{Finish this description}
+In light of the strategy stated so far and Lemma~\ref{lem:information}, the path forward is clear: at each iteration $r$, we should add enough random masking elements to $T$ to keep the mutual information between $T$ and all previously added elements below $\approx \frac 12 \log \frac 1{\delta}$. Then we expect a constant fraction of iterations succeed. The encoder knows which iterations do not succeed since he shares public randomness with the decoder (and can thus simulate him), so he can simply tell the decoder which rounds are the failed ones, then explicitly include in $M$ correct new elements of $S$ for the decoder to use in the place of Bob's wrong output in those rounds. It turns out the right number of random masking elements to add after iteration $r$ to keep the mutual information sufficiently small is $m(2^{-c\frac{r-1}{\log(1/\delta)}} - 2^{-c\frac{r}{\log(1/\delta)}})$, so that $T$ has size $m(1 - 2^{-c\frac r{\log(1/\delta)}})$ right before iteration $r+1$ starts. This is implied by our Lemma~\ref{lemma:mutual-entropy-bound}. This also implies that the number of iterations we can have before $T$ becomes all of $S$, i.e.\ has size $m$, is $R = \Theta(\log(1/\delta)\log(\frac{m}{\log(1/\delta)}))$. We then set $m = \sqrt{n\log(1/\delta)}$, so that $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(|R|\log \frac nm) = \Omega(\min\{n, \log(1/\delta)\log^2 \frac n{\log(1/\delta)}\})$ as desired.
+
+The argument for lower bounding $\randcom^{\rightarrow,pub}_\delta(\ur_k^\subset)$ is a bit simpler, and in particular does not need rely on Lemma~\ref{lem:information}. Both the idea and rigorous argument can be found in Section~\ref{sec:k-samples-lb}, but again the idea is to use a protocol for this problem to encode appropriately sized subsets of $[n]$.
 
 
 % As mentioned, we show space lower bounds for maintaining a \suppfind{} data structure for a {\em binary} vector. That is, our lower bound holds even if at all times in the stream we are guaranteed $x\in \{0,1\}^n$. Our lower bounds are based on communication complexity in the public random coin model. Alice wants to send Bob a uniform random set $A\subseteq [n]$ of size $m$ (Bob knows $m$, but the random source generating $A$ is independent of the random source accessible to Bob). The one-way communication problem is: Alice sends some message to Bob, and Bob is required to recover $A$ completely. Any randomized protocol that succeeds with probability $1$ requires Alice to send at least $\log (^n_m)$ bits in expectation.
 
 % We consider the following protocol. Alice attaches (the memory of) a support-finder \samp in the message. The support-finder uses public random coins as its random source, so that \samp will behave the same for Alice and for Bob as long as the updates are all the same. Alice will insert all the items in $A$ into \samp and send the memory footprint of \samp to Bob as a message. In addition, Alice will send a subset $B\subseteq A$ to Bob, so that together with $B$ and \samp, Bob is able to recover $A$ with good probability based on some protocol they have agreed on. 
- 
-Now we turn the previous protocol into a new one without any failure. Let \success denote the event (or a subset of the event) that Bob successfully recovers $A$ (note that Alice can simulate Bob, so she knows exactly when \success happens). If \success happens Alice will send Bob a message starting with a $1$, followed by (the memory of) \samp, then followed by a naive encoding (explained later) of $B$; otherwise, Alice will send a message starting with a $0$, followed by a naive encoding of $A$. We say the {\em naive encoding} of a set $S\subseteq [n]$ is an integer (expressed in binary) in $[{n \choose |S|}]$ together with $|S|$ (taking $\log n$ bits). We drop the size of the set if it is known by the receiver.
+As mentioned above, our lower bounds will use protocols for $\ur^\subset$ and $\ur^\subset_k$ to estabalish protocols for encoding subsets of some fixed size $m$ of $[n]$. These encoders always consist of some message $M$ Alice would have sent in a $\ur^\subset$ or $\ur^\subset_k$ protocol, together with a random subset $B\subset S$ (using $\lceil \log_2|B|\rceil + \lceil\log{n\choose |B|}\rceil$ bits, to represent both $|B|$ and the set $B$ itself). Here $|B|$ is a random variable. These encoders are thus {\em Las Vegas}: the length of the encoding is a random variable, but the encoder/decoder always succeed in compressing and recovering the subset. The final lower bounds then come from the following simple lemma. 
 
 \begin{lemma} \label{lemma:lb-meta}
-  Let $\s$ denote the space (in bits) used by a sampler with failure probability at most $\delta$. Let $\s'$ denote the expected number of bits to represent $B$ conditioned on \success (if we need to send some extra auxiliary information, we will also count it into $\s'$). We have 
-  
-  \begin{align}
-  (1+\s+\s')\cdot \Pr(\success)+(1+\log(^n_m) \cdot (1-\Pr(\success)) \ge \log (^n_m).
-  \end{align} 
-  
-  If $\Pr(\success)\ge 1/2$, we have 
-  
-  \begin{align} \label{eqn:lb-meta}
-  \s\ge \log (^n_m) - \s' - 2.
-  \end{align} 
+  Let $\s$ denote the number of bits used by the $\ur^\subset$ or $\ur^\subset_k$ protocol, and let $\s'$ denote the expected number of bits to represent $B$. Then $(1+\s+\s') \ge \log (^n_m)$. In particular, $s \ge \log(^n_m) - s' - 1$.
 \end{lemma}
 
 % We consider the range of failure probability $\delta$ to be 
@@ -137,11 +126,4 @@ Now we turn the previous protocol into a new one without any failure. Let \succe
 % \end{align}
 % where $c_1=0.9$ and $c_2=2^{-10}$. In fact, our lower bound applies for the range of $\delta$ where $c_1$ and $c_2$ are any constants smaller than $1$. 
 
-In Section~\ref{sec:simple-lb} we give a lower bound of $\Omega(\log(\frac n{\log(1/\delta)}) \log \frac{1}{\delta})$ bits. This illustrates some key ideas of our framework. Then we show a lower bound of $\Omega(\log^2(\frac n{\log(1/\delta)}) \log \frac{1}{\delta})$ bits in Section~\ref{sec:optimal-lb}.
-We extend our results in Section~\ref{sec:k-samples-lb} to \suppfind{k} for $k\ge 1$ proving a lower bound of $\Omega(k\log^2(n/k))$ bits for constant failure probability.
-
-\begin{remark}
-\textup{
-  Because our space lower bound is proven under the public coin model, it holds even against algorithms which are allowed to store hash functions (or any arbitrary number of random bits) for free.
-}
-\end{remark}
+Section~\ref{sec:optimal-lb} provides the full details of the proof that $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\min\{n, \log^2(\frac n{\log(1/\delta)}) \log \frac{1}{\delta}\})$. We extend our results in Section~\ref{sec:k-samples-lb} to $\ur_k^\subset$ for $k\ge 1$, proving a lower bound of $\Omega(k\log^2(n/k))$ communication even for constant failure probability.
