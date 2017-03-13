@@ -196,7 +196,7 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
 \end{corollary}
 
 \begin{lemma}\label{lemma:mutual-entropy-bound}
-  $I(X;A_r)\le 5K$, for $r=1,\ldots, R$.
+  $I(X;A_r)\le 6K$, for $r=1,\ldots, R$.
 \end{lemma}
 
 \begin{proof}
@@ -227,14 +227,18 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
   Moreover, 
   \begin{align}
     \prod_{i=1}^{r} \frac{n_{i-1}}{n_{i-1}-n_r}
-    =\prod_{i=1}^{r} \frac{1}{1-2^{(i-1-r)/K}}
-    =\prod_{j=1}^{r} \frac{1}{1-2^{-j/K}}
-    \le \prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}.
+    \le\prod_{i=1}^{r} \frac{1}{1-\frac{m\cdot 2^{-r/K}}{m\cdot 2^{-(i-1)/K}-1}}
+    \le\prod_{i=1}^{r} \frac{1}{1-\frac{m\cdot 2^{-r/K}+1}{m\cdot 2^{-(i-1)/K}}}
+    =\prod_{j=1}^{r} \frac{1}{1-2^{-j/K}-2^{\frac{r-j}{K}}/m}.
   \end{align}
   
-  \TODO{deal with the rounding issue}
+  By setting of parameters $2^{r/K}/m \le 2^{R/K}/m \le \frac{1}{4K}$.
+  Therefore, $\frac{1}{1-2^{-j/K}-2^{\frac{r-j}{K}}/m}\le \frac{1}{1-(1+\frac{1}{4K})2^{-j/K}}$ for $j=1,\ldots,r$.
+  First, we can prove $\frac{1}{1-(1+\frac{1}{4K})2^{-1/K}}\le 2K \le 2^K$. 
+  Also by Taylor expansion we can obtain $1+\frac{1}{4K}\le 2^{-1/K}$, and thus $\frac{1}{1-(1+\frac{1}{4K})2^{-j/K}}\le \frac{1}{1-2^{(1-j)/K}}$, for $j=2,\ldots, r$. 
+  By Lemma~\ref{lemma:Pochhammer}, we have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. 
   
-  By Lemma~\ref{lemma:Pochhammer}, we have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. Let $p={2^{5K}}/{{m\choose n_r}}$, we have $\Pr(A_r=T|X=x)\le p$ and thus $H(A_r|X=x)\ge \log\frac{1}{p}=\log{{m\choose n_r}}-5K$. Therefore, $H(A_r|X)\ge \log{{m\choose n_r}}-5K$ and so $I(X;A_r)=H(A_r)-H(A_r|X)\le 5K$.  
+  Let $p={2^{6K}}/{{m\choose n_r}}$, we have $\Pr(A_r=T|X=x)\le p$ and thus $H(A_r|X=x)\ge \log\frac{1}{p}=\log{{m\choose n_r}}-6K$. Therefore, $H(A_r|X)\ge \log{{m\choose n_r}}-6K$ and so $I(X;A_r)=H(A_r)-H(A_r|X)\le 6K$.  
 \end{proof}
 
 %By \url{http://mathworld.wolfram.com/q-PochhammerSymbol.html} We have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. I think we can improve the constant 5 to 4 if we bound it more carefully. 
@@ -273,9 +277,10 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
   By Lemma~\ref{lemma:lb-meta}, we have $\s\ge \log (^n_m) - \s' -1$, where $\s'=\log n + R+ \E(\log (^n_{|B|}))$. 
   The size of $B$ is $|B|=|S|-\sum_{r=1}^{R}{b_r}$.
   By Corollary~\ref{corollary:sampler-failure}, conditioned on $S$, $\Pr(b_r=0)\le \frac{I(X;A_{r-1})+1}{\log\frac{1}{\delta}}$. 
-  By Lemma~\ref{lemma:mutual-entropy-bound}, $I(X;A_{r-1})\le 5K$ (Note that when $r=1$, $I(X;A_0)=0\le 5K$). Therefore, $\E(b_r)\ge 1-\frac{5K+1}{\log\frac{1}{\delta}}$.
-  By the setting of parameters (see Algorithm~\ref{algo:para}) we have $\E(b_r)\ge \frac{5}{8}$. Therefore, $\E(|B|)\le |S|-\frac{5}{8}R$. 
-  By Lemma~\ref{lemma:bits-saving}, $\log (^n_m)-\E(\log (^n_{|B|}))\ge \frac{5}{8}R\cdot \log (\frac{n}{m}-1) \ge \frac{1}{2}R\log (\frac{n}{\log(1/\delta)})$. 
+  By Lemma~\ref{lemma:mutual-entropy-bound}, $I(X;A_{r-1})\le 6K$ (Note that when $r=1$, $I(X;A_0)=0\le 6K$). 
+  Therefore, $\E(b_r)\ge 1-\frac{6K+1}{\log\frac{1}{\delta}}$.
+  By the setting of parameters (see Algorithm~\ref{algo:para}) we have $\E(b_r)\ge \frac{39}{64}$. Therefore, $\E(|B|)\le |S|-\frac{39}{64}R$. 
+  By Lemma~\ref{lemma:bits-saving}, $\log (^n_m)-\E(\log (^n_{|B|}))\ge \frac{39}{64}R\cdot \log (\frac{n}{m}-1) \ge \frac{1}{2}R\log (\frac{n}{\log(1/\delta)})$. 
   Furthermore, $\frac{1}{6}R\log \frac{n}{\log (1/\delta)} \ge R$.
   Combining together we get $\s \ge \frac{R}{3}\log \frac{n}{\log(1/\delta)} -(\log n + 1)  =\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$.
 \end{proof}
