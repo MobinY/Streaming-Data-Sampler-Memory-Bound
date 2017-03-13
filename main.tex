@@ -1,35 +1,48 @@
 \section{Communication Lower Bound for $\ur^\subset$} \label{sec:optimal-lb}
 
-In the previous section we have shown how to extract $\Theta(\log \frac{1}{\delta})$ words of information from the sketch by sequentially peeling off elements. 
-Because the number of bad events we need to union-bound increases exponentially, the approach cannot obtain more elements. 
-Let us consider failure probability of $\query(\sketch(\chi_A), \chi_S)$ where $S\subset A$ in terms of information leak, which is defined as the mutual informatio (conditioned on $A$) between $S$ and randomness in the UR-protocol. 
+%In the previous section we have shown how to extract $\Theta(\log \frac{1}{\delta})$ words of information from the sketch by sequentially peeling off elements. 
+%Because the number of bad events we need to union-bound increases exponentially, the approach cannot obtain more elements. 
+
+Let $(\sketch, \query)$ denote a protocol for $\ur^\subset$ under one-way public coin model with failure probability $\delta$.
+Namely, when Alice's input is $x$ and Bob's input is $y$, Alice will send $\sketch(x)$ to Bob, and Bob will output $\query(\sketch(x), y)$. 
+Note that $\sketch$ and $\query$ use the same random source. 
+
+Let us consider failure probability of $\query(\sketch(\mathbf{1}_S), \mathbf{1}_T)$ where $T\subset S$ in terms of information leak, which is defined as the mutual information (conditioned on $S$) between $T$ and random source used in the $\ur^\subset$-protocol. 
 We show in this section that the failure probability is upper-bounded by information leak divided by $\log \frac{1}{\delta}$. 
 Therefore, in order to invoke $\query$ with good success probability, it is sufficient to control information leak.
 
-Our key technique is noise injection: after obtaining an element from $A\backslash S$, we not only peel off the element, but also randomly remove $1/K$ fraction of items remaining in $A\backslash S$. 
-We prove that no matter how many peeling rounds we proceed, the information leak is always bounded by $O(K)$. 
-By setting $K=\Theta(\log \frac{1}{\delta})$ and $m=\sqrt{n\log\frac{1}{\delta}}$, we can proceed in $\Theta(\frac{\log (m/K)}{\log (1 +1/K)}) = \Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ rounds, and thus in expectation obtain $\Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ samples.
-Moreover, each sample contains $\Theta(\log(n/m))=\Theta(\log \frac{n}{\log (1/\delta)})$ bits of information, so we get $\Theta(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)}) $ bits of information from the sketch. 
+Our key technique is noise injection: after obtaining an element from $S\backslash T$ via the $\ur^\subset$-protocol, we not only add the element to $T$, but also randomly add $1/K$ fraction of elements in $S\backslash T$ to $T$. 
+We prove that no matter how many rounds we proceed, the information leak is always bounded by $O(K)$. 
+By setting $K=\Theta(\log \frac{1}{\delta})$ and $m=\sqrt{n\log\frac{1}{\delta}}$, we can proceed in $\Theta(\frac{\log (m/K)}{\log (1 +1/K)}) = \Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ rounds, and thus in expectation obtain $\Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ elements in $S$.
+Moreover, each element contains $\Theta(\log(n/m))=\Theta(\log \frac{n}{\log (1/\delta)})$ bits of information, so we get $\Theta(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)}) $ bits of information from $\sketch(\mathbf{1}_S)$. 
 
 \subsection{Protocol}
 
 The parameters used by Alice and Bob are given in Algorithm~\ref{algo:para}.
-Alice wants to send a uniformly random set $A$ to Bob where $|A|=m$. Similar to $\enc_1$, Alice computes $\sk \leftarrow \sketch(\chi_A)$, and sends it to Bob. Moreover, Alice will send Bob a subset $B\subseteq A$ computed as follows. Initially $B=A$ and let $A_0=A$. Alice proceeds in $R$ rounds. On round $r$ ($r=1,\ldots, R$), Alice computes $s_r\leftarrow \query(\sk, \chi_{A\backslash A_{r-1}})$. 
-Let $b$ denote a binary string of length $R$, where $b_r$ records whether $\query$ succeeds on round $r$. Alice will also send $b$ to Bob in the end.
+Alice wants to send a uniformly random set $S$ to Bob where $|S|=m$. 
+Similar to $\enc_1$, Alice computes $M \leftarrow \sketch(\mathbf{1}_S)$, and sends it to Bob. 
+Moreover, Alice will send Bob a subset $B\subseteq S$ computed as follows.
+Initially $B=S$ and let $A_0=S$. Alice proceeds in $R$ rounds. 
+On round $r$ ($r=1,\ldots, R$), Alice computes $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash A_{r-1}})$. 
+Let $b$ denote a binary string of length $R$, where $b_r$ records whether $\query$ succeeds on round $r$. 
+Alice will also send $b$ to Bob.
  
-If $s_r\in A_{r-1}$, i.e. $\query(\sk, \chi_{A\backslash A_{r-1}})$ succeeds, Alice will set $b_r=1$, and remove $s_r$ from $B$ (since $s_r$ can be obtained from the UR-protocol, Alice does not need to include it in $B$. In Algorithm~\ref{algo:enc} Alice uses $S$ to keep track of $A\backslash B$); otherwise Alice will set $b_r=0$.
+If $s_r\in A_{r-1}$, i.e. $\query(M, \mathbf{1}_{S\backslash A_{r-1}})$ succeeds, Alice will set $b_r=1$, and remove $s_r$ from $B$ (since $s_r$ can be obtained from the $\ur^\subset$-protocol, Alice does not need to include it in $B$. Algorithm~\ref{algo:enc} uses $D$ to keep track of $S\backslash B$); otherwise Alice will set $b_r=0$.
 At the end of round $r$, Alice will generate a uniformly random set $A_r$, so that $A_r$ is a subset of $A_{r-1}\backslash \{s_r\}$ and $|A_r|=n_r$. 
 In particular, Alice uses shared random source to generate $A_r$, so that Bob can recover $A_{r-1}\backslash A_r$ on round $r$. 
 We present Alice's encoder in Algorithm~\ref{algo:enc}.
 
-The decoding process is symmetric. Let $C_0=\emptyset$ and $S=\emptyset$. Bob proceeds in $R$ rounds. 
-On round $r$ ($r=1,\ldots,R$), Bob obtains sample $s_r\in A\backslash C_{r-1}$ by invoking $\query(\sk, \chi_{C_{r-1}})$. 
-By the construction of $C_{r-1}$ that will be described later it is guaranteed that $A_{r-1}=A\backslash C_{r-1}$. 
+The decoding process is symmetric. 
+Let $C_0=\emptyset$ and $D=\emptyset$. 
+Bob proceeds in $R$ rounds. 
+On round $r$ ($r=1,\ldots,R$), Bob obtains $s_r\in S\backslash C_{r-1}$ by invoking $\query(M, \mathbf{1}_{C_{r-1}})$. 
+By the construction of $C_{r-1}$ that will be described later it is guaranteed that $A_{r-1}=S\backslash C_{r-1}$. 
 Therefore, Bob will get exactly the same $s_r$ as Alice. 
 Bob assigns initial value $C_{r-1}$ to $C_r$.
-If $b_r=1$, Bob will add $s_r$ to both $S$ and $C_r$.
-At the end of round $r$, Bob inserts a bunch of items to $C_r$ so that $C_r=A\backslash A_r$. Bob can achieve this because of the shared randomness when constructing $A_r$.
-In the end, Bob's decoder outputs $B\cup S$.
+If $b_r=1$, Bob will add $s_r$ to both $D$ and $C_r$.
+At the end of round $r$, Bob inserts a bunch of items to $C_r$ so that $C_r=S\backslash A_r$. 
+Bob can achieve this because of the shared random permutation $\sigma$ when constructing $A_r$.
+In the end, Bob's decoder outputs $B\cup D$.
 We present the decoder in Algorithm~\ref{algo:dec}.
 
 \begin{algorithm}[H] 
@@ -39,34 +52,32 @@ We present the decoder in Algorithm~\ref{algo:dec}.
     \State $K\leftarrow \lfloor \frac{1}{16}\log \frac{1}{\delta} \rfloor$
     \State $R\leftarrow \lfloor K\log(m/4K) \rfloor$
     \For {$r = 0, \ldots, R$}
-      \State $n_r\leftarrow \lfloor m \cdot 2^{-\frac{r}{K}} \rfloor$ \Comment{By the setting of parameters we have $n_r-n_{r+1}\ge 2$}
+      \State $n_r\leftarrow \lfloor m \cdot 2^{-\frac{r}{K}} \rfloor$ \Comment{$|A_r|=n_r$, and we have $n_r-n_{r+1}\ge 2$}
     \EndFor
-    \For {$a\in [n]$}
-      \State Let $U_a$ be uniformly and independent sample from $[0,1]$ \Comment{Used to generate $A_r$, $r=1,\ldots, R$}
-    \EndFor
+    \State Let $\sigma$ be a random permutation on $[n]$ \Comment{Used to generate $A_r$ and $C_r$}
   \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}[H] 
   \caption{Alice's Encoder.} \label{algo:enc}
   \begin{algorithmic}[1]
-    \Procedure{$\enc$}{$A$}
-    \State $\sk\leftarrow \sketch(\chi_A)$
-    \State $A_0 \leftarrow A$
-    \State $S\leftarrow \emptyset$
+    \Procedure{$\enc$}{$S$}
+    \State $M \leftarrow \sketch(\mathbf{1}_S)$
+    \State $D\leftarrow \emptyset$
+    \State $A_0 \leftarrow S$
     \For {$r=1,\ldots,R$}
-      \State $s_r\leftarrow \query(\sk, \chi_{A\backslash A_{r-1}})$
+      \State $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash A_{r-1}})$
       \State $A_r\leftarrow A_{r-1}$
       \If {$s_r\in A_{r-1}$} \Comment{i.e. if $s_r$ is a valid sample}
         \State $b_r\leftarrow 1$ \Comment{$b$ is a binary string of length $R$, indicating if $\query$ succeeds on round $r$}
-        \State $S\leftarrow S \cup \{s_r\}$
+        \State $D\leftarrow D \cup \{s_r\}$
         \State $A_r\leftarrow A_r \backslash \{s_r\}$
       \Else 
         \State $b_r\leftarrow 0$
       \EndIf
-      \State Remove $|A_r|-n_r$ elements from $A_r$ with smallest $U_a$'s among $a\in A_r$ \Comment{So that $|A_r|=n_r$}
+      \State Remove $|A_r|-n_r$ elements from $A_r$ with smallest $\sigma_a$'s among $a\in A_r$ \Comment{So that $|A_r|=n_r$}
     \EndFor
-    \State \Return ($\sk$, $A\backslash S$, $b$) 
+    \State \Return ($M$, $A\backslash D$, $b$) 
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -74,56 +85,84 @@ We present the decoder in Algorithm~\ref{algo:dec}.
 \begin{algorithm}[H] 
   \caption{Bob's Decoder.} \label{algo:dec}
   \begin{algorithmic}[1]
-    \Procedure{$\dec$}{$\sk$, $B$, $b$}
-    \State $S\leftarrow \emptyset$
+    \Procedure{$\dec$}{$M$, $B$, $b$}
+    \State $D\leftarrow \emptyset$
     \State $C_0 \leftarrow \emptyset$
     \For {$r=1,\ldots,R$}
       \State $C_r\leftarrow C_{r-1}$
       \If{$b_r=1$}
-        \State $s_r\leftarrow \query(\sk, \chi_{C_{r-1}})$ \Comment{Invariant: $C_r=A\backslash A_r$ ($A_r$ is defined in $\enc$)}
-        \State $S\leftarrow S \cup \{s_r\}$
+        \State $s_r\leftarrow \query(M, \mathbf{1}_{C_{r-1}})$ \Comment{Invariant: $C_r=S \backslash A_r$ ($A_r$ is defined in $\enc$)}
+        \State $D\leftarrow D \cup \{s_r\}$
         \State $C_r\leftarrow C_r \cup \{s_r\}$
       \EndIf
-       \State Insert $m-n_r-|C_r|$ items into $C_r$ with smallest $U_a$'s among $a\in B\backslash C_r$
+       \State Insert $m-n_r-|C_r|$ items into $C_r$ with smallest $\sigma_a$'s among $a\in B\backslash C_r$
     \EndFor
-    \State \Return $B\cup S$ 
+    \State \Return $B\cup D$ 
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
 
 \subsection{Analysis}
 
-We have three random objects here: (1) Set $A$, which is a uniform random set of size $m$; (2) The random source used by the UR-protocol, denoted by $X$; (3) The collection of random variables $U_a$ where $a\in [n]$, denoted by $U$. They are independent. We do the analysis conditioned on $A$. Namely, the following arguments apply for any fixed $A$. 
+We have three random objects here: 
+(1) Set $S$, which is a uniform random set of size $m$; 
+(2) The random source used by the $\ur^\subset$-protocol, denoted by $X$; 
+(3) Random permutation $\sigma$. 
+They are independent. 
+We do the analysis conditioned on $S$. 
+Namely, the following arguments apply for any fixed $S$. 
 
-First, we can prove that $\dec(\enc(A))=A$. That is, no matter the randomness in $X$ and $U$, Bob will always decode $A$ successfully. It is because Alice's $\enc$ and Bob's $\dec$ share $X$ and $U$, so that Bob essentially simulates Alice. We formally prove this by induction in Lemma~\ref{lemma:zero-fail-prob}. 
+First, we can prove that $\dec(\enc(S))=S$. 
+That is, no matter the randomness in $X$ and $\sigma$, Bob will always decode $S$ successfully. 
+It is because Alice's $\enc$ and Bob's $\dec$ share $X$ and $\sigma$, so that Bob essentially simulates Alice. 
+We formally prove this by induction in Lemma~\ref{lemma:zero-fail-prob}. 
 
-Now our goal is to prove that by using UR-protocol, the number of bits that Alice saves is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$. Intuitively, it is equivalent to prove the number of items that Alice saves is $\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)} )$.
-We formalize this in Lemma~\ref{lemma:bits-saving}. Note that Alice also needs to send $b$ (i.e., whether the $\query$ succeeds on $R$ rounds) to Bob, which takes $R$ bits. By setting of parameters we can afford the loss of $R$ bits. Thus it is sufficient to prove $\E(|B|)=|A|-\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$. 
+Now our goal is to prove that by using $\ur^\subset$-protocol, the number of bits that Alice saves is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$. 
+Intuitively, it is equivalent to prove the number of elements that Alice saves is $\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)} )$.
+We formalize this in Lemma~\ref{lemma:bits-saving}. 
+Note that Alice also needs to send $b$ (i.e., whether the $\query$ succeeds on $R$ rounds) to Bob, which takes $R$ bits. 
+By setting of parameters we can afford the loss of $R$ bits. 
+Thus it is sufficient to prove $\E(|B|)=|S|-\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$. 
 
-We have $|A|-|B|=\sum_{r=1}^{R}b_r$. 
+We have $|S|-|B|=\sum_{r=1}^{R}b_r$. 
 In Lemma~\ref{lemma:mutual-entropy-vs-fail-prob}, we prove the probability that $\query$ fails on round $r$ is upper bounded by $\frac{I(X;A_{r-1})+1}{\log \frac{1}{\delta}}$, where $I(X;A_{r-1})$ is the mutual information between $X$ and $A_{r-1}$. 
-Furthermore, we will show in Lemma~\ref{lemma:mutual-entropy-bound} that $I(X;A_{r-1})$ is upper bounded by $5K$.
-Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \frac{5}{8}$ and thus $\E(|A|-|B|)\ge \frac{5}{8}R=\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$.
+Furthermore, we will show in Lemma~\ref{lemma:mutual-entropy-bound} that $I(X;A_{r-1})$ is upper bounded by $O(K)$.
+By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omega(R)=\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$.
  
 \begin{lemma}\label{lemma:zero-fail-prob}
-  $\dec(\enc(A))=A$.
+  $\dec(\enc(S))=S$.
 \end{lemma}
 
 \begin{proof}
-  We claim that for $r=0,\ldots, R$, $\{A_r, C_r\}$ is a partition of $A$ ($A_r$ is in \enc, and $C_r$ is in \dec). We prove the claim by induction on $r$.
+  We claim that for $r=0,\ldots, R$, $\{A_r, C_r\}$ is a partition of $S$ ($A_r$ is in \enc, and $C_r$ is in \dec). We prove the claim by induction on $r$.
   
-  The basis case is $r=0$. $A_0=A$ and $C_0=\emptyset$. The claim is true.
+  The basis case is $r=0$. $A_0=S$ and $C_0=\emptyset$. The claim is true.
   
   Assume by induction the claim holds for $r$ ($0\le r < R$), and we consider $r+1$. 
-  On round $r$, $\samp_r$ is \samp with items in $A\backslash A_{r-1}=C_{r-1}$ removed in both \enc and \dec. Therefore, the sample $s_r$ obtained from $\samp_r$ in both sides is the same. Initially $A_r=A_{r-1}$ and $C_r=C_{r-1}$, and so $\{A_r,C_r\}$ is a partition of $A$. If $s_r$ is a valid sample (i.e. $s_r\in A_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $A_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{A_r, C_r\}$ remains a partition of $A$. 
+  On round $r$, because $S\backslash A_{r-1}=C_{r-1}$, $s_r$ obtained in both sides are the same. 
+  Initially $A_r=A_{r-1}$ and $C_r=C_{r-1}$, and so $\{A_r,C_r\}$ is a partition of $S$. 
+  If $s_r$ is a valid sample (i.e. $s_r\in A_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $A_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{A_r, C_r\}$ remains a partition of $S$. 
   
-  After that, Alice's \enc repeats removing $a$ from $A_r$ with smallest $U_a$ until $|A_r|=n_r$. Symmetrically, Bob's \dec repeats inserting $a$ into $C_r$ with smallest $U_a$ among $a\in B\backslash C_r$, until $|C_r|=|A|-n_r$. In the end we have $|A_r|+|C_r|=|A|$, so \enc and \dec execute repetition the same number of times. Moreover, we can prove that during the same repetition the item removed from $A_r$ is exactly the same item inserted to $C_r$. This is because in the beginning of a repetition $\{A_r, C_r\}$ is a partition of $A$. We have $B\backslash C_r\subseteq A\backslash C_r=A_r$. Let $a^*$ denote  $a\in A_r$ that minimizes $U_a$. We can prove that $a^*\in B\backslash C_r\subseteq A_r$ (since $a^*$ will be removed from $A_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $U_{a^*}$ is also the smallest among $\{U_a|a\in B\backslash C_r\}$. Thus in the end of the repetition, both Alice and Bob will take $a^{*}$ to update (remove from $A_r$, insert into $C_r$). Therefore, $\{A_r, C_r\}$ remains a partition of $A$.
+  After that, Alice's \enc repeats removing $a$ from $A_r$ with smallest $\sigma_a$ until $|A_r|=n_r$. 
+  Symmetrically, Bob's \dec repeats inserting $a$ into $C_r$ with smallest $\sigma_a$ among $a\in B\backslash C_r$, until $|C_r|=|S|-n_r$. 
+  In the end we have $|A_r|+|C_r|=|S|$, so \enc and \dec execute repetition the same number of times. 
+  Moreover, we can prove that during the same repetition the element removed from $A_r$ is exactly the same element inserted to $C_r$. 
+  This is because in the beginning of a repetition $\{A_r, C_r\}$ is a partition of $S$. 
+  We have $B\backslash C_r\subseteq S\backslash C_r=A_r$. Let $a^*$ denote  $a\in A_r$ that minimizes $\sigma_a$. 
+  We can prove that $a^*\in B\backslash C_r\subseteq A_r$ (since $a^*$ will be removed from $A_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $\sigma_{a^*}$ is also the smallest among $\{\sigma_a|a\in B\backslash C_r\}$. 
+  Thus in the end of the repetition, both Alice and Bob will take $a^{*}$ to update (remove from $A_r$, insert into $C_r$). 
+  Therefore, $\{A_r, C_r\}$ remains a partition of $S$.
   
-  Given the fact that $\{A_r, C_r\}$ is a partition of $A$, $s_r$ is the same in \enc and \dec. Furthermore, $S=\{s_r|b_r=1,r=1,\ldots, R\}$ is the same in \enc and \dec. We know $S\subseteq A$. Since \enc outputs $A\backslash S$, and \dec outputs $(A\backslash S)\cup S$, we have $\dec(\enc(A))=A$. 
+  Given the fact that $\{A_r, C_r\}$ is a partition of $S$, $s_r$ are the same in \enc and \dec. 
+  Furthermore, $D=\{s_r|b_r=1,r=1,\ldots, R\}$ are the same in \enc and \dec.
+  We know $D\subseteq S$. 
+  Since \enc outputs $S\backslash D$, and \dec outputs $(S\backslash D)\cup D$, we have $\dec(\enc(S))=S$. 
 \end{proof}
 
 \begin{lemma} \label{lemma:bits-saving}
-  Let $W\in \mathbb{N}$ be a random variable, and $W\le m$. Moreover, $\E(W)\le m-d$. We have $\E(\log {n \choose m}-\log {n \choose W})\ge d \log (\frac{n}{m}-1)$.
+  Let $W\in \mathbb{N}$ be a random variable, and $W\le m$. 
+  Moreover, $\E(W)\le m-d$. 
+  We have $\E(\log {n \choose m}-\log {n \choose W})\ge d \log (\frac{n}{m}-1)$.
 \end{lemma}
 
 \begin{proof}
@@ -139,21 +178,21 @@ Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \f
 \end{proof}
 
 \begin{lemma}\label{lemma:mutual-entropy-vs-fail-prob}
-  Let function $f$: $\{0,1\}^n\times \{0,1\}^m\rightarrow \{0,1\}$. Let $X$ be a uniformly random string in $\{0,1\}^n$. If for any $y\in \{0,1\}^m$ we have $\Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any random variable $Y$ in $\{0,1\}^m$, we have 
+  Consider $f$: $\{0,1\}^b\times \{0,1\}^q\rightarrow \{0,1\}$ and $X\in\{0,1\}^b$ uniformly random. If $\forall y\in \{0,1\}^q,\ \Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any random variable $Y$ supported on $\{0,1\}^q$,
   \begin{align}
-    \Pr(f(X,Y)=1)\le \frac{I(X;Y)+1}{\log \frac{1}{\delta}},
+  \Pr(f(X,Y)=1)\le \frac{I(X;Y)+1}{\log \frac{1}{\delta}},
   \end{align}
   where $I(X;Y)$ is the mutual information (in bits) between $X$ and $Y$.
 \end{lemma}
 
 \begin{proof}
-  It is equivalent to prove $I(X;Y)\ge \E(f(X,Y))\cdot \log\frac{1}{\delta}-1$. By definition of mutual entropy, $I(X;Y)=H(X)-H(X|Y)$ where $H(X)=n$ and $H(X|Y)\le 1+(1-\E(f(X,Y)))\cdot n+\E(f(X,Y))\cdot (n-\log\frac{1}{\delta})=n+1-\E(f(X,Y))\cdot \log\frac{1}{\delta}$.
+  It is equivalent to prove $I(X;Y)\ge \E(f(X,Y))\cdot \log\frac{1}{\delta}-1$. By definition of mutual entropy, $I(X;Y)=H(X)-H(X|Y)$ where $H(X)=b$ and $H(X|Y)\le 1+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\delta})=b+1-\E(f(X,Y))\cdot \log\frac{1}{\delta}$.
   The upper bound for $H(X|Y)$ is obtained by considering the following one-way communication problem: Alice obtains both $X$ and $Y$ while Bob only gets $Y$, what is the (minimum) expected number of bits that Alice sends to Bob so that Bob can recover $X$? 
-  Any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: first Alice sends Bob $f(X,Y)$ (taking $1$ bit); and then if $f(X,Y)=0$ Alice sends $X$ directly (taking $n$ bits), otherwise, $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^n)=n-\log\frac{1}{\delta}$ bits).  
+  Any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: first Alice sends Bob $f(X,Y)$ (taking $1$ bit); and then if $f(X,Y)=0$ Alice sends $X$ directly (taking $b$ bits), otherwise, $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^b)=b-\log\frac{1}{\delta}$ bits).  
 \end{proof}
 
 \begin{corollary}\label{corollary:sampler-failure}
-  Given a sampler with failure probability at most $\delta$ whenever the updates to it are independent from the randomness used by the sampler. Let $X$ denote the random source used by the sampler, and let $D$ denote the random source generating the updates. Then the probability that the sampler fails on updates $D$ is at most $\frac{I(X;D)+1}{\log\frac{1}{\delta}}$.
+  Let $X$ denote the random source used by the $\ur^\subset$-protocol with failure probability at most $\delta$. If $S$ is a fixed set and $T\subset S$, $\Pr(\query(\sketch(\mathbf{1}_S), \mathbf{1}_T)\not\in S\backslash T)\le \frac{I(X;T)+1}{\log\frac{1}{\delta}}$.
 \end{corollary}
 
 \begin{lemma}\label{lemma:mutual-entropy-bound}
@@ -161,7 +200,7 @@ Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \f
 \end{lemma}
 
 \begin{proof}
-  $I(X;A_r)=H(A_r)-H(A_r|X)$. Since $|A_r|=n_r$ and $A_r\subseteq A$ where $|A|=m$, $H(A_r)\le \log {m \choose n_r}$. Now we want to lower bound $H(A_r|X)$. By definition of conditional entropy, $H(A_r|X)=\sum_x{p_x\cdot H(A_r|X=x)}$. We fix an arbitrary $x$. If we can prove that for any $T\subseteq A$ where $|T|=n_r$, $\Pr(A_r=T|X=x)\le p$, then by definition of entropy we have $H(A_r|X=x)\ge\log\frac{1}{p}$. In fact, for any fixed $T$, we have
+  $I(X;A_r)=H(A_r)-H(A_r|X)$. Since $|A_r|=n_r$ and $A_r\subseteq S$ where $|S|=m$, $H(A_r)\le \log {m \choose n_r}$. Now we want to lower bound $H(A_r|X)$. By definition of conditional entropy, $H(A_r|X)=\sum_x{p_x\cdot H(A_r|X=x)}$. We fix an arbitrary $x$. If we can prove that for any $T\subseteq S$ where $|T|=n_r$, $\Pr(A_r=T|X=x)\le p$, then by definition of entropy we have $H(A_r|X=x)\ge\log\frac{1}{p}$. In fact, for any fixed $T$, we have
   
   \begin{align}
     \Pr(A_r=T|X=x)\le \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}},
@@ -192,6 +231,8 @@ Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \f
     =\prod_{j=1}^{r} \frac{1}{1-2^{-j/K}}
     \le \prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}.
   \end{align}
+  
+  \TODO{deal with the rounding issue}
   
   By Lemma~\ref{lemma:Pochhammer}, we have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. Let $p={2^{5K}}/{{m\choose n_r}}$, we have $\Pr(A_r=T|X=x)\le p$ and thus $H(A_r|X=x)\ge \log\frac{1}{p}=\log{{m\choose n_r}}-5K$. Therefore, $H(A_r|X)\ge \log{{m\choose n_r}}-5K$ and so $I(X;A_r)=H(A_r)-H(A_r|X)\le 5K$.  
 \end{proof}
@@ -224,17 +265,17 @@ Combining together we get $\E(b_r)\ge 1-\frac{5K+1}{\log \frac{1}{\delta}}\ge \f
 \end{proof}
 
 \begin{theorem}
-  $\s = \Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$, given that $64 \le \log \frac{1}{\delta} \le \frac{n}{64}$.
+  $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$, given that $64 \le \log \frac{1}{\delta} \le \frac{n}{64}$.
 \end{theorem}
 
 \begin{proof}
   By Lemma~\ref{lemma:zero-fail-prob}, the success probability of protocol $(\enc,\dec)$ is $1$. 
-  By Lemma~\ref{lemma:lb-meta}, we have $\s\ge \log (^n_m) - \s' -2$, where $\s'=\log n + R+ \E(\log (^n_{|B|}))$. 
-  The size of $B$ is $|B|=|A|-\sum_{r=1}^{R}{b_r}$.
-  By Corollary~\ref{corollary:sampler-failure}, and because conditioned on $A$, the randomness of updates to $\samp_r$ comes from $A_{r-1}$ (for $r=1, \ldots, R$), we get $\Pr(b_r=0)\le \frac{I(X;A_{r-1})+1}{\log\frac{1}{\delta}}$ and thus $\E(b_r)\ge 1-\frac{I(X;A_{r-1})+1}{\log\frac{1}{\delta}}$. 
+  By Lemma~\ref{lemma:lb-meta}, we have $\s\ge \log (^n_m) - \s' -1$, where $\s'=\log n + R+ \E(\log (^n_{|B|}))$. 
+  The size of $B$ is $|B|=|S|-\sum_{r=1}^{R}{b_r}$.
+  By Corollary~\ref{corollary:sampler-failure}, conditioned on $S$, $\Pr(b_r=0)\le \frac{I(X;A_{r-1})+1}{\log\frac{1}{\delta}}$. 
   By Lemma~\ref{lemma:mutual-entropy-bound}, $I(X;A_{r-1})\le 5K$ (Note that when $r=1$, $I(X;A_0)=0\le 5K$). Therefore, $\E(b_r)\ge 1-\frac{5K+1}{\log\frac{1}{\delta}}$.
-  By the setting of parameters (see Algorithm~\ref{algo:para}) we have $\E(b_r)\ge \frac{5}{8}$. Therefore, $\E(|B|)\le |A|-\frac{5}{8}R$. 
+  By the setting of parameters (see Algorithm~\ref{algo:para}) we have $\E(b_r)\ge \frac{5}{8}$. Therefore, $\E(|B|)\le |S|-\frac{5}{8}R$. 
   By Lemma~\ref{lemma:bits-saving}, $\log (^n_m)-\E(\log (^n_{|B|}))\ge \frac{5}{8}R\cdot \log (\frac{n}{m}-1) \ge \frac{1}{2}R\log (\frac{n}{\log(1/\delta)})$. 
   Furthermore, $\frac{1}{6}R\log \frac{n}{\log (1/\delta)} \ge R$.
-  Combining together we get $\s \ge \frac{R}{3}\log \frac{n}{\log(1/\delta)} -(\log n + 2)  =\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$.
+  Combining together we get $\s \ge \frac{R}{3}\log \frac{n}{\log(1/\delta)} -(\log n + 1)  =\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$.
 \end{proof}
