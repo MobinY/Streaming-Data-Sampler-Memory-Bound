@@ -4,8 +4,7 @@
 %Because the number of bad events we need to union-bound increases exponentially, the approach cannot obtain more elements. 
 
 Let $(\sketch, \query)$ denote a protocol for $\ur^\subset$ under one-way public coin model with failure probability $\delta$.
-Namely, when Alice's input is $x$ and Bob's input is $y$, Alice will send $\sketch(x)$ to Bob, and Bob will output $\query(\sketch(x), y)$. 
-Note that $\sketch$ and $\query$ use the same random source. 
+Namely, when Alice's input is $x$ and Bob's input is $y$, Alice will send $\sketch(x)$ to Bob, and Bob gets $\query(\sketch(x), y)\in supp(x-y)$ with probability at least $1-\delta$, as long as $x,y$ are independent from the shared random source used by $\sketch$ and $\query$. 
 
 Let us consider failure probability of $\query(\sketch(\mathbf{1}_S), \mathbf{1}_T)$ where $T\subset S$ in terms of information leak, which is defined as the mutual information (conditioned on $S$) between $T$ and random source used in the $\ur^\subset$-protocol. 
 We show in this section that the failure probability is upper-bounded by information leak divided by $\log \frac{1}{\delta}$. 
@@ -17,36 +16,37 @@ By setting $K=\Theta(\log \frac{1}{\delta})$ and $m=\sqrt{n\log\frac{1}{\delta}}
 Moreover, each element contains $\Theta(\log(n/m))=\Theta(\log \frac{n}{\log (1/\delta)})$ bits of information, so we get $\Theta(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)}) $ bits of information from $\sketch(\mathbf{1}_S)$. 
 
 \subsection{Protocol}
+We are going to devise an encoding/decoding protocol $(\enc, \dec)$ for elements in ${[n] \choose m}$ on top of the $\ur^\subset$-protocol $(\sketch, \query)$.
+The parameters shared by $\enc$ and $\dec$ are given in Algorithm~\ref{algo:para}.
+Similar to Section~\ref{sec:overview}, on input $S\in {[n] \choose m}$, $\enc$ computes $M \leftarrow \sketch(\mathbf{1}_S)$ as part of its output. 
+Moreover, $\enc$ will also output a subset $B\subseteq S$ computed as follows.
+Initially $B=S$ and let $A_0=S$. $\enc$ proceeds in $R$ rounds. 
 
-The parameters used by Alice and Bob are given in Algorithm~\ref{algo:para}.
-Alice wants to send a uniformly random set $S$ to Bob where $|S|=m$. 
-Similar to $\enc_1$, Alice computes $M \leftarrow \sketch(\mathbf{1}_S)$, and sends it to Bob. 
-Moreover, Alice will send Bob a subset $B\subseteq S$ computed as follows.
-Initially $B=S$ and let $A_0=S$. Alice proceeds in $R$ rounds. 
-On round $r$ ($r=1,\ldots, R$), Alice computes $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash A_{r-1}})$. 
+On round $r$ ($r=1,\ldots, R$), $\enc$ computes $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash A_{r-1}})$. 
 Let $b$ denote a binary string of length $R$, where $b_r$ records whether $\query$ succeeds on round $r$. 
-Alice will also send $b$ to Bob.
- 
-If $s_r\in A_{r-1}$, i.e. $\query(M, \mathbf{1}_{S\backslash A_{r-1}})$ succeeds, Alice will set $b_r=1$, and remove $s_r$ from $B$ (since $s_r$ can be obtained from the $\ur^\subset$-protocol, Alice does not need to include it in $B$. Algorithm~\ref{algo:enc} uses $D$ to keep track of $S\backslash B$); otherwise Alice will set $b_r=0$.
-At the end of round $r$, Alice will generate a uniformly random set $A_r$, so that $A_r$ is a subset of $A_{r-1}\backslash \{s_r\}$ and $|A_r|=n_r$. 
-In particular, Alice uses shared random source to generate $A_r$, so that Bob can recover $A_{r-1}\backslash A_r$ on round $r$. 
-We present Alice's encoder in Algorithm~\ref{algo:enc}.
+$\enc$ will also output $b$. 
+If $s_r\in A_{r-1}$, i.e. $\query(M, \mathbf{1}_{S\backslash A_{r-1}})$ succeeds, $\enc$ will set $b_r=1$, and remove $s_r$ from $B$ 
+(since $s_r$ can be obtained from the $\ur^\subset$-protocol, $\enc$ does not need to include it in $B$. Algorithm~\ref{algo:enc} uses $D$ to keep track of $S\backslash B$); 
+otherwise $\enc$ will set $b_r=0$.
+At the end of round $r$, $\enc$ will generate a uniformly random set $A_r$, so that $A_r$ is a subset of $A_{r-1}\backslash \{s_r\}$ and $|A_r|=n_r$. 
+In particular, $\enc$ uses shared random source to generate $A_r$, so that $\dec$ can recover $A_{r-1}\backslash A_r$ on round $r$. 
+We present $\enc$ in Algorithm~\ref{algo:enc}.
 
 The decoding process is symmetric. 
 Let $C_0=\emptyset$ and $D=\emptyset$. 
-Bob proceeds in $R$ rounds. 
-On round $r$ ($r=1,\ldots,R$), Bob obtains $s_r\in S\backslash C_{r-1}$ by invoking $\query(M, \mathbf{1}_{C_{r-1}})$. 
+$\dec$ proceeds in $R$ rounds. 
+On round $r$ ($r=1,\ldots,R$), $\dec$ obtains $s_r\in S\backslash C_{r-1}$ by invoking $\query(M, \mathbf{1}_{C_{r-1}})$. 
 By the construction of $C_{r-1}$ that will be described later it is guaranteed that $A_{r-1}=S\backslash C_{r-1}$. 
-Therefore, Bob will get exactly the same $s_r$ as Alice. 
-Bob assigns initial value $C_{r-1}$ to $C_r$.
-If $b_r=1$, Bob will add $s_r$ to both $D$ and $C_r$.
-At the end of round $r$, Bob inserts a bunch of items to $C_r$ so that $C_r=S\backslash A_r$. 
-Bob can achieve this because of the shared random permutation $\sigma$ when constructing $A_r$.
-In the end, Bob's decoder outputs $B\cup D$.
-We present the decoder in Algorithm~\ref{algo:dec}.
+Therefore, $\dec$ will get exactly the same $s_r$ as $\enc$. 
+$\dec$ assigns initial value $C_{r-1}$ to $C_r$.
+If $b_r=1$, $\dec$ will add $s_r$ to both $D$ and $C_r$.
+At the end of round $r$, $\dec$ inserts a bunch of items to $C_r$ so that $C_r=S\backslash A_r$. 
+$\dec$ can achieve this because of the shared random permutation $\sigma$ when constructing $A_r$.
+In the end, $\dec$ outputs $B\cup D$.
+We present $\dec$ in Algorithm~\ref{algo:dec}.
 
 \begin{algorithm}[H] 
-  \caption{Variables Shared by Alice's $\enc$ and Bob's $\dec$.} \label{algo:para}
+  \caption{Variables Shared by encoder $\enc$ and decoder $\dec$.} \label{algo:para}
   \begin{algorithmic}[1] 
     \State $m\leftarrow \lfloor \sqrt{n \log\frac{1}{\delta}} \rfloor$ \Comment{We take the floor whenever a parameter is supposed to be an integer}
     \State $K\leftarrow \lfloor \frac{1}{16}\log \frac{1}{\delta} \rfloor$
@@ -59,7 +59,7 @@ We present the decoder in Algorithm~\ref{algo:dec}.
 \end{algorithm}
 
 \begin{algorithm}[H] 
-  \caption{Alice's Encoder.} \label{algo:enc}
+  \caption{Encoder $\enc$.} \label{algo:enc}
   \begin{algorithmic}[1]
     \Procedure{$\enc$}{$S$}
     \State $M \leftarrow \sketch(\mathbf{1}_S)$
@@ -83,7 +83,7 @@ We present the decoder in Algorithm~\ref{algo:dec}.
 \end{algorithm}
 
 \begin{algorithm}[H] 
-  \caption{Bob's Decoder.} \label{algo:dec}
+  \caption{Decoder $\dec$.} \label{algo:dec}
   \begin{algorithmic}[1]
     \Procedure{$\dec$}{$M$, $B$, $b$}
     \State $D\leftarrow \emptyset$
@@ -113,14 +113,14 @@ We do the analysis conditioned on $S$.
 Namely, the following arguments apply for any fixed $S$. 
 
 First, we can prove that $\dec(\enc(S))=S$. 
-That is, no matter the randomness in $X$ and $\sigma$, Bob will always decode $S$ successfully. 
-It is because Alice's $\enc$ and Bob's $\dec$ share $X$ and $\sigma$, so that Bob essentially simulates Alice. 
+That is, no matter the randomness in $X$ and $\sigma$, $\dec$ will always decode $S$ successfully. 
+It is because $\enc$ and $\dec$ share $X$ and $\sigma$, so that $\dec$ essentially simulates $\enc$. 
 We formally prove this by induction in Lemma~\ref{lemma:zero-fail-prob}. 
 
-Now our goal is to prove that by using $\ur^\subset$-protocol, the number of bits that Alice saves is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$. 
-Intuitively, it is equivalent to prove the number of elements that Alice saves is $\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)} )$.
+Now our goal is to prove that by using the $\ur^\subset$-protocol, the number of bits that $\enc$ saves is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$. 
+Intuitively, it is equivalent to prove the number of elements that $\enc$ saves is $\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)} )$.
 We formalize this in Lemma~\ref{lemma:bits-saving}. 
-Note that Alice also needs to send $b$ (i.e., whether the $\query$ succeeds on $R$ rounds) to Bob, which takes $R$ bits. 
+Note that $\enc$ also needs to output $b$ (i.e., whether the $\query$ succeeds on $R$ rounds), which takes $R$ bits. 
 By setting of parameters we can afford the loss of $R$ bits. 
 Thus it is sufficient to prove $\E(|B|)=|S|-\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$. 
 
@@ -143,14 +143,14 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
   Initially $A_r=A_{r-1}$ and $C_r=C_{r-1}$, and so $\{A_r,C_r\}$ is a partition of $S$. 
   If $s_r$ is a valid sample (i.e. $s_r\in A_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $A_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{A_r, C_r\}$ remains a partition of $S$. 
   
-  After that, Alice's \enc repeats removing $a$ from $A_r$ with smallest $\sigma_a$ until $|A_r|=n_r$. 
-  Symmetrically, Bob's \dec repeats inserting $a$ into $C_r$ with smallest $\sigma_a$ among $a\in B\backslash C_r$, until $|C_r|=|S|-n_r$. 
+  After that, \enc repeats removing $a$ from $A_r$ with smallest $\sigma_a$ until $|A_r|=n_r$. 
+  Symmetrically, \dec repeats inserting $a$ into $C_r$ with smallest $\sigma_a$ among $a\in B\backslash C_r$, until $|C_r|=|S|-n_r$. 
   In the end we have $|A_r|+|C_r|=|S|$, so \enc and \dec execute repetition the same number of times. 
   Moreover, we can prove that during the same repetition the element removed from $A_r$ is exactly the same element inserted to $C_r$. 
   This is because in the beginning of a repetition $\{A_r, C_r\}$ is a partition of $S$. 
   We have $B\backslash C_r\subseteq S\backslash C_r=A_r$. Let $a^*$ denote  $a\in A_r$ that minimizes $\sigma_a$. 
   We can prove that $a^*\in B\backslash C_r\subseteq A_r$ (since $a^*$ will be removed from $A_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $\sigma_{a^*}$ is also the smallest among $\{\sigma_a|a\in B\backslash C_r\}$. 
-  Thus in the end of the repetition, both Alice and Bob will take $a^{*}$ to update (remove from $A_r$, insert into $C_r$). 
+  Thus in the end of the repetition, both $\enc$ and $\dec$ will take $a^{*}$ to update (remove from $A_r$, insert into $C_r$). 
   Therefore, $\{A_r, C_r\}$ remains a partition of $S$.
   
   Given the fact that $\{A_r, C_r\}$ is a partition of $S$, $s_r$ are the same in \enc and \dec. 
@@ -206,7 +206,7 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
     \Pr(A_r=T|X=x)\le \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}},
   \end{align}
   
-  because on round $i$ ($1\le i \le r$), Alice removes $n_{i-1}-n_i$ elements from $A_{i-1}$ to get $A_i$. Conditioned on the event that $A_{i-1}\supseteq T$, the probability that $A_i\supseteq T$ is at most ${{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}/{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}$, where the equation achieves when $s_i\in A_{i-1}\backslash T$, and Alice takes a uniformly random subset of $A_{i-1}\backslash \{s_i\}$ of size $n_{i-1}-n_i-1$, so that the subset does not intersect with $T$.
+  because on round $i$ ($1\le i \le r$), $\enc$ removes $n_{i-1}-n_i$ elements from $A_{i-1}$ to get $A_i$. Conditioned on the event that $A_{i-1}\supseteq T$, the probability that $A_i\supseteq T$ is at most ${{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}/{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}$, where the equation achieves when $s_i\in A_{i-1}\backslash T$, and $\enc$ takes a uniformly random subset of $A_{i-1}\backslash \{s_i\}$ of size $n_{i-1}-n_i-1$, so that the subset does not intersect with $T$.
   
   For notation simplicity, let $n^{\underline{k}}$ denote $n\cdot (n-1)\ldots (n-k+1)$. We have 
   \begin{align}
