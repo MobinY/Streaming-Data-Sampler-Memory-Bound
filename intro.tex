@@ -65,7 +65,7 @@ For $\ell_p$-sampling as defined above, the first work to realize its importance
 
 \TODO{cite more previous work, like \cite{GopalanR09} on finding duplicates}
 
-\section{Overview of techniques}
+\section{Overview of techniques}\label{sec:overview}
 We describe our proof of Theorem~\ref{thm:main}. For the upper bound, \cite{JowhariST11} achieved $O(t\log^2n)$, but in the appendix we show that slight modifications to their approach yield $O(\min\{n,t\log^2(n/t)\})$ bits. Our main contribution is in proving an improved lower bound. Our lower bound proof is split into two parts: we show $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\log(1/\delta)\log^2 \frac n{\log\frac 1{\delta}})$ and $\randcom^{\rightarrow,pub}_{\frac 12}(\ur_k^\subset)=\Omega(k\log^2\frac nk)$ separately. We first describe the former, which is the more technically challenging half.
 
 We prove the lower bound via an encoding argument. Fix $m$. A randomized encoder is given a set $S\subset[n]$ with $|S| = m$ and must output an encoding $\enc(S)$, and a decoder sharing public randomness with the encoder must be able to recover $S$ given only $\enc(S)$. We consider such schemes in which the decoder must succeed with probability $1$, and the encoding length is a random variable. Any such encoding must use $\Omega(\log(^n_m)) = \Omega(m\log \frac nm)$ bits in expectation for some $S$.
