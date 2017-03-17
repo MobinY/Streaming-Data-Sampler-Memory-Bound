@@ -20,29 +20,29 @@ We are going to devise an encoding/decoding protocol $(\enc, \dec)$ for elements
 The parameters shared by $\enc$ and $\dec$ are given in Algorithm~\ref{algo:para}.
 Similar to Section~\ref{sec:overview}, on input $S\in {[n] \choose m}$, $\enc$ computes $M \leftarrow \sketch(\mathbf{1}_S)$ as part of its output. 
 Moreover, $\enc$ will also output a subset $B\subseteq S$ computed as follows.
-Initially $B=S$ and let $A_0=S$. $\enc$ proceeds in $R$ rounds. 
+Initially $B=S$ and let $S_0=S$. $\enc$ proceeds in $R$ rounds. 
 
-On round $r$ ($r=1,\ldots, R$), $\enc$ computes $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash A_{r-1}})$. 
+On round $r$ ($r=1,\ldots, R$), $\enc$ computes $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash S_{r-1}})$. 
 Let $b$ denote a binary string of length $R$, where $b_r$ records whether $\query$ succeeds on round $r$. 
 $\enc$ will also output $b$. 
-If $s_r\in A_{r-1}$, i.e. $\query(M, \mathbf{1}_{S\backslash A_{r-1}})$ succeeds, $\enc$ will set $b_r=1$, and remove $s_r$ from $B$ 
-(since $s_r$ can be obtained from the $\ur^\subset$-protocol, $\enc$ does not need to include it in $B$. Algorithm~\ref{algo:enc} uses $D$ to keep track of $S\backslash B$); 
+If $s_r\in S_{r-1}$, i.e. $\query(M, \mathbf{1}_{S\backslash S_{r-1}})$ succeeds, $\enc$ will set $b_r=1$, and remove $s_r$ from $B$ 
+(since $s_r$ can be obtained from the $\ur^\subset$-protocol, $\enc$ does not need to include it in $B$. Algorithm~\ref{algo:enc} uses $A$ to keep track of $S\backslash B$); 
 otherwise $\enc$ will set $b_r=0$.
-At the end of round $r$, $\enc$ will generate a uniformly random set $A_r$, so that $A_r$ is a subset of $A_{r-1}\backslash \{s_r\}$ and $|A_r|=n_r$. 
-In particular, $\enc$ uses shared random source to generate $A_r$, so that $\dec$ can recover $A_{r-1}\backslash A_r$ on round $r$. 
+At the end of round $r$, $\enc$ will generate a uniformly random set $S_r$, so that $S_r$ is a subset of $S_{r-1}\backslash \{s_r\}$ and $|S_r|=n_r$. 
+In particular, $\enc$ uses shared random source to generate $S_r$, so that $\dec$ can recover $S_{r-1}\backslash S_r$ on round $r$. 
 We present $\enc$ in Algorithm~\ref{algo:enc}.
 
 The decoding process is symmetric. 
-Let $C_0=\emptyset$ and $D=\emptyset$. 
+Let $C_0=\emptyset$ and $A=\emptyset$. 
 $\dec$ proceeds in $R$ rounds. 
 On round $r$ ($r=1,\ldots,R$), $\dec$ obtains $s_r\in S\backslash C_{r-1}$ by invoking $\query(M, \mathbf{1}_{C_{r-1}})$. 
-By the construction of $C_{r-1}$ that will be described later it is guaranteed that $A_{r-1}=S\backslash C_{r-1}$. 
+By the construction of $C_{r-1}$ that will be described later it is guaranteed that $S_{r-1}=S\backslash C_{r-1}$. 
 Therefore, $\dec$ will get exactly the same $s_r$ as $\enc$. 
 $\dec$ assigns initial value $C_{r-1}$ to $C_r$.
-If $b_r=1$, $\dec$ will add $s_r$ to both $D$ and $C_r$.
-At the end of round $r$, $\dec$ inserts a bunch of items to $C_r$ so that $C_r=S\backslash A_r$. 
-$\dec$ can achieve this because of the shared random permutation $\pi$ when constructing $A_r$.
-In the end, $\dec$ outputs $B\cup D$.
+If $b_r=1$, $\dec$ will add $s_r$ to both $A$ and $C_r$.
+At the end of round $r$, $\dec$ inserts a bunch of items to $C_r$ so that $C_r=S\backslash S_r$. 
+$\dec$ can achieve this because of the shared random permutation $\pi$ when constructing $S_r$.
+In the end, $\dec$ outputs $B\cup A$.
 We present $\dec$ in Algorithm~\ref{algo:dec}.
 
 \begin{algorithm}[H] 
@@ -52,9 +52,9 @@ We present $\dec$ in Algorithm~\ref{algo:dec}.
     \State $K\leftarrow \lfloor \frac{1}{16}\log \frac{1}{\delta} \rfloor$
     \State $R\leftarrow \lfloor K\log(m/4K) \rfloor$
     \For {$r = 0, \ldots, R$}
-      \State $n_r\leftarrow \lfloor m \cdot 2^{-\frac{r}{K}} \rfloor$ \Comment{$|A_r|=n_r$, and we have $n_r-n_{r+1}\ge 2$}
+      \State $n_r\leftarrow \lfloor m \cdot 2^{-\frac{r}{K}} \rfloor$ \Comment{$|S_r|=n_r$, and we have $n_r-n_{r+1}\ge 2$}
     \EndFor
-    \State Let $\pi$ be a random permutation on $[n]$ \Comment{Used to generate $A_r$ and $C_r$}
+    \State Let $\pi$ be a random permutation on $[n]$ \Comment{Used to generate $S_r$ and $C_r$}
   \end{algorithmic}
 \end{algorithm}
 
@@ -63,21 +63,21 @@ We present $\dec$ in Algorithm~\ref{algo:dec}.
   \begin{algorithmic}[1]
     \Procedure{$\enc$}{$S$}
     \State $M \leftarrow \sketch(\mathbf{1}_S)$
-    \State $D\leftarrow \emptyset$
-    \State $A_0 \leftarrow S$
+    \State $A\leftarrow \emptyset$
+    \State $S_0 \leftarrow S$
     \For {$r=1,\ldots,R$}
-      \State $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash A_{r-1}})$
-      \State $A_r\leftarrow A_{r-1}$
-      \If {$s_r\in A_{r-1}$} \Comment{i.e. if $s_r$ is a valid sample}
+      \State $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash S_{r-1}})$
+      \State $S_r\leftarrow S_{r-1}$
+      \If {$s_r\in S_{r-1}$} \Comment{i.e. if $s_r$ is a valid sample}
         \State $b_r\leftarrow 1$ \Comment{$b$ is a binary string of length $R$, indicating if $\query$ succeeds on round $r$}
-        \State $D\leftarrow D \cup \{s_r\}$
-        \State $A_r\leftarrow A_r \backslash \{s_r\}$
+        \State $A\leftarrow A \cup \{s_r\}$
+        \State $S_r\leftarrow S_r \backslash \{s_r\}$
       \Else 
         \State $b_r\leftarrow 0$
       \EndIf
-      \State Remove $|A_r|-n_r$ elements from $A_r$ with smallest $\pi_a$'s among $a\in A_r$ \Comment{So that $|A_r|=n_r$}
+      \State Remove $|S_r|-n_r$ elements from $S_r$ with smallest $\pi_a$'s among $a\in S_r$ \Comment{So that $|S_r|=n_r$}
     \EndFor
-    \State \Return ($M$, $A\backslash D$, $b$) 
+    \State \Return ($M$, $S\backslash A$, $b$) 
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -86,18 +86,18 @@ We present $\dec$ in Algorithm~\ref{algo:dec}.
   \caption{Decoder $\dec$.} \label{algo:dec}
   \begin{algorithmic}[1]
     \Procedure{$\dec$}{$M$, $B$, $b$}
-    \State $D\leftarrow \emptyset$
+    \State $A\leftarrow \emptyset$
     \State $C_0 \leftarrow \emptyset$
     \For {$r=1,\ldots,R$}
       \State $C_r\leftarrow C_{r-1}$
       \If{$b_r=1$}
-        \State $s_r\leftarrow \query(M, \mathbf{1}_{C_{r-1}})$ \Comment{Invariant: $C_r=S \backslash A_r$ ($A_r$ is defined in $\enc$)}
-        \State $D\leftarrow D \cup \{s_r\}$
+        \State $s_r\leftarrow \query(M, \mathbf{1}_{C_{r-1}})$ \Comment{Invariant: $C_r=S \backslash S_r$ ($S_r$ is defined in $\enc$)}
+        \State $A\leftarrow A \cup \{s_r\}$
         \State $C_r\leftarrow C_r \cup \{s_r\}$
       \EndIf
        \State Insert $m-n_r-|C_r|$ items into $C_r$ with smallest $\pi_a$'s among $a\in B\backslash C_r$
     \EndFor
-    \State \Return $B\cup D$ 
+    \State \Return $B\cup A$ 
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -125,8 +125,8 @@ By setting of parameters we can afford the loss of $R$ bits.
 Thus it is sufficient to prove $\E(|B|)=|S|-\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$. 
 
 We have $|S|-|B|=\sum_{r=1}^{R}b_r$. 
-In Lemma~\ref{lemma:mutual-entropy-vs-fail-prob}, we prove the probability that $\query$ fails on round $r$ is upper bounded by $\frac{I(X;A_{r-1})+1}{\log \frac{1}{\delta}}$, where $I(X;A_{r-1})$ is the mutual information between $X$ and $A_{r-1}$. 
-Furthermore, we will show in Lemma~\ref{lemma:mutual-entropy-bound} that $I(X;A_{r-1})$ is upper bounded by $O(K)$.
+In Lemma~\ref{lemma:mutual-entropy-vs-fail-prob}, we prove the probability that $\query$ fails on round $r$ is upper bounded by $\frac{I(X;S_{r-1})+1}{\log \frac{1}{\delta}}$, where $I(X;S_{r-1})$ is the mutual information between $X$ and $S_{r-1}$. 
+Furthermore, we will show in Lemma~\ref{lemma:mutual-entropy-bound} that $I(X;S_{r-1})$ is upper bounded by $O(K)$.
 By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omega(R)=\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$.
  
 \begin{lemma}\label{lemma:zero-fail-prob}
@@ -134,29 +134,29 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
 \end{lemma}
 
 \begin{proof}
-  We claim that for $r=0,\ldots, R$, $\{A_r, C_r\}$ is a partition of $S$ ($A_r$ is in \enc, and $C_r$ is in \dec). We prove the claim by induction on $r$.
+  We claim that for $r=0,\ldots, R$, $\{S_r, C_r\}$ is a partition of $S$ ($S_r$ is in \enc, and $C_r$ is in \dec). We prove the claim by induction on $r$.
   
-  The basis case is $r=0$. $A_0=S$ and $C_0=\emptyset$. The claim is true.
+  The basis case is $r=0$. $S_0=S$ and $C_0=\emptyset$. The claim is true.
   
   Assume by induction the claim holds for $r$ ($0\le r < R$), and we consider $r+1$. 
-  On round $r$, because $S\backslash A_{r-1}=C_{r-1}$, $s_r$ obtained in both sides are the same. 
-  Initially $A_r=A_{r-1}$ and $C_r=C_{r-1}$, and so $\{A_r,C_r\}$ is a partition of $S$. 
-  If $s_r$ is a valid sample (i.e. $s_r\in A_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $A_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{A_r, C_r\}$ remains a partition of $S$. 
+  On round $r$, because $S\backslash S_{r-1}=C_{r-1}$, $s_r$ obtained in both sides are the same. 
+  Initially $S_r=S_{r-1}$ and $C_r=C_{r-1}$, and so $\{S_r,C_r\}$ is a partition of $S$. 
+  If $s_r$ is a valid sample (i.e. $s_r\in S_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $S_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{S_r, C_r\}$ remains a partition of $S$. 
   
-  After that, \enc repeats removing $a$ from $A_r$ with smallest $\pi_a$ until $|A_r|=n_r$. 
+  After that, \enc repeats removing $a$ from $S_r$ with smallest $\pi_a$ until $|S_r|=n_r$. 
   Symmetrically, \dec repeats inserting $a$ into $C_r$ with smallest $\pi_a$ among $a\in B\backslash C_r$, until $|C_r|=|S|-n_r$. 
-  In the end we have $|A_r|+|C_r|=|S|$, so \enc and \dec execute repetition the same number of times. 
-  Moreover, we can prove that during the same repetition the element removed from $A_r$ is exactly the same element inserted to $C_r$. 
-  This is because in the beginning of a repetition $\{A_r, C_r\}$ is a partition of $S$. 
-  We have $B\backslash C_r\subseteq S\backslash C_r=A_r$. Let $a^*$ denote  $a\in A_r$ that minimizes $\pi_a$. 
-  We can prove that $a^*\in B\backslash C_r\subseteq A_r$ (since $a^*$ will be removed from $A_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $\pi_{a^*}$ is also the smallest among $\{\pi_a|a\in B\backslash C_r\}$. 
-  Thus in the end of the repetition, both $\enc$ and $\dec$ will take $a^{*}$ to update (remove from $A_r$, insert into $C_r$). 
-  Therefore, $\{A_r, C_r\}$ remains a partition of $S$.
+  In the end we have $|S_r|+|C_r|=|S|$, so \enc and \dec execute repetition the same number of times. 
+  Moreover, we can prove that during the same repetition the element removed from $S_r$ is exactly the same element inserted to $C_r$. 
+  This is because in the beginning of a repetition $\{S_r, C_r\}$ is a partition of $S$. 
+  We have $B\backslash C_r\subseteq S\backslash C_r=S_r$. Let $a^*$ denote  $a\in S_r$ that minimizes $\pi_a$. 
+  We can prove that $a^*\in B\backslash C_r\subseteq S_r$ (since $a^*$ will be removed from $S_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $\pi_{a^*}$ is also the smallest among $\{\pi_a|a\in B\backslash C_r\}$. 
+  Thus in the end of the repetition, both $\enc$ and $\dec$ will take $a^{*}$ to update (remove from $S_r$, insert into $C_r$). 
+  Therefore, $\{S_r, C_r\}$ remains a partition of $S$.
   
-  Given the fact that $\{A_r, C_r\}$ is a partition of $S$, $s_r$ are the same in \enc and \dec. 
-  Furthermore, $D=\{s_r|b_r=1,r=1,\ldots, R\}$ are the same in \enc and \dec.
-  We know $D\subseteq S$. 
-  Since \enc outputs $S\backslash D$, and \dec outputs $(S\backslash D)\cup D$, we have $\dec(\enc(S))=S$. 
+  Given the fact that $\{S_r, C_r\}$ is a partition of $S$, $s_r$ are the same in \enc and \dec. 
+  Furthermore, $A=\{s_r|b_r=1,r=1,\ldots, R\}$ are the same in \enc and \dec.
+  We know $A\subseteq S$. 
+  Since \enc outputs $S\backslash A$, and \dec outputs $(S\backslash A)\cup A$, we have $\dec(\enc(S))=S$. 
 \end{proof}
 
 \begin{lemma} \label{lemma:bits-saving}
@@ -196,17 +196,17 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
 \end{corollary}
 
 \begin{lemma}\label{lemma:mutual-entropy-bound}
-  $I(X;A_r)\le 6K$, for $r=1,\ldots, R$.
+  $I(X;S_r)\le 6K$, for $r=1,\ldots, R$.
 \end{lemma}
 
 \begin{proof}
-  $I(X;A_r)=H(A_r)-H(A_r|X)$. Since $|A_r|=n_r$ and $A_r\subseteq S$ where $|S|=m$, $H(A_r)\le \log {m \choose n_r}$. Now we want to lower bound $H(A_r|X)$. By definition of conditional entropy, $H(A_r|X)=\sum_x{p_x\cdot H(A_r|X=x)}$. We fix an arbitrary $x$. If we can prove that for any $T\subseteq S$ where $|T|=n_r$, $\Pr(A_r=T|X=x)\le p$, then by definition of entropy we have $H(A_r|X=x)\ge\log\frac{1}{p}$. In fact, for any fixed $T$, we have
+  $I(X;S_r)=H(S_r)-H(S_r|X)$. Since $|S_r|=n_r$ and $S_r\subseteq S$ where $|S|=m$, $H(S_r)\le \log {m \choose n_r}$. Now we want to lower bound $H(S_r|X)$. By definition of conditional entropy, $H(S_r|X)=\sum_x{p_x\cdot H(S_r|X=x)}$. We fix an arbitrary $x$. If we can prove that for any $T\subseteq S$ where $|T|=n_r$, $\Pr(S_r=T|X=x)\le p$, then by definition of entropy we have $H(S_r|X=x)\ge\log\frac{1}{p}$. In fact, for any fixed $T$, we have
   
   \begin{align}
-    \Pr(A_r=T|X=x)\le \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}},
+    \Pr(S_r=T|X=x)\le \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}},
   \end{align}
   
-  because on round $i$ ($1\le i \le r$), $\enc$ removes $n_{i-1}-n_i$ elements from $A_{i-1}$ to get $A_i$. Conditioned on the event that $A_{i-1}\supseteq T$, the probability that $A_i\supseteq T$ is at most ${{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}/{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}$, where the equation achieves when $s_i\in A_{i-1}\backslash T$, and $\enc$ takes a uniformly random subset of $A_{i-1}\backslash \{s_i\}$ of size $n_{i-1}-n_i-1$, so that the subset does not intersect with $T$.
+  because on round $i$ ($1\le i \le r$), $\enc$ removes $n_{i-1}-n_i$ elements from $S_{i-1}$ to get $S_i$. Conditioned on the event that $S_{i-1}\supseteq T$, the probability that $S_i\supseteq T$ is at most ${{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}/{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}$, where the equation achieves when $s_i\in S_{i-1}\backslash T$, and $\enc$ takes a uniformly random subset of $S_{i-1}\backslash \{s_i\}$ of size $n_{i-1}-n_i-1$, so that the subset does not intersect with $T$.
   
   For notation simplicity, let $n^{\underline{k}}$ denote $n\cdot (n-1)\ldots (n-k+1)$. We have 
   \begin{align}
@@ -238,7 +238,7 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
   Also by Taylor expansion we can obtain $1+\frac{1}{4K}\le 2^{-1/K}$, and thus $\frac{1}{1-(1+\frac{1}{4K})2^{-j/K}}\le \frac{1}{1-2^{(1-j)/K}}$, for $j=2,\ldots, r$. 
   By Lemma~\ref{lemma:Pochhammer}, we have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. 
   
-  Let $p={2^{6K}}/{{m\choose n_r}}$, we have $\Pr(A_r=T|X=x)\le p$ and thus $H(A_r|X=x)\ge \log\frac{1}{p}=\log{{m\choose n_r}}-6K$. Therefore, $H(A_r|X)\ge \log{{m\choose n_r}}-6K$ and so $I(X;A_r)=H(A_r)-H(A_r|X)\le 6K$.  
+  Let $p={2^{6K}}/{{m\choose n_r}}$, we have $\Pr(S_r=T|X=x)\le p$ and thus $H(S_r|X=x)\ge \log\frac{1}{p}=\log{{m\choose n_r}}-6K$. Therefore, $H(S_r|X)\ge \log{{m\choose n_r}}-6K$ and so $I(X;S_r)=H(S_r)-H(S_r|X)\le 6K$.  
 \end{proof}
 
 %By \url{http://mathworld.wolfram.com/q-PochhammerSymbol.html} We have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. I think we can improve the constant 5 to 4 if we bound it more carefully. 
@@ -276,8 +276,8 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
   By Lemma~\ref{lemma:zero-fail-prob}, the success probability of protocol $(\enc,\dec)$ is $1$. 
   By Lemma~\ref{lemma:lb-meta}, we have $\s\ge \log (^n_m) - \s' -1$, where $\s'=\log n + R+ \E(\log (^n_{|B|}))$. 
   The size of $B$ is $|B|=|S|-\sum_{r=1}^{R}{b_r}$.
-  By Corollary~\ref{corollary:sampler-failure}, conditioned on $S$, $\Pr(b_r=0)\le \frac{I(X;A_{r-1})+1}{\log\frac{1}{\delta}}$. 
-  By Lemma~\ref{lemma:mutual-entropy-bound}, $I(X;A_{r-1})\le 6K$ (Note that when $r=1$, $I(X;A_0)=0\le 6K$). 
+  By Corollary~\ref{corollary:sampler-failure}, conditioned on $S$, $\Pr(b_r=0)\le \frac{I(X;S_{r-1})+1}{\log\frac{1}{\delta}}$. 
+  By Lemma~\ref{lemma:mutual-entropy-bound}, $I(X;S_{r-1})\le 6K$ (Note that when $r=1$, $I(X;S_0)=0\le 6K$). 
   Therefore, $\E(b_r)\ge 1-\frac{6K+1}{\log\frac{1}{\delta}}$.
   By the setting of parameters (see Algorithm~\ref{algo:para}) we have $\E(b_r)\ge \frac{39}{64}$. Therefore, $\E(|B|)\le |S|-\frac{39}{64}R$. 
   By Lemma~\ref{lemma:bits-saving}, $\log (^n_m)-\E(\log (^n_{|B|}))\ge \frac{39}{64}R\cdot \log (\frac{n}{m}-1) \ge \frac{1}{2}R\log (\frac{n}{\log(1/\delta)})$. 
