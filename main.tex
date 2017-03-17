@@ -41,7 +41,7 @@ Therefore, $\dec$ will get exactly the same $s_r$ as $\enc$.
 $\dec$ assigns initial value $C_{r-1}$ to $C_r$.
 If $b_r=1$, $\dec$ will add $s_r$ to both $D$ and $C_r$.
 At the end of round $r$, $\dec$ inserts a bunch of items to $C_r$ so that $C_r=S\backslash A_r$. 
-$\dec$ can achieve this because of the shared random permutation $\sigma$ when constructing $A_r$.
+$\dec$ can achieve this because of the shared random permutation $\pi$ when constructing $A_r$.
 In the end, $\dec$ outputs $B\cup D$.
 We present $\dec$ in Algorithm~\ref{algo:dec}.
 
@@ -54,7 +54,7 @@ We present $\dec$ in Algorithm~\ref{algo:dec}.
     \For {$r = 0, \ldots, R$}
       \State $n_r\leftarrow \lfloor m \cdot 2^{-\frac{r}{K}} \rfloor$ \Comment{$|A_r|=n_r$, and we have $n_r-n_{r+1}\ge 2$}
     \EndFor
-    \State Let $\sigma$ be a random permutation on $[n]$ \Comment{Used to generate $A_r$ and $C_r$}
+    \State Let $\pi$ be a random permutation on $[n]$ \Comment{Used to generate $A_r$ and $C_r$}
   \end{algorithmic}
 \end{algorithm}
 
@@ -75,7 +75,7 @@ We present $\dec$ in Algorithm~\ref{algo:dec}.
       \Else 
         \State $b_r\leftarrow 0$
       \EndIf
-      \State Remove $|A_r|-n_r$ elements from $A_r$ with smallest $\sigma_a$'s among $a\in A_r$ \Comment{So that $|A_r|=n_r$}
+      \State Remove $|A_r|-n_r$ elements from $A_r$ with smallest $\pi_a$'s among $a\in A_r$ \Comment{So that $|A_r|=n_r$}
     \EndFor
     \State \Return ($M$, $A\backslash D$, $b$) 
     \EndProcedure
@@ -95,7 +95,7 @@ We present $\dec$ in Algorithm~\ref{algo:dec}.
         \State $D\leftarrow D \cup \{s_r\}$
         \State $C_r\leftarrow C_r \cup \{s_r\}$
       \EndIf
-       \State Insert $m-n_r-|C_r|$ items into $C_r$ with smallest $\sigma_a$'s among $a\in B\backslash C_r$
+       \State Insert $m-n_r-|C_r|$ items into $C_r$ with smallest $\pi_a$'s among $a\in B\backslash C_r$
     \EndFor
     \State \Return $B\cup D$ 
     \EndProcedure
@@ -107,14 +107,14 @@ We present $\dec$ in Algorithm~\ref{algo:dec}.
 We have three random objects here: 
 (1) Set $S$, which is a uniform random set of size $m$; 
 (2) The random source used by the $\ur^\subset$-protocol, denoted by $X$; 
-(3) Random permutation $\sigma$. 
+(3) Random permutation $\pi$. 
 They are independent. 
 We do the analysis conditioned on $S$. 
 Namely, the following arguments apply for any fixed $S$. 
 
 First, we can prove that $\dec(\enc(S))=S$. 
-That is, no matter the randomness in $X$ and $\sigma$, $\dec$ will always decode $S$ successfully. 
-It is because $\enc$ and $\dec$ share $X$ and $\sigma$, so that $\dec$ essentially simulates $\enc$. 
+That is, no matter the randomness in $X$ and $\pi$, $\dec$ will always decode $S$ successfully. 
+It is because $\enc$ and $\dec$ share $X$ and $\pi$, so that $\dec$ essentially simulates $\enc$. 
 We formally prove this by induction in Lemma~\ref{lemma:zero-fail-prob}. 
 
 Now our goal is to prove that by using the $\ur^\subset$-protocol, the number of bits that $\enc$ saves is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$. 
@@ -143,13 +143,13 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
   Initially $A_r=A_{r-1}$ and $C_r=C_{r-1}$, and so $\{A_r,C_r\}$ is a partition of $S$. 
   If $s_r$ is a valid sample (i.e. $s_r\in A_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $A_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{A_r, C_r\}$ remains a partition of $S$. 
   
-  After that, \enc repeats removing $a$ from $A_r$ with smallest $\sigma_a$ until $|A_r|=n_r$. 
-  Symmetrically, \dec repeats inserting $a$ into $C_r$ with smallest $\sigma_a$ among $a\in B\backslash C_r$, until $|C_r|=|S|-n_r$. 
+  After that, \enc repeats removing $a$ from $A_r$ with smallest $\pi_a$ until $|A_r|=n_r$. 
+  Symmetrically, \dec repeats inserting $a$ into $C_r$ with smallest $\pi_a$ among $a\in B\backslash C_r$, until $|C_r|=|S|-n_r$. 
   In the end we have $|A_r|+|C_r|=|S|$, so \enc and \dec execute repetition the same number of times. 
   Moreover, we can prove that during the same repetition the element removed from $A_r$ is exactly the same element inserted to $C_r$. 
   This is because in the beginning of a repetition $\{A_r, C_r\}$ is a partition of $S$. 
-  We have $B\backslash C_r\subseteq S\backslash C_r=A_r$. Let $a^*$ denote  $a\in A_r$ that minimizes $\sigma_a$. 
-  We can prove that $a^*\in B\backslash C_r\subseteq A_r$ (since $a^*$ will be removed from $A_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $\sigma_{a^*}$ is also the smallest among $\{\sigma_a|a\in B\backslash C_r\}$. 
+  We have $B\backslash C_r\subseteq S\backslash C_r=A_r$. Let $a^*$ denote  $a\in A_r$ that minimizes $\pi_a$. 
+  We can prove that $a^*\in B\backslash C_r\subseteq A_r$ (since $a^*$ will be removed from $A_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $\pi_{a^*}$ is also the smallest among $\{\pi_a|a\in B\backslash C_r\}$. 
   Thus in the end of the repetition, both $\enc$ and $\dec$ will take $a^{*}$ to update (remove from $A_r$, insert into $C_r$). 
   Therefore, $\{A_r, C_r\}$ remains a partition of $S$.
   
