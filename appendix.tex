@@ -9,7 +9,7 @@ Recall Alice and Bob receive $x, y\in\{0,1\}^n$, respectively, and share a publi
 As mentioned, the protocol we describe is nearly identical to one in \cite{JowhariST11} (see also \cite{CormodeF14}). We will describe the new protocol here, then point out the two minor modifications that improve the $O(k\log^2 n)$ bound to $O(k\log^2(n/k))$ in Remark~\ref{rem:recov}. We first need the following lemma.
 
 \begin{lemma}\label{lem:sparse-recov}
-Let $\F_q$ be a finite field and $n>1$ an integer. Then for any $1\le k\le \frac n2$, there exists $\Pi_k\in \F_q^{m\times n}$ for $m = O(k\log_q(n/k))$ s.t.\ for any $w\neq w'\in\F_q^n$ with $\|w\|_0, \|w'\|_0 \le k$, $\Pi_k w \neq \Pi_k w'$.
+Let $\F_q$ be a finite field and $n>1$ an integer. Then for any $1\le k\le \frac n2$, there exists $\Pi_k\in \F_q^{m\times n}$ for $m = O(k\log_q(qn/k))$ s.t.\ for any $w\neq w'\in\F_q^n$ with $\|w\|_0, \|w'\|_0 \le k$, $\Pi_k w \neq \Pi_k w'$.
 \end{lemma}
 \begin{proof}
 The proof is via the probabilistic method. $\Pi_k w = \Pi_k w'$ iff $\Pi_k (w - w') = 0$. Note $v = w-w'$ has $\|v\|_0 \le 2k$. Thus it suffices to show that such a $\Pi_k$ exists with no $(2k)$-sparse vector in its kernel. The number of vectors $v\in\F_q^n$ with $\|v_0\| \le 2k$ is at most $\binom{n}{2k}\cdot q^{2k}$. For any fixed $v$, $\Pr(\Pi_k v = 0) = q^{-m}$. Thus 
@@ -18,7 +18,7 @@ by a union bound. The above is strictly less than $1$ for $m > 2k + \log_q\binom
 \end{proof}
 
 \begin{corollary}\label{cor:ksparse}
-Let $\F_q$ be a finite field and $n>1$ an integer. Then for any $1\le k\le \frac n2$, there exists $\Pi_k\in \F_q^{m\times n}$ for $m = O(k\log_q(n/k))$ together with an algorithm $\mathcal{R}$ such that for any $w\in\F_q^n$ with $\|w\|_0 \le k$, $\mathcal{R}(\Pi_k w) = w$.
+Let $\F_q$ be a finite field and $n>1$ an integer. Then for any $1\le k\le \frac n2$, there exists $\Pi_k\in \F_q^{m\times n}$ for $m = O(k\log_q(qn/k))$ together with an algorithm $\mathcal{R}$ such that for any $w\in\F_q^n$ with $\|w\|_0 \le k$, $\mathcal{R}(\Pi_k w) = w$.
 \end{corollary}
 \begin{proof}
 Given Lemma~\ref{lem:sparse-recov}, a simple such $\mathcal{R}$ is as follows. Given some $y = \Pi_k w^*$ with $\|w^*\|_0 \le k$, $\mathcal{R}$ loops over all $w$ in $\F_q^n$ with $\|w\|_0 \le k$ and outputs the first one it finds for which $\Pi_k w = y$.
