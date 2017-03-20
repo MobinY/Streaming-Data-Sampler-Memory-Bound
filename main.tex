@@ -3,52 +3,26 @@
 %In the previous section we have shown how to extract $\Theta(\log \frac{1}{\delta})$ words of information from the sketch by sequentially peeling off elements. 
 %Because the number of bad events we need to union-bound increases exponentially, the approach cannot obtain more elements. 
 
-Let $(\sketch, \query)$ denote a protocol for $\ur^\subset$ under one-way public coin model with failure probability $\delta$.
-Namely, when Alice's input is $x$ and Bob's input is $y$, Alice will send $\sketch(x)$ to Bob, and Bob gets $\query(\sketch(x), y)\in supp(x-y)$ with probability at least $1-\delta$, as long as $x,y$ are independent from the shared random source used by $\sketch$ and $\query$. 
+Consider a protocol $\mathcal{P}$ for $\ur^\subset$ with failure probability $\delta$, operating in the one-way public coin model. When Alice's input is $x$ and Bob's input is $y$, Alice sends $\sketch(x)$ to Bob, and Bob outputs $\query(\sketch(x), y)$, which with probability at least $1-\delta$ is in $\supp(x-y)$. As mentioned in Section~\ref{sec:overview}, we use $\mathcal{P}$ as a subroutine in a scheme for encoding/decoding elements of $\binom{[n]}m$ for $m = \lfloor \sqrt{n\log(1/\delta)}\rfloor$. In this section, we assume $\log \frac 1{\delta} \le n/64$, since for larger $n$ we have an $\Omega(n)$ lower bound.
 
-Let us consider failure probability of $\query(\sketch(\mathbf{1}_S), \mathbf{1}_T)$ where $T\subset S$ in terms of information leak, which is defined as the mutual information (conditioned on $S$) between $T$ and random source used in the $\ur^\subset$-protocol. 
-We show in this section that the failure probability is upper-bounded by information leak divided by $\log \frac{1}{\delta}$. 
-Therefore, in order to invoke $\query$ with good success probability, it is sufficient to control information leak.
+% Let us consider failure probability of $\query(\sketch(\mathbf{1}_S), \mathbf{1}_T)$ where $T\subset S$ in terms of information leak, which is defined as the mutual information (conditioned on $S$) between $T$ and random source used in the $\ur^\subset$-protocol. We show in this section that the failure probability is upper-bounded by information leak divided by $\log \frac{1}{\delta}$. Therefore, in order to invoke $\query$ with good success probability, it is sufficient to control information leak.
 
-Our key technique is noise injection: after obtaining an element from $S\backslash T$ via the $\ur^\subset$-protocol, we not only add the element to $T$, but also randomly add $1/K$ fraction of elements in $S\backslash T$ to $T$. 
-We prove that no matter how many rounds we proceed, the information leak is always bounded by $O(K)$. 
-By setting $K=\Theta(\log \frac{1}{\delta})$ and $m=\sqrt{n\log\frac{1}{\delta}}$, we can proceed in $\Theta(\frac{\log (m/K)}{\log (1 +1/K)}) = \Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ rounds, and thus in expectation obtain $\Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ elements in $S$.
-Moreover, each element contains $\Theta(\log(n/m))=\Theta(\log \frac{n}{\log (1/\delta)})$ bits of information, so we get $\Theta(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)}) $ bits of information from $\sketch(\mathbf{1}_S)$. 
+%  Our key technique is noise injection: after obtaining an element from $S\backslash T$ via the $\ur^\subset$-protocol, we not only add the element to $T$, but also randomly add roughly a $1/K$ fraction of elements in $S\backslash T$ to $T$. 
+% We prove that for every round, the mutual information between the randomness used by $\mathcal{P}$ and the next inputs fed to $\mathcal{P}$ by the encoding scheme is $O(K)$.  
+% By setting $K=\Theta(\log \frac{1}{\delta})$ and $m=\sqrt{n\log\frac{1}{\delta}}$, we can proceed in $\Theta(\frac{\log (m/K)}{\log (1 +1/K)}) = \Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ rounds, and thus in expectation obtain $\Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ elements in $S$.
+% Moreover, each element contains $\Theta(\log(n/m))=\Theta(\log \frac{n}{\log (1/\delta)})$ bits of information, so we get $\Theta(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)}) $ bits of information from $\sketch(\mathbf{1}_S)$. 
 
-\subsection{Protocol}
-We are going to devise an encoding/decoding protocol $(\enc, \dec)$ for elements in ${[n] \choose m}$ on top of the $\ur^\subset$-protocol $(\sketch, \query)$.
-The parameters shared by $\enc$ and $\dec$ are given in Algorithm~\ref{algo:para}.
-Similar to Section~\ref{sec:overview}, on input $S\in {[n] \choose m}$, $\enc$ computes $M \leftarrow \sketch(\mathbf{1}_S)$ as part of its output. 
-Moreover, $\enc$ will also output a subset $B\subseteq S$ computed as follows.
-Initially $B=S$ and let $S_0=S$. $\enc$ proceeds in $R$ rounds. 
+\subsection{Encoding/decoding scheme}
+We now describe our encoding/decoding scheme $(\enc, \dec)$ for elements in ${[n] \choose m}$, which uses $\mathcal{P}$ in a black-box way. The parameters shared by $\enc$ and $\dec$ are given in Algorithm~\ref{algo:para}.
 
-On round $r$ ($r=1,\ldots, R$), $\enc$ computes $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash S_{r-1}})$. 
-Let $b$ denote a binary string of length $R$, where $b_r$ records whether $\query$ succeeds on round $r$. 
-$\enc$ will also output $b$. 
-If $s_r\in S_{r-1}$, i.e. $\query(M, \mathbf{1}_{S\backslash S_{r-1}})$ succeeds, $\enc$ will set $b_r=1$, and remove $s_r$ from $B$ 
-(since $s_r$ can be obtained from the $\ur^\subset$-protocol, $\enc$ does not need to include it in $B$. Algorithm~\ref{algo:enc} uses $A$ to keep track of $S\backslash B$); 
-otherwise $\enc$ will set $b_r=0$.
-At the end of round $r$, $\enc$ will generate a uniformly random set $S_r$, so that $S_r$ is a subset of $S_{r-1}\backslash \{s_r\}$ and $|S_r|=n_r$. 
-In particular, $\enc$ uses shared random source to generate $S_r$, so that $\dec$ can recover $S_{r-1}\backslash S_r$ on round $r$. 
-We present $\enc$ in Algorithm~\ref{algo:enc}.
+As discussed in Section~\ref{sec:overview}, on input $S\in {[n] \choose m}$, $\enc$ computes $M \leftarrow \sketch(\mathbf{1}_S)$ as part of its output. Moreover, $\enc$ also outputs a subset $B\subseteq S$ computed as follows. Initially $B=S$ and $S_0=S$. $\enc$ proceeds in $R$ rounds.  In round $r\in[R]$, $\enc$ computes $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash S_{r-1}})$.  Let $b$ denote a binary string of length $R$, where $b_r$ records whether $\query$ succeeds in round $r$.  $\enc$ also outputs $b$.  If $s_r\in S_{r-1}$, i.e. $\query(M, \mathbf{1}_{S\backslash S_{r-1}})$ succeeds, $\enc$ sets $b_r=1$ and removes $s_r$ from $B$ (since the decoder can recover $s_r$ from the $\ur^\subset$-protocol, $\enc$ does not need to include it in $B$); otherwise $\enc$ sets $b_r=0$.  At the end of round $r$, $\enc$ picks a uniformly random set $S_r$ in $\binom{S_{r-1}\backslash \{s_r\}}{n_r}$.  In particular, $\enc$ uses its shared randomness with $\dec$ to generate $S_r$ in such a way that $\enc, \dec$ agree on the sets $S_r$ ($\dec$ will actually iteratively construct $C_r = S\backslash S_r$). We present $\enc$ in Algorithm~\ref{algo:enc}.
 
-The decoding process is symmetric. 
-Let $C_0=\emptyset$ and $A=\emptyset$. 
-$\dec$ proceeds in $R$ rounds. 
-On round $r$ ($r=1,\ldots,R$), $\dec$ obtains $s_r\in S\backslash C_{r-1}$ by invoking $\query(M, \mathbf{1}_{C_{r-1}})$. 
-By the construction of $C_{r-1}$ that will be described later it is guaranteed that $S_{r-1}=S\backslash C_{r-1}$. 
-Therefore, $\dec$ will get exactly the same $s_r$ as $\enc$. 
-$\dec$ assigns initial value $C_{r-1}$ to $C_r$.
-If $b_r=1$, $\dec$ will add $s_r$ to both $A$ and $C_r$.
-At the end of round $r$, $\dec$ inserts a bunch of items to $C_r$ so that $C_r=S\backslash S_r$. 
-$\dec$ can achieve this because of the shared random permutation $\pi$ when constructing $S_r$.
-In the end, $\dec$ outputs $B\cup A$.
-We present $\dec$ in Algorithm~\ref{algo:dec}.
+The decoding process is symmetric.  Let $C_0=\emptyset$ and $A=\emptyset$.  $\dec$ proceeds in $R$ rounds.  On round $r\in[R]$, $\dec$ obtains $s_r\in S\backslash C_{r-1}$ by invoking $\query(M, \mathbf{1}_{C_{r-1}})$.  By construction of $C_{r-1}$ (to be described later), it is guaranteed that $S_{r-1}=S\backslash C_{r-1}$.  Therefore, $\dec$ recovers exactly the same $s_r$ as $\enc$.  $\dec$ initially assigns $C_r\leftarrow C_{r-1}$.  If $b_r=1$, $\dec$ adds $s_r$ to both $A$ and $C_r$.  At the end of round $r$, $\dec$ inserts many random items from $B$ into $C_r$ so that $C_r=S\backslash S_r$.  $\dec$ can achieve this because of the shared random permutation $\pi$ when constructing $S_r$.  In the end, $\dec$ outputs $B\cup A$.  We present $\dec$ in Algorithm~\ref{algo:dec}.
 
 \begin{algorithm}[H] 
   \caption{Variables Shared by encoder $\enc$ and decoder $\dec$.} \label{algo:para}
   \begin{algorithmic}[1] 
-    \State $m\leftarrow \lfloor \sqrt{n \log\frac{1}{\delta}} \rfloor$ \Comment{We take the floor whenever a parameter is supposed to be an integer}
+    \State $m\leftarrow \lfloor \sqrt{n \log\frac{1}{\delta}} \rfloor$ 
     \State $K\leftarrow \lfloor \frac{1}{16}\log \frac{1}{\delta} \rfloor$
     \State $R\leftarrow \lfloor K\log(m/4K) \rfloor$
     \For {$r = 0, \ldots, R$}
@@ -104,91 +78,59 @@ We present $\dec$ in Algorithm~\ref{algo:dec}.
 
 \subsection{Analysis}
 
-We have three random objects here: 
-(1) Set $S$, which is a uniform random set of size $m$; 
-(2) The random source used by the $\ur^\subset$-protocol, denoted by $X$; 
-(3) Random permutation $\pi$. 
-They are independent. 
-We do the analysis conditioned on $S$. 
-Namely, the following arguments apply for any fixed $S$. 
+We have two random objects in our encoding/decoding scheme: (1) the random source used by $\mathcal{P}$, denoted by $X$, and (2) the random permutation $\pi$. These are independent.
 
-First, we can prove that $\dec(\enc(S))=S$. 
-That is, no matter the randomness in $X$ and $\pi$, $\dec$ will always decode $S$ successfully. 
-It is because $\enc$ and $\dec$ share $X$ and $\pi$, so that $\dec$ essentially simulates $\enc$. 
-We formally prove this by induction in Lemma~\ref{lemma:zero-fail-prob}. 
+First, we can prove that $\dec(\enc(S))=S$.  That is, for any fixing of the randomness in $X$ and $\pi$, $\dec$ will always decode $S$ successfully.  It is because $\enc$ and $\dec$ share $X$ and $\pi$, so that $\dec$ essentially simulates $\enc$.  We formally prove this by induction in Lemma~\ref{lemma:zero-fail-prob}.
 
-Now our goal is to prove that by using the $\ur^\subset$-protocol, the number of bits that $\enc$ saves is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$. 
-Intuitively, it is equivalent to prove the number of elements that $\enc$ saves is $\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)} )$.
+Now our goal is to prove that by using the $\ur^\subset$-protocol, the number of bits that $\enc$ saves in expectation over the naive $\lceil\log(^n_m)\rceil$-bit encoding is $\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$ bits.  Intuitively, it is equivalent to prove the number of elements that $\enc$ saves is $\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)} )$.
 We formalize this in Lemma~\ref{lemma:bits-saving}. 
 Note that $\enc$ also needs to output $b$ (i.e., whether the $\query$ succeeds on $R$ rounds), which takes $R$ bits. 
-By setting of parameters we can afford the loss of $R$ bits. 
-Thus it is sufficient to prove $\E(|B|)=|S|-\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$. 
+By our setting of parameters, we can afford the loss of $R$ bits.  Thus it is sufficient to prove $\E|B|=|S|-\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$. 
 
 We have $|S|-|B|=\sum_{r=1}^{R}b_r$. 
-In Lemma~\ref{lemma:mutual-entropy-vs-fail-prob}, we prove the probability that $\query$ fails on round $r$ is upper bounded by $\frac{I(X;S_{r-1})+1}{\log \frac{1}{\delta}}$, where $I(X;S_{r-1})$ is the mutual information between $X$ and $S_{r-1}$. 
+In Lemma~\ref{lem:information}, we prove the probability that $\query$ fails on round $r$ is upper bounded by $\frac{I(X;S_{r-1})+1}{\log \frac{1}{\delta}}$, where $I(X;S_{r-1})$ is the mutual information between $X$ and $S_{r-1}$. 
 Furthermore, we will show in Lemma~\ref{lemma:mutual-entropy-bound} that $I(X;S_{r-1})$ is upper bounded by $O(K)$.
-By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omega(R)=\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$.
+By our setting of parameters, we have $\E b_r=\Omega(1)$ and thus $\E(|S|-|B|)=\Omega(R)=\Omega(\log \frac{1}{\delta}\log \frac{n}{\log (1/\delta)})$.
  
 \begin{lemma}\label{lemma:zero-fail-prob}
   $\dec(\enc(S))=S$.
 \end{lemma}
-
 \begin{proof}
-  We claim that for $r=0,\ldots, R$, $\{S_r, C_r\}$ is a partition of $S$ ($S_r$ is in \enc, and $C_r$ is in \dec). We prove the claim by induction on $r$.
+  We claim that for $r=0,\ldots, R$, $\{S_r, C_r\}$ is a partition of $S$ ($S_r$ is defined in Algorithm~\ref{algo:enc}, and $C_r$ in Algorithm~\ref{algo:dec}). We prove the claim by induction on $r$. Our base case is $r=0$, for which the claim holds since $S_0 = S$, $C_0 = \emptyset$.
   
-  The basis case is $r=0$. $S_0=S$ and $C_0=\emptyset$. The claim is true.
+  Assume the claim holds for $r$ ($0\le r < R$), and we consider round $r+1$.  On round $r$, because $S\backslash S_{r-1}=C_{r-1}$, the index $s_r$ obtained by both \enc and \dec are the same.  Initially $S_r=S_{r-1}$ and $C_r=C_{r-1}$, and so $\{S_r,C_r\}$ is a partition of $S$.  If $s_r$ is a valid sample (i.e. $s_r\in S_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $S_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{S_r, C_r\}$ remains a partition of $S$. Next, \enc repeats removing the $a$ from $S_r$ with the smallest $\pi_a$ value until $|S_r|=n_r$. Symmetrically, \dec repeats inserting the $a$ into $C_r$ with the smallest $\pi_a$ value among $a\in B\backslash C_r$, until $|C_r|=|S|-n_r$. In the end we have $|S_r|+|C_r|=|S|$, so \enc and \dec execute repetition the same number of times.  Moreover, we can prove that during the same iteration of this repreated insertion, the element removed from $S_r$ is exactly the same element inserted to $C_r$.  This is because in the beginning of a repetition $\{S_r, C_r\}$ is a partition of $S$.  We have $B\backslash C_r\subseteq S\backslash C_r=S_r$. Let $a^*$ denote $a\in S_r$ that minimizes $\pi_a$.  Then $a^*\in B\backslash C_r\subseteq S_r$ (since $a^*$ will be removed from $S_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $\pi_{a^*}$ is also the smallest among $\{\pi_a : a\in B\backslash C_r\}$.  Thus both $\enc$ and $\dec$ will take $a^{*}$ (for \enc, to remove from $S_r$, and for \dec, to insert into $C_r$).  Therefore, $\{S_r, C_r\}$ remains a partition of $S$.
   
-  Assume by induction the claim holds for $r$ ($0\le r < R$), and we consider $r+1$. 
-  On round $r$, because $S\backslash S_{r-1}=C_{r-1}$, $s_r$ obtained in both sides are the same. 
-  Initially $S_r=S_{r-1}$ and $C_r=C_{r-1}$, and so $\{S_r,C_r\}$ is a partition of $S$. 
-  If $s_r$ is a valid sample (i.e. $s_r\in S_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $S_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{S_r, C_r\}$ remains a partition of $S$. 
-  
-  After that, \enc repeats removing $a$ from $S_r$ with smallest $\pi_a$ until $|S_r|=n_r$. 
-  Symmetrically, \dec repeats inserting $a$ into $C_r$ with smallest $\pi_a$ among $a\in B\backslash C_r$, until $|C_r|=|S|-n_r$. 
-  In the end we have $|S_r|+|C_r|=|S|$, so \enc and \dec execute repetition the same number of times. 
-  Moreover, we can prove that during the same repetition the element removed from $S_r$ is exactly the same element inserted to $C_r$. 
-  This is because in the beginning of a repetition $\{S_r, C_r\}$ is a partition of $S$. 
-  We have $B\backslash C_r\subseteq S\backslash C_r=S_r$. Let $a^*$ denote  $a\in S_r$ that minimizes $\pi_a$. 
-  We can prove that $a^*\in B\backslash C_r\subseteq S_r$ (since $a^*$ will be removed from $S_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $\pi_{a^*}$ is also the smallest among $\{\pi_a|a\in B\backslash C_r\}$. 
-  Thus in the end of the repetition, both $\enc$ and $\dec$ will take $a^{*}$ to update (remove from $S_r$, insert into $C_r$). 
-  Therefore, $\{S_r, C_r\}$ remains a partition of $S$.
-  
-  Given the fact that $\{S_r, C_r\}$ is a partition of $S$, $s_r$ are the same in \enc and \dec. 
-  Furthermore, $A=\{s_r|b_r=1,r=1,\ldots, R\}$ are the same in \enc and \dec.
-  We know $A\subseteq S$. 
-  Since \enc outputs $S\backslash A$, and \dec outputs $(S\backslash A)\cup A$, we have $\dec(\enc(S))=S$. 
+  Given the fact that $\{S_r, C_r\}$ is a partition of $S$, the $s_r$ are the same in \enc and \dec.  Furthermore, $A=\{s_r : b_r=1,r=1,\ldots, R\}$ are the same in \enc and \dec.  We know $A\subseteq S$.  Since \enc outputs $S\backslash A$, and \dec outputs $(S\backslash A)\cup A$, we have $\dec(\enc(S))=S$.
 \end{proof}
 
 \begin{lemma} \label{lemma:bits-saving}
-  Let $W\in \mathbb{N}$ be a random variable, and $W\le m$. 
-  Moreover, $\E(W)\le m-d$. 
-  We have $\E(\log {n \choose m}-\log {n \choose W})\ge d \log (\frac{n}{m}-1)$.
+Let $W\in \mathbb{N}$ be a random variable with $W\le m$ and $\E W\le m-d$. Then $\E(\log {n \choose m}-\log {n \choose W})\ge d \log (\frac{n}{m}-1)$.
 \end{lemma}
 
 \begin{proof}
-  \begin{align}
+  \begin{align*}
   \log {n \choose m}-\log {n \choose W}
   &= \log \frac{n!/(m!(n-m)!)}{n!/(W!(n-W)!)} \\
   &= \sum_{i=1}^{m-W}\log \frac{n-W-i+1}{m-i+1} \\
   &\ge (m-W)\cdot \log \frac{n-W}{m} \\
   &\ge (m-W)\cdot \log \frac{n-m}{m}
-  \end{align}
+  \end{align*}
   
-  Taking expectation on both sides, we get $\E(\log {n \choose m}-\log {n \choose W})\ge d \log (\frac{n}{m}-1)$. 
+  Taking expectation on both sides, we have $\E(\log {n \choose m}-\log {n \choose W})\ge d \log (\frac{n}{m}-1)$. 
 \end{proof}
 
-\begin{lemma}\label{lemma:mutual-entropy-vs-fail-prob}
-  Consider $f$: $\{0,1\}^b\times \{0,1\}^q\rightarrow \{0,1\}$ and $X\in\{0,1\}^b$ uniformly random. If $\forall y\in \{0,1\}^q,\ \Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any random variable $Y$ supported on $\{0,1\}^q$,
-  \begin{align}
-  \Pr(f(X,Y)=1)\le \frac{I(X;Y)+1}{\log \frac{1}{\delta}},
-  \end{align}
-  where $I(X;Y)$ is the mutual information (in bits) between $X$ and $Y$.
-\end{lemma}
-
+\noindent \textbf{Lemma~\ref{lem:information} (restated).}
+  Consider $f$: $\{0,1\}^b\times \{0,1\}^q\rightarrow \{0,1\}$ and $X\in\{0,1\}^b$ uniformly random. If $\forall y\in \{0,1\}^q,\ \Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any r.v.\ $Y$ supported on $\{0,1\}^q$,
+$$
+  \Pr(f(X,Y)=1)\le \frac{I(X;Y)+1}{\log \frac{1}{\delta}} ,
+$$
+  where $I(X;Y)$ is the mutual information between $X$ and $Y$.
 \begin{proof}
-  It is equivalent to prove $I(X;Y)\ge \E(f(X,Y))\cdot \log\frac{1}{\delta}-1$. By definition of mutual entropy, $I(X;Y)=H(X)-H(X|Y)$ where $H(X)=b$ and $H(X|Y)\le 1+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\delta})=b+1-\E(f(X,Y))\cdot \log\frac{1}{\delta}$.
-  The upper bound for $H(X|Y)$ is obtained by considering the following one-way communication problem: Alice obtains both $X$ and $Y$ while Bob only gets $Y$, what is the (minimum) expected number of bits that Alice sends to Bob so that Bob can recover $X$? 
-  Any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: first Alice sends Bob $f(X,Y)$ (taking $1$ bit); and then if $f(X,Y)=0$ Alice sends $X$ directly (taking $b$ bits), otherwise, $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^b)=b-\log\frac{1}{\delta}$ bits).  
+  It is equivalent to prove 
+$$I(X;Y)\ge \E(f(X,Y))\cdot \log\frac{1}{\delta}-1 .$$
+By definition of mutual entropy $I(X;Y)=H(X)-H(X|Y)$, where $H(X)=b$ and 
+$$H(X|Y)\le 1+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\delta})=b+1-\E(f(X,Y))\cdot \log\frac{1}{\delta} .$$
+  The upper bound for $H(X|Y)$ is obtained by considering the following one-way communication problem: Alice knows both $X$ and $Y$ while Bob only knows $Y$, and Alice must send a single message to Bob so that Bob can recover $X$. The expected message length in an optimal protocol is exactly $H(X|Y)$.  Thus, any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: first Alice sends Bob $f(X,Y)$ (taking $1$ bit). Then if $f(X,Y)=0$, Alice sends $X$ directly (taking $b$ bits). Otherwise, when $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^b)=b-\log\frac{1}{\delta}$ bits).  
 \end{proof}
 
 \begin{corollary}\label{corollary:sampler-failure}
@@ -200,15 +142,14 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
 \end{lemma}
 
 \begin{proof}
-  $I(X;S_r)=H(S_r)-H(S_r|X)$. Since $|S_r|=n_r$ and $S_r\subseteq S$ where $|S|=m$, $H(S_r)\le \log {m \choose n_r}$. Now we want to lower bound $H(S_r|X)$. By definition of conditional entropy, $H(S_r|X)=\sum_x{p_x\cdot H(S_r|X=x)}$. We fix an arbitrary $x$. If we can prove that for any $T\subseteq S$ where $|T|=n_r$, $\Pr(S_r=T|X=x)\le p$, then by definition of entropy we have $H(S_r|X=x)\ge\log\frac{1}{p}$. In fact, for any fixed $T$, we have
+  $I(X;S_r)=H(S_r)-H(S_r|X)$. Since $|S_r|=n_r$ with $S_r\subseteq S$, $H(S_r)\le \log {m \choose n_r}$. Now we want to lower bound $H(S_r|X)$. By definition of conditional entropy, $H(S_r|X)=\sum_x{p_x\cdot H(S_r|X=x)}$. We fix an arbitrary $x$. If we can prove that for any $T\subseteq S$ where $|T|=n_r$, $\Pr(S_r=T|X=x)\le p$, then by definition of entropy we have $H(S_r|X=x)\ge\log\frac{1}{p}$. In fact, for any fixed $T$, we have
   
   \begin{align}
     \Pr(S_r=T|X=x)\le \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}},
   \end{align}
+   because on round $i$ ($1\le i \le r$), $\enc$ removes $n_{i-1}-n_i$ elements from $S_{i-1}$ to obtain $S_i$. Conditioned on the event that $S_{i-1}\supseteq T$, the probability that $S_i\supseteq T$ is at most ${{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}/{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}$, where the equation achieves when $s_i\in S_{i-1}\backslash T$, and $\enc$ takes a uniformly random subset of $S_{i-1}\backslash \{s_i\}$ of size $n_{i-1}-n_i-1$, so that the subset does not intersect with $T$.
   
-  because on round $i$ ($1\le i \le r$), $\enc$ removes $n_{i-1}-n_i$ elements from $S_{i-1}$ to get $S_i$. Conditioned on the event that $S_{i-1}\supseteq T$, the probability that $S_i\supseteq T$ is at most ${{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}/{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}$, where the equation achieves when $s_i\in S_{i-1}\backslash T$, and $\enc$ takes a uniformly random subset of $S_{i-1}\backslash \{s_i\}$ of size $n_{i-1}-n_i-1$, so that the subset does not intersect with $T$.
-  
-  For notation simplicity, let $n^{\underline{k}}$ denote $n\cdot (n-1)\ldots (n-k+1)$. We have 
+  For notational simplicity, let $n^{\underline{k}}$ denote $n\cdot (n-1)\ldots (n-k+1)$. We have 
   \begin{align}
     \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}}
     =\prod_{i=1}^{r}\frac{(n_{i-1}-n_r-1)!n_i!}{(n_{i-1}-1)!(n_i-n_r)!}
@@ -229,12 +170,15 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
     \prod_{i=1}^{r} \frac{n_{i-1}}{n_{i-1}-n_r}
     \le\prod_{i=1}^{r} \frac{1}{1-\frac{m\cdot 2^{-r/K}}{m\cdot 2^{-(i-1)/K}-1}}
     \le\prod_{i=1}^{r} \frac{1}{1-\frac{m\cdot 2^{-r/K}+1}{m\cdot 2^{-(i-1)/K}}}
-    =\prod_{j=1}^{r} \frac{1}{1-2^{-j/K}-2^{\frac{r-j}{K}}/m}.
+    =\prod_{j=1}^{r} \frac{1}{1-2^{-j/K}-\frac{2^{\frac{r-j}{K}}}m}.
   \end{align}
   
-  By setting of parameters $2^{r/K}/m \le 2^{R/K}/m \le \frac{1}{4K}$.
-  Therefore, $\frac{1}{1-2^{-j/K}-2^{\frac{r-j}{K}}/m}\le \frac{1}{1-(1+\frac{1}{4K})2^{-j/K}}$ for $j=1,\ldots,r$.
-  First, we can prove $\frac{1}{1-(1+\frac{1}{4K})2^{-1/K}}\le 2K \le 2^K$. 
+  By our setting of parameters 
+$$\frac{2^{\frac rK}}m \le \frac{2^{\frac RK}}m \le \frac{1}{4K} .$$
+  Therefore, 
+$$\frac{1}{1-2^{-\frac jK}-\frac{2^{\frac{r-j}{K}}}m}\le \frac{1}{1-(1+\frac{1}{4K})2^{-\frac jK}}$$ 
+for $j\in[r]$. First, we can prove 
+$$\frac{1}{1-(1+\frac{1}{4K})2^{-\frac 1K}}\le 2K \le 2^K .$$
   Also by Taylor expansion we can obtain $1+\frac{1}{4K}\le 2^{-1/K}$, and thus $\frac{1}{1-(1+\frac{1}{4K})2^{-j/K}}\le \frac{1}{1-2^{(1-j)/K}}$, for $j=2,\ldots, r$. 
   By Lemma~\ref{lemma:Pochhammer}, we have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. 
   
@@ -282,5 +226,5 @@ By setting of parameters we have $\E(b_r)=\Omega(1)$ and thus $\E(|S|-|B|)=\Omeg
   By the setting of parameters (see Algorithm~\ref{algo:para}) we have $\E(b_r)\ge \frac{39}{64}$. Therefore, $\E(|B|)\le |S|-\frac{39}{64}R$. 
   By Lemma~\ref{lemma:bits-saving}, $\log (^n_m)-\E(\log (^n_{|B|}))\ge \frac{39}{64}R\cdot \log (\frac{n}{m}-1) \ge \frac{1}{2}R\log (\frac{n}{\log(1/\delta)})$. 
   Furthermore, $\frac{1}{6}R\log \frac{n}{\log (1/\delta)} \ge R$.
-  Combining together we get $\s \ge \frac{R}{3}\log \frac{n}{\log(1/\delta)} -(\log n + 1)  =\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$.
+  Thus we obtain $\s \ge \frac{R}{3}\log \frac{n}{\log(1/\delta)} -(\log n + 1)  =\Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$.
 \end{proof}

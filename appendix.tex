@@ -1,3 +1,63 @@
 \section{Appendix}
-In \cite[Proposition 1]{JowhariST11} it is shown that $\randcom^{\rightarrow,pub}_\delta(\ur_k) = O(\min\{n,t\log^2 n\})$ for $t = \max\{k,\log(1/\delta)\}$. Here we show that a minor modification of their argument in fact shows the correct complexity $\randcom^{\rightarrow,pub}_\delta(\ur_k) = O(\min\{n,t\log^2(n/t)\})$, which is optimal up to a constant factor for the full range of $n,k,\delta$ given our lower bound.
-\TODO{finish this}
+
+\subsection{A tight upper bound for $\randcom^{\rightarrow,pub}_\delta(\ur_k)$}
+
+In \cite[Proposition 1]{JowhariST11} it is shown that $\randcom^{\rightarrow,pub}_\delta(\ur_k) = O(\min\{n,t\log^2 n\})$ for $t = \max\{k,\log(1/\delta)\}$. Here we show that a minor modification of their protocol in fact shows the correct complexity $\randcom^{\rightarrow,pub}_\delta(\ur_k) = O(\min\{n,t\log^2(n/t)\})$, which given our new lower bound, is optimal up to a constant factor for the full range of $n,k,\delta$ as long as $\delta$ is bounded away from $1$.
+
+Recall Alice and Bob receive $x, y\in\{0,1\}^n$, respectively, and share a public random string. Alice must send a single message $M$ to Bob, from which Bob must recover $\min\{k, \|x-y\|_0\}$ indices $i\in[n]$ for which $x_i\neq y_i$. Bob is allowed to fail with probability $\delta$. The fact that $\randcom^{\rightarrow,pub}_\delta(\ur_k) \le n$ is obvious: Alice can simply send the message $M = x$, and Bob can then succeed with failure probability $0$. We thus now show $\randcom^{\rightarrow,pub}_{e^{-ck}}(\ur_k) \le k\log^2(n/k)$ for some constant $c>0$, which completes the proof of the upper bound. We assume $k\le n/2$ (otherwise, Alice sends $x$ explicitly).
+
+As mentioned, the protocol we describe is nearly identical to one in \cite{JowhariST11} (see also \cite{CormodeF14}). We will describe the new protocol here, then point out the two minor modifications that improve the $O(k\log^2 n)$ bound to $O(k\log^2(n/k))$ in Remark~\ref{rem:recov}. We first need the following lemma.
+
+\begin{lemma}\label{lem:sparse-recov}
+Let $\F_q$ be a finite field and $n>1$ an integer. Then for any $1\le k\le \frac n2$, there exists $\Pi_k\in \F_q^{m\times n}$ for $m = O(k\log_q(n/k))$ s.t.\ for any $w\neq w'\in\F_q^n$ with $\|w\|_0, \|w'\|_0 \le k$, $\Pi_k w \neq \Pi_k w'$.
+\end{lemma}
+\begin{proof}
+The proof is via the probabilistic method. $\Pi_k w = \Pi_k w'$ iff $\Pi_k (w - w') = 0$. Note $v = w-w'$ has $\|v\|_0 \le 2k$. Thus it suffices to show that such a $\Pi_k$ exists with no $(2k)$-sparse vector in its kernel. The number of vectors $v\in\F_q^n$ with $\|v_0\| \le 2k$ is at most $\binom{n}{2k}\cdot q^{2k}$. For any fixed $v$, $\Pr(\Pi_k v = 0) = q^{-m}$. Thus 
+$$\Pr(\exists v, \|v\|_0 \le 2k: \Pi_k v = 0) \le \binom{n}{2k}\cdot q^{2k} \cdot q^{-m}$$ 
+by a union bound. The above is strictly less than $1$ for $m > 2k + \log_q\binom{n}{2k}$, yielding the claim.
+\end{proof}
+
+\begin{corollary}\label{cor:ksparse}
+Let $\F_q$ be a finite field and $n>1$ an integer. Then for any $1\le k\le \frac n2$, there exists $\Pi_k\in \F_q^{m\times n}$ for $m = O(k\log_q(n/k))$ together with an algorithm $\mathcal{R}$ such that for any $w\in\F_q^n$ with $\|w\|_0 \le k$, $\mathcal{R}(\Pi_k w) = w$.
+\end{corollary}
+\begin{proof}
+Given Lemma~\ref{lem:sparse-recov}, a simple such $\mathcal{R}$ is as follows. Given some $y = \Pi_k w^*$ with $\|w^*\|_0 \le k$, $\mathcal{R}$ loops over all $w$ in $\F_q^n$ with $\|w\|_0 \le k$ and outputs the first one it finds for which $\Pi_k w = y$.
+\end{proof}
+
+The protocol for $\ur_k$ is now as follows. Alice and Bob use public randomness to pick commonly known random functions $h_0,\ldots,h_L:[n]\rightarrow\{0,1\}$ for $L = \lfloor\log_2(n/k)\rfloor$, such that for any $i\in[n]$ and for any $j$, $\Pr(h_j(i) = 1) = 2^{-j}$. They also agree on a matrix $\Pi_{16k}$ and $\mathcal{R}$ as described in Corollary~\ref{cor:ksparse} for a sufficiently large constant $C>0$ to be determined later, with $q = 3$. Thus $\Pi_{16k}$ has $m = O(k\log(n/k))$ rows. Alice then computes $v_j = \Pi_{16k} x|_{h_j^{-1}(1)}$ for $j=0,\ldots,L$ where $v_j\in\F_q^m$, and her message to Bob is $M = (v_0,\ldots,v_L)$. For $S\subseteq [n]$ and $x$ an $n$-dimensional vector, $x|_S$ denotes the $n$-dimensional vector with $(x|_S)_i = x_i$ for $i\in S$, and $(x|_S)_i = 0$ for $i\notin S$. Note Alice's message $M$ is $O(k\log^2(n/k))$ bits, as desired. Bob then executes the following algorithm and outputs the returned values.
+
+\begin{algorithm}[H] 
+  \caption{Bob's algorithm in the $\ur_k$ protocol.} \label{algo:bob-protocol}
+  \begin{algorithmic}[1]
+    \Procedure{Bob}{$v_0,\ldots,v_L$}
+    \For {$j=L,L-1,\ldots,0$}
+      \State $v_j \leftarrow v_j - \Pi_{16k} y|_{h_j^{-1}(1)}$
+      \State $w_j\leftarrow \mathcal{R}(v_j)$
+      \If {$\|w_j\|_0 \ge k$ or $j=0$}
+      \State \Return an arbitrary $\min\{k, \|w_j\|_0\}$ elements from $\supp(w_j)$
+      \EndIf
+    \EndFor
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+The correctness analysis is then as follows, which is nearly the same as the $\ell_0$-sampler of \cite{JowhariST11}. If Alice's input is $x$ and Bob's is $y$, let $a = x-y \in \{-1,0,1\}^n$, so that $a$ can be viewed as an element of $\F_3^n$. Also let $a_j = a|_{h_j^{-1}(1)}$. Then $\E \|v_j\|_0 = \|a\|_0\cdot 2^{-j}$, and since $0\le \|a\|_0 \le n$, there either (1) exists a unique $0\le j^*\le L$ such that $2k\le \E\|a_j\|_0\cdot 2^{-j^*}< 4k$, or (2) $\|a\|_0 < 2k$ (in which case we define $j^* = 0$). Let $\mathcal{E}$ be the event that $\|a_j\|_0 \le 16k$ simultaneously for all $j\le j^*$. Let $\mathcal{F}$ be the event that {\it either} we are in case (2), or we are in case (1) and $\|a_{j^*}\|_0 \ge k$ holds. Note that conditioned on $\mathcal{E}, \mathcal{F}$ both occurring, Bob succeeds by Corollary~\ref{cor:ksparse}.
+
+We now just need to show $\Pr(\neg\mathcal{E} \wedge \neg\mathcal{F}) < e^{-\Omega(k)}$. We use the union bound. First, consider $\mathcal{F}$. If $j^* = 0$, then $\Pr(\neg\mathcal{F}) = 0$. If $j^*\neq 0$, then $\Pr(\neg\mathcal{F}) \le \Pr(\|a_{j^*}\|_0 < \frac 12 \cdot\E\|a_{j^*}\|_0)$, which is $e^{-\Omega(k)}$ by the Chernoff bound since $\E\|a_{j^*}\|_0 = \Theta(k)$. Next we bound $\Pr(\neg \mathcal{E})$. For $j\ge j^*$, we know $\E\|a_j\|_0 \le 4k/2^{j-j^*}$. Thus, letting $\mu$ denote $\E\|a_j\|_0$, 
+\begin{equation}
+\Pr(\|a_j\|_0 > 16k) < \left(\frac{e^{\frac{16k}{\mu} - 1}}{(\frac{16k}{\mu})^{\frac{16k}{\mu}}}\right)^\mu < \left(\frac{16k}{\mu}\right)^{-\Omega(k)} < (e^{-Ck})^{j-j^*}\label{eqn:geometric}
+\end{equation}
+for some constant $C>0$ by the Chernoff bound and the fact that $16k/\mu \ge 4 > e$. Recall that the Chernoff bound states that for $X$ a sum of independent Bernoullis,
+$$
+\forall \delta > 0,\ \Pr(X > (1+\delta) \E X) < \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^{\E X} .
+$$
+Then by a union bound over $j\ge j^*$ and applying \eqref{eqn:geometric},
+$$
+\Pr(\neg \mathcal{E}) = \Pr(\exists j\ge j^*: \|a_j\|_0 > 16k) < \sum_{j=j^*}^\infty (e^{-Ck})^{j-j^*} = O(e^{-Ck}) .
+$$
+
+\begin{remark}\label{rem:recov}
+\textup{
+As already mentioned, the protocol given above and the one described in \cite{JowhariST11} using $O(k\log^2 n)$ bits differ in minor points. First: the protocol there used $\lfloor\log_2 n\rfloor$ different hash functions $h_j$, but as seen above, only $\lfloor \log_2(n/k)\rfloor$ are needed. This already improves one $\log n$ factor to $\log(n/k)$. The other improvement comes from replacing the $k$-sparse recovery structure with $2k$ rows used in \cite{JowhariST11} with our Corollary~\ref{cor:ksparse}. Note the matrix $\Pi_k$ in our corollary has even {\it more} rows, but the key point is that the bit complexity is improved. Whereas using a $k$-sparse recovery scheme as described in \cite{JowhariST11} would use $2k$ linear measurements of a $k$-sparse vector $w\in\{-1,0,1\}^n$ with $\log n$ bits per measurement (for a total of $O(k\log n)$ bits), we use $O(k\log(n/k))$ measurements with only $O(1)$ bits per measurement. The key insight is that we can work over $\F_3^n$ instead of $\R^n$ when the entries of $w$ are in $\{-1,0,1\}$, which leads to our slight improvement.
+}
+\end{remark}

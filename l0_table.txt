@@ -1,0 +1,46 @@
+For each problem/paper, figure out what they need. To get failure probability 1/3, they need l0-sampling_k with what delta? What k? Do they really need l0-sampling or did it suffice to have any element of the support? Or did they need another distribution?
+
+connectivity [AGM12a]: suppfind_1, delta = .01
+
+k-connectivity [AGM12a]: suppfind_1, says delta = .01 but it seems we need delta = O(1/lg k) (???)
+
+bipartiteness [AGM12a]: suppfind_1, delta = .01
+
+minimum spanning tree [AGM12a]: suppfind_1, delta ~ epsilon/lg(W) where all edge weights are in [W] and we want the approx MST weight up to 1+epsilon
+
+subgraph counting [AGM12b]: (ell_0)_k for k ~ eps^{-2} lg(1/delta), and failure prob. delta
+
+minimum cut [AGM12b]
+
+cut-sparsifier [AGM12b]
+
+spanner computation [AGM12b]
+
+spectral sparsifiers [AGM13]
+
+maximal matching [CCHM15]
+
+maximum matching [AGM12a]: needs multiple passes
+
+maximum matching [BS15]
+
+maximum matching [Kon15]
+
+maximum matching [AKLY16]
+
+maximum matching [CCE+16]
+
+maximum matching [AKL17]
+
+vertex cover [CCHM15]
+vertex cover [CCE+ 16]
+hitting set [CCE+ 16]
+b-matching [CCE+ 16]
+disjoint paths [CCE+ 16]
+k-colorable subgraph [CCE+ 16]
+several other maximum subgraph problems [CCE+ 16]
+densest subgraph [BHNT15]
+densest subgraph [MTVV15]
+densest subgraph [EHW16]
+vertex and hyperedge connectivity [GMT15]
+graph degeneracy [FT16]
