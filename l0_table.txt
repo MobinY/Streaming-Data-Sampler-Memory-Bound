@@ -43,4 +43,5 @@ densest subgraph [BHNT15]
 densest subgraph [MTVV15]
 densest subgraph [EHW16]
 vertex and hyperedge connectivity [GMT15]
-graph degeneracy [FT16]
+
+graph degeneracy [FT16]: (ell_0)_k for k ~ eps^{-2} n lg(n) with delta = n^{-Omega(1)} (to get failure probability n^{-Omega(1)}. Note that universe size here is {n \choose 2})
