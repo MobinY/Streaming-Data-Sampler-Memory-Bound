@@ -147,7 +147,7 @@ $$H(X|Y)\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\d
   Next we can prove 
   
   \begin{align}
-    \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}} \le \frac{2^{6K}}{{m \choose n_r}}. \label{formula:prod-bound}
+    \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}} \le \frac{2^{6K}}{{m \choose n_r}}. \label{eqn:prod-bound}
   \end{align}
     
   For notational simplicity, let $n^{\underline{k}}$ denote $n\cdot (n-1)\ldots (n-k+1)$. We have 
@@ -164,7 +164,7 @@ $$H(X|Y)\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\d
     =\frac{n_r^{\underline{n_r}}}{n_0^{\underline{n_r}}}
     =\frac{n_r!(n_0-n_r)!}{n_0!}=\frac{1}{{n_0 \choose n_r}}
     =\frac{1}{{m \choose n_r}}.
-    \label{formula:telescoping}
+    \label{eqn:telescoping}
   \end{align}
   
   Moreover, 
@@ -173,7 +173,7 @@ $$H(X|Y)\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\d
     \le\prod_{i=1}^{r} \frac{1}{1-\frac{m\cdot 2^{-r/K}}{m\cdot 2^{-(i-1)/K}-1}}
     \le\prod_{i=1}^{r} \frac{1}{1-\frac{m\cdot 2^{-r/K}+1}{m\cdot 2^{-(i-1)/K}}}
     =\prod_{j=1}^{r} \frac{1}{1-2^{-j/K}-\frac{2^{\frac{r-j}{K}}}m}.
-    \label{formula:bound-with-floor}
+    \label{eqn:bound-with-floor}
   \end{align}
   
   By our setting of parameters 
@@ -184,7 +184,7 @@ $$H(X|Y)\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\d
   
   By Taylor series $2^{1/K} = \sum_{n=0}^{\infty}{\frac{(\ln 2 )^n}{n!K^n}} >1+\frac{\ln 2}{K}>1+\frac{1}{4K}$, and thus $\frac{1}{1-(1+\frac{1}{4K})2^{-j/K}}\le \frac{1}{1-2^{(1-j)/K}}$, for $j=2,\ldots, r$. For $j=1$, we have $\frac{1}{1-(1+\frac{1}{4K})2^{-\frac 1K}} \le 2^K$.
   
-  By Lemma~\ref{lemma:Pochhammer}, we have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. Therefore, the right hand side of Formula~\ref{formula:bound-with-floor} is upper bounded by $2^{6K}$. Together with Formula~\ref{formula:telescoping}, we prove Formula~\ref{formula:prod-bound} holds.  
+  By Lemma~\ref{lemma:Pochhammer}, we have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. Therefore, the right hand side of \eqref{eqn:bound-with-floor} is upper bounded by $2^{6K}$. Together with \eqref{eqn:telescoping}, we prove \eqref{eqn:prod-bound} holds.  
   
   Finally, let $p={2^{6K}}/{{m\choose n_r}}$, we have $\Pr(S_r=T|X=x)\le p$ and thus $H(S_r|X=x)\ge \log\frac{1}{p}=\log{{m\choose n_r}}-6K$. Therefore, $H(S_r|X)\ge \log{{m\choose n_r}}-6K$ and so $I(X;S_r)=H(S_r)-H(S_r|X)\le 6K$.  
 \end{proof}
