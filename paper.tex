@@ -4,7 +4,6 @@
 \usepackage{algorithm,algpseudocode,float}
 \usepackage{xspace}
 \usepackage[usenames]{color}
-%\usepackage{hyperref}
 \newcommand{\TODO}[1]{\textcolor{red}{\textbf{todo:} \textit{#1}}}
 
 \newcommand{\supp}{\mathop{support}}
@@ -33,7 +32,6 @@
 \newcommand{\ur}{\mathbf{UR}\xspace}
 \newcommand{\randcom}{\mathbf{R}}
 \newcommand{\findup}[1]{\textsf{FindDuplicate}$({#1})$\xspace}
-%\newcommand{\findupk}[1]{\textsf{FindDuplicate}$_k({#1})$\xspace}
 
 \title{Optimal lower bounds for universal relation, samplers, and finding duplicates}
 \author{Jelani Nelson\thanks{Harvard University. \texttt{minilek@seas.harvard.edu}. Supported by NSF grant IIS-1447471 and
@@ -54,26 +52,17 @@ In the communication problem $\ur$ ({\em universal relation}) \cite{KarchmerRW95
 
 As a corollary, we obtain optimal lower bounds for sampling problems in strict turnstile streams, as well as for the problem of finding duplicates in a stream.  Specifically, consider a high-dimensional vector $x\in\R^n$ receiving streaming updates of the form ``$x_i\leftarrow x_i + \Delta$'', and in response to a query we must with probability $1-\delta$ recover {\em any} element $i\in\supp(x) = \{j : x_j \neq 0\}$. Our lower bound implies the first optimal $\Omega(\log(1/\delta)\log^2 n)$-bit space lower bound for any solution to this problem as long as $\delta > 2^{-n^{.99}}$, matching an upper bound of \cite{JowhariST11}. Our result thus implies optimal lower bounds for the so-called ``$\ell_p$-sampling'' problem for any $0\le p < 2$ in the strict turnstile model, as well as variations in which a query response must include $\min\{k, |\supp(x)|\}$ elements from $\supp(x)$.  Our lower bounds also do not need to use large weights, and hold even if it is promised that $x\in\{0,1\}^n$ at all points in the stream.
 
-
-% In the $\ell_0$-sampler turnstile streaming problem, a high-dimensional vector $x\in\R^n$ receives coordinate-wise updates of the form ``$x_i\leftarrow x_i + \Delta$'', and we must  maintain a {\em sketch} $\sk(x)\in\{0,1\}^S$ so that
-% \begin{enumerate}
-% \item $S$, the memory footprint of the sketch in bits, is as small as possible, and
-% \item given access to only $\sk(x)$, one can recover an index $i\in[n]$ such that with probability $1-\delta$, $i$ is a uniformly random element in $\supp(x) = \{i : x_i\neq 0\}$.
-% \end{enumerate}
-% We prove that any such sketching algorithm requires $S = \Omega(\log^2 n\cdot \log(1/\delta))$ bits for any $2^{-n^{.99}} < \delta < .1$, which is nearly the full range of $\delta$ of interest and is optimal in this range \cite{JowhariST11}. Our lower bound holds even if the algorithm is allowed to output {\em any} element of the support, and not necessarily a random one, which is actually all that is needed for almost all known applications of $\ell_0$-sampling to dynamic graph streams. This furthermore means that our lower bound also holds against $\ell_p$-sampling for any $p$, and is optimal for $0<p<2$ for constant error parameter $\eps$ given the upper bound of \cite{JowhariST11}. Also, our lower bound holds even in the strict turnstile model, in which it is promised that $x_i\ge 0$ for all $i$ at all times.
-
 More easily explained in the language of the above support-finding turnstile streaming problem, our lower bound operates by showing that any algorithm $\mathcal{A}$ solving that problem in low memory can be used to encode subsets of $[n]$ of certain sizes into a number of bits below the information theoretic minimum. Our encoder makes adaptive queries to $\mathcal{A}$ throughout its execution, but done carefully so as to not violate correctness. This is accomplished by injecting random noise into the encoder's interactions with $\mathcal{A}$, which is loosely motivated by techniques in differential privacy. Our correctness analysis involves understanding the ability of $\mathcal{A}$ to correctly answer adaptive queries which have positive but bounded mutual information with $\mathcal{A}$'s internal randomness, and may be of independent interest in the newly emerging area of adaptive data analysis with a theoretical computer science lens.
 \end{abstract}
 
 \newpage
 
 \input{intro.tex}
-%\input{warmup.tex}
 \input{main.tex}
 \input{more_samples.tex}
 
 \section*{Acknowledgments}
-Initially the authors were focused on proving optimal lower bounds for samplers, but we thank Vasileios Nakos for pointing out that our $\ur^\subset$ lower bound immediately implies a tight lower bound for finding a duplicate in data streams as well.
+Initially the authors were focused on proving optimal lower bounds for samplers, but we thank Vasileios Nakos for pointing out that our $\ur^\subset$ lower bound immediately implies a tight lower bound for finding a duplicate in data streams as well. Also, initially our proof of Lemma~\ref{lem:information} incurred an additive $1$ in the numerator of the right hand side of \eqref{eqn:adaptivity}. This is clearly suboptimal for small $I(X; Y)$ (for example, consider $I(X; Y) = 0$, in which case the right hand side should be $\delta$ and not $1/\log(1/\delta)$)). We thank T.S.\ Jayram for pointing out that a slight modification of our proof could actually replace the additive $1$ with the binary entropy function (and also for showing us a different proof of this lemma, which resembles the standard proof of Fano's inequality).
 
 \bibliographystyle{alpha}
 \bibliography{shortbib}

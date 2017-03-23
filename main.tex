@@ -1,16 +1,6 @@
 \section{Communication Lower Bound for $\ur^\subset$} \label{sec:optimal-lb}
 
-%In the previous section we have shown how to extract $\Theta(\log \frac{1}{\delta})$ words of information from the sketch by sequentially peeling off elements. 
-%Because the number of bad events we need to union-bound increases exponentially, the approach cannot obtain more elements. 
-
 Consider a protocol $\mathcal{P}$ for $\ur^\subset$ with failure probability $\delta$, operating in the one-way public coin model. When Alice's input is $x$ and Bob's input is $y$, Alice sends $\sketch(x)$ to Bob, and Bob outputs $\query(\sketch(x), y)$, which with probability at least $1-\delta$ is in $\supp(x-y)$. As mentioned in Section~\ref{sec:overview}, we use $\mathcal{P}$ as a subroutine in a scheme for encoding/decoding elements of $\binom{[n]}m$ for $m = \lfloor \sqrt{n\log(1/\delta)}\rfloor$. In this section, we assume $\log \frac 1{\delta} \le n/64$, since for larger $n$ we have an $\Omega(n)$ lower bound.
-
-% Let us consider failure probability of $\query(\sketch(\mathbf{1}_S), \mathbf{1}_T)$ where $T\subset S$ in terms of information leak, which is defined as the mutual information (conditioned on $S$) between $T$ and random source used in the $\ur^\subset$-protocol. We show in this section that the failure probability is upper-bounded by information leak divided by $\log \frac{1}{\delta}$. Therefore, in order to invoke $\query$ with good success probability, it is sufficient to control information leak.
-
-%  Our key technique is noise injection: after obtaining an element from $S\backslash T$ via the $\ur^\subset$-protocol, we not only add the element to $T$, but also randomly add roughly a $1/K$ fraction of elements in $S\backslash T$ to $T$. 
-% We prove that for every round, the mutual information between the randomness used by $\mathcal{P}$ and the next inputs fed to $\mathcal{P}$ by the encoding scheme is $O(K)$.  
-% By setting $K=\Theta(\log \frac{1}{\delta})$ and $m=\sqrt{n\log\frac{1}{\delta}}$, we can proceed in $\Theta(\frac{\log (m/K)}{\log (1 +1/K)}) = \Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ rounds, and thus in expectation obtain $\Theta(\log\frac{1}{\delta}\log\frac{n}{\log(1/\delta)})$ elements in $S$.
-% Moreover, each element contains $\Theta(\log(n/m))=\Theta(\log \frac{n}{\log (1/\delta)})$ bits of information, so we get $\Theta(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)}) $ bits of information from $\sketch(\mathbf{1}_S)$. 
 
 \subsection{Encoding/decoding scheme}
 We now describe our encoding/decoding scheme $(\enc, \dec)$ for elements in ${[n] \choose m}$, which uses $\mathcal{P}$ in a black-box way. The parameters shared by $\enc$ and $\dec$ are given in Algorithm~\ref{algo:para}.
@@ -98,7 +88,7 @@ By our setting of parameters, we have $\E b_r=\Omega(1)$ and thus $\E(|S|-|B|)=\
 \begin{proof}
   We claim that for $r=0,\ldots, R$, $\{S_r, C_r\}$ is a partition of $S$ ($S_r$ is defined in Algorithm~\ref{algo:enc}, and $C_r$ in Algorithm~\ref{algo:dec}). We prove the claim by induction on $r$. Our base case is $r=0$, for which the claim holds since $S_0 = S$, $C_0 = \emptyset$.
   
-  Assume the claim holds for $r$ ($0\le r < R$), and we consider round $r+1$.  On round $r$, because $S\backslash S_{r-1}=C_{r-1}$, the index $s_r$ obtained by both \enc and \dec are the same.  Initially $S_r=S_{r-1}$ and $C_r=C_{r-1}$, and so $\{S_r,C_r\}$ is a partition of $S$.  If $s_r$ is a valid sample (i.e. $s_r\in S_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $S_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{S_r, C_r\}$ remains a partition of $S$. Next, \enc repeats removing the $a$ from $S_r$ with the smallest $\pi_a$ value until $|S_r|=n_r$. Symmetrically, \dec repeats inserting the $a$ into $C_r$ with the smallest $\pi_a$ value among $a\in B\backslash C_r$, until $|C_r|=|S|-n_r$. In the end we have $|S_r|+|C_r|=|S|$, so \enc and \dec execute repetition the same number of times.  Moreover, we can prove that during the same iteration of this repreated insertion, the element removed from $S_r$ is exactly the same element inserted to $C_r$.  This is because in the beginning of a repetition $\{S_r, C_r\}$ is a partition of $S$.  We have $B\backslash C_r\subseteq S\backslash C_r=S_r$. Let $a^*$ denote $a\in S_r$ that minimizes $\pi_a$.  Then $a^*\in B\backslash C_r\subseteq S_r$ (since $a^*$ will be removed from $S_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $\pi_{a^*}$ is also the smallest among $\{\pi_a : a\in B\backslash C_r\}$.  Thus both $\enc$ and $\dec$ will take $a^{*}$ (for \enc, to remove from $S_r$, and for \dec, to insert into $C_r$).  Therefore, $\{S_r, C_r\}$ remains a partition of $S$.
+  Assume the claim holds for $r$ ($0\le r < R$), and we consider round $r+1$.  On round $r$, because $S\backslash S_{r-1}=C_{r-1}$, the index $s_r$ obtained by both \enc and \dec are the same.  Initially $S_r=S_{r-1}$ and $C_r=C_{r-1}$, and so $\{S_r,C_r\}$ is a partition of $S$.  If $s_r$ is a valid sample (i.e. $s_r\in S_{r-1}$), then $b_r=1$, and \enc removes $s_r$ from $S_r$ and in the meanwhile \dec inserts $s_r$ into $C_r$, so that $\{S_r, C_r\}$ remains a partition of $S$. Next, \enc repeats removing the $a$ from $S_r$ with the smallest $\pi_a$ value until $|S_r|=n_r$. Symmetrically, \dec repeats inserting the $a$ into $C_r$ with the smallest $\pi_a$ value among $a\in B\backslash C_r$, until $|C_r|=|S|-n_r$. In the end we have $|S_r|+|C_r|=|S|$, so \enc and \dec execute repetition the same number of times.  Moreover, we can prove that during the same iteration of this repeated insertion, the element removed from $S_r$ is exactly the same element inserted to $C_r$.  This is because in the beginning of a repetition $\{S_r, C_r\}$ is a partition of $S$.  We have $B\backslash C_r\subseteq S\backslash C_r=S_r$. Let $a^*$ denote $a\in S_r$ that minimizes $\pi_a$.  Then $a^*\in B\backslash C_r\subseteq S_r$ (since $a^*$ will be removed from $S_r$, it has no chance to be included in $S$ in \enc, so that $B$ contains $a^*$), and $\pi_{a^*}$ is also the smallest among $\{\pi_a : a\in B\backslash C_r\}$.  Thus both $\enc$ and $\dec$ will take $a^{*}$ (for \enc, to remove from $S_r$, and for \dec, to insert into $C_r$).  Therefore, $\{S_r, C_r\}$ remains a partition of $S$.
   
   Given the fact that $\{S_r, C_r\}$ is a partition of $S$, the $s_r$ are the same in \enc and \dec.  Furthermore, $A=\{s_r : b_r=1,r=1,\ldots, R\}$ are the same in \enc and \dec.  We know $A\subseteq S$.  Since \enc outputs $S\backslash A$, and \dec outputs $(S\backslash A)\cup A$, we have $\dec(\enc(S))=S$.
 \end{proof}
@@ -122,19 +112,19 @@ Let $W\in \mathbb{N}$ be a random variable with $W\le m$ and $\E W\le m-d$. Then
 \noindent \textbf{Lemma~\ref{lem:information} (restated).}
   Consider $f$: $\{0,1\}^b\times \{0,1\}^q\rightarrow \{0,1\}$ and $X\in\{0,1\}^b$ uniformly random. If $\forall y\in \{0,1\}^q,\ \Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any r.v.\ $Y$ supported on $\{0,1\}^q$,
 $$
-  \Pr(f(X,Y)=1)\le \frac{I(X;Y)+1}{\log \frac{1}{\delta}} ,
+  \Pr(f(X,Y)=1)\le \frac{I(X;Y)+H_2(\delta)}{\log \frac{1}{\delta}} ,
 $$
-  where $I(X;Y)$ is the mutual information between $X$ and $Y$.
+  where $I(X;Y)$ is the mutual information between $X$ and $Y$, and $H_2$ is the binary entropy function.
 \begin{proof}
   It is equivalent to prove 
-$$I(X;Y)\ge \E(f(X,Y))\cdot \log\frac{1}{\delta}-1 .$$
-By definition of mutual entropy $I(X;Y)=H(X)-H(X|Y)$, where $H(X)=b$ and 
-$$H(X|Y)\le 1+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\delta})=b+1-\E(f(X,Y))\cdot \log\frac{1}{\delta} .$$
-  The upper bound for $H(X|Y)$ is obtained by considering the following one-way communication problem: Alice knows both $X$ and $Y$ while Bob only knows $Y$, and Alice must send a single message to Bob so that Bob can recover $X$. The expected message length in an optimal protocol is exactly $H(X|Y)$.  Thus, any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: first Alice sends Bob $f(X,Y)$ (taking $1$ bit). Then if $f(X,Y)=0$, Alice sends $X$ directly (taking $b$ bits). Otherwise, when $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^b)=b-\log\frac{1}{\delta}$ bits).  
+$$I(X;Y)\ge \E(f(X,Y))\cdot \log\frac{1}{\delta}-H_2(\delta).$$
+By definition of mutual entropy $I(X;Y)=H(X)-H(X|Y)$, where $H(X)=b$ and we must show
+$$H(X|Y)\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\delta})=b+H_2(\delta)-\E(f(X,Y))\cdot \log\frac{1}{\delta} .$$
+  The upper bound for $H(X|Y)$ is obtained by considering the following one-way communication problem: Alice knows both $X$ and $Y$ while Bob only knows $Y$, and Alice must send a single message to Bob so that Bob can recover $X$. The expected message length in an optimal protocol is exactly $H(X|Y)$.  Thus, any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: Alice prepends a $1$ bit to her message iff $f(X,Y) = 1$ (taking $H_2(\delta)$ bits in expectation). Then if $f(X,Y)=0$, Alice sends $X$ directly (taking $b$ bits). Otherwise, when $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^b)=b-\log\frac{1}{\delta}$ bits).  
 \end{proof}
 
 \begin{corollary}\label{corollary:sampler-failure}
-  Let $X$ denote the random source used by the $\ur^\subset$-protocol with failure probability at most $\delta$. If $S$ is a fixed set and $T\subset S$, $\Pr(\query(\sketch(\mathbf{1}_S), \mathbf{1}_T)\not\in S\backslash T)\le \frac{I(X;T)+1}{\log\frac{1}{\delta}}$.
+  Let $X$ denote the random source used by the $\ur^\subset$-protocol with failure probability at most $\delta$. If $S$ is a fixed set and $T\subset S$, $\Pr(\query(\sketch(\mathbf{1}_S), \mathbf{1}_T)\not\in S\backslash T)\le \frac{I(X;T)+H_2(\delta)}{\log\frac{1}{\delta}}$.
 \end{corollary}
 
 \begin{lemma}\label{lemma:mutual-entropy-bound}
@@ -199,7 +189,6 @@ $$H(X|Y)\le 1+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\delta})=b+1
   Finally, let $p={2^{6K}}/{{m\choose n_r}}$, we have $\Pr(S_r=T|X=x)\le p$ and thus $H(S_r|X=x)\ge \log\frac{1}{p}=\log{{m\choose n_r}}-6K$. Therefore, $H(S_r|X)\ge \log{{m\choose n_r}}-6K$ and so $I(X;S_r)=H(S_r)-H(S_r|X)\le 6K$.  
 \end{proof}
 
-%By \url{http://mathworld.wolfram.com/q-PochhammerSymbol.html} We have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. I think we can improve the constant 5 to 4 if we bound it more carefully. 
 \begin{lemma}\label{lemma:Pochhammer}
   Let $K\in \mathbb{N}$ and $K\ge 1$. We have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$.
 \end{lemma}
