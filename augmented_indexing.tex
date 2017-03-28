@@ -82,13 +82,15 @@ As mentioned, we assume we have an $s$-bit protocol $\mathcal P$ for $\ur^\subse
 
 The protocol $\mathcal P'$ operates as follows. Without loss of generality we may assume that, using the notation of Lemma~\ref{lem:code}, $|\mathcal S_{u,m}|$ is a power of $2$ for $u, m$ as in the lemma statement. This is accomplished by simply rounding $|\mathcal S_{u,m}|$ down to the nearest power of $2$ by removing elements arbitrarily. Also, define $L = c\log(n/t)$ for some sufficiently small constant $c\in(0,1)$ to be determined later. Now, Charlie partitions the bits of his input $z\in\{0,1\}^N$ into $L$ consecutive sequences of bits such that the $i$th chunk of bits for each $i\in[L]$ can be viewed as specifying an element $S_i\in \mathcal S_{u_i,m}$ for $u_i = \frac n{100^i\cdot L}$ and $m = ct$. Lemma~\ref{lem:code} gives $\log|\mathcal S_{u_i,m}| = \Theta(m\log(u_i/m))$, which is $\Theta(t\log(n/t))$ for $c < 1/14$. Thus $N = \Theta(L\cdot t\log(n/t)) = \Theta(t\log^2(n/t))$. Given these sets $S_1,\ldots,S_L$, we now discuss how Charlie generates a vector $x\in\{0,1\}^n$. Charlie then simulates Alice on $x$ to generate the message Alice would have send to Bob in protocol $\mathcal P$, then sends that same message to Diane.
 
-To generate $x\in\{0,1\}^n$, assume Charlie and Diane have agreed on an arbitrary bijection from 
-$$A = \bigcup_{i=1}^L (\{i\} \times [u_i]\times [100^i])$$
-to $[n]$. This is possible since $|A| = n$. Henceforth we think of $x$ as being indexed by $A$. Then Charlie defines $x$ to be the indicator vector $\mathbf{1}_S$ of the set
+To generate $x\in\{0,1\}^n$, assume Charlie and Diane have sampled a bijection from 
+\begin{equation}\label{eq:pi-origin}
+A = \bigcup_{i=1}^L (\{i\} \times [u_i]\times [100^i])
+\end{equation}
+to $[n]$ uniformly at random. We denote this bijection by $\pi$. This is possible since $|A| = n$. Then Charlie defines $x$ to be the indicator vector $\mathbf{1}_{\pi(S)}$, where
 $$
-S = \bigcup_{i=1}^L (\{i\} \times S_i \times [100^i]) 
+S = \bigcup_{i=1}^L (\{i\} \times S_i \times [100^i]),
 $$
-then sends a message $M$ to Diane, equal to Alice's message with input $\mathbf{1}_S$. This completes the description of Charlie's behavior in the protocol $\mathcal P'$.
+then sends a message $M$ to Diane, equal to Alice's message with input $\mathbf{1}_{\pi(S)}$. This completes the description of Charlie's behavior in the protocol $\mathcal P'$.
 
 We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies in some chunk $i^*\in[L]$. We now show how Diane can use $\mathcal P$ to recover $S_{i^*}$ with probability $2/3$ (and thus in particular recover $z_{j^*}$). Since Diane knows $z_j$ for $j>j^*$, she knows $S_i$ for $i>i^*$. She can then execute the following algorithm.
 
@@ -97,10 +99,10 @@ We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies
   \caption{Behavior of Diane in $\mathcal P'$ for $\ur^\subset$.} \label{algo:diane1}
   \begin{algorithmic}[1]
     \Procedure{$\diane$}{$M$}
-    \State $T \leftarrow \bigcup_{i=i^*+1}^L (\{i\} \times S_i \times [100^i])$
+    \State $T \leftarrow \pi\left(\bigcup_{i=i^*+1}^L (\{i\} \times S_i \times [100^i])\right)$
     \State $T_{i^*}\leftarrow \emptyset$
     \While {$|T_{i^*}| < \frac m2$}
-      \State $(i,a,r)\leftarrow \query(M, \mathbf{1}_T)$
+      \State $(i,a,r)\leftarrow \pi^{-1}(\query(M, \mathbf{1}_{\pi(T)}))$
       \State $T\leftarrow T \cup ((i,a) \times [100^i])$
       \If {$i=i^*$} 
         \State $T_{i^*} \leftarrow T_{i^*}\cup \{a\}$
@@ -111,7 +113,15 @@ We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies
   \end{algorithmic}
 \end{algorithm}
 
-In Algorithm~\ref{algo:diane1} Diane is building up a subset $T_{i^*}$ of $S_{i^*}$. Once $|T_{i^*}| \ge |S_{i^*}|/2 = m/2$, Diane can uniquely recover $S_{i^*}$ by the limited intersection property of $\mathcal{S}_{u_i,m}$ guaranteed by Lemma~\ref{lem:code}. Until then, she uses $\mathcal P$ to recover uniformly random elements of $S\backslash T$. Since the elements of $S_i$ appear with frequency $100^i$ in $S\backslash T$, they are more likely to be returned by Bob. Indeed, as long as $T_{i^*}\le m/2$, at least $m/2$ elements remain in $S_{i^*}\backslash T_{i^*}$, implying Bob's output $(i,a,r)$ satisfies
+In Algorithm~\ref{algo:diane1} Diane is building up a subset $T_{i^*}$ of $S_{i^*}$. Once $|T_{i^*}| \ge |S_{i^*}|/2 = m/2$, Diane can uniquely recover $S_{i^*}$ by the limited intersection property of $\mathcal{S}_{u_i,m}$ guaranteed by Lemma~\ref{lem:code}. Until then, she uses $\mathcal P$ to recover elements of $S\backslash T$, which, as we now show, are chosen uniformly at random from $S\setminus T$. It will be useful to write $\query(\cdot, \cdot, R)$ to denote the deterministic protocol obtained by fixing the randomness in $\query$ to $R$.
+
+\begin{claim}\label{cl:uniform}
+For every random string $R$ of $\query$ one has that in every iteration of Algorithm~\ref{algo:diane1}, the call $\pi^{-1}(\query(M, \mathbf{1}_{\pi(T)}, R))$ in ~line~5 either fails or returns a uniformly random element of $S\setminus T$.
+\end{claim}
+\begin{proof}
+We condition on the values $\{\pi(j)\}_{j\in T}$ and $\pi(S\setminus T)$. Let $U:=\pi(T)$ and $V:=\pi(S\setminus T)$. Let $j:=\query(M, \mathbf{1}_{\pi(T)}, R)=\query(M, \mathbf{1}_{U}, R)$. If the protocol does not fail, then $j\in V\setminus U$. It remains to note that by conditioning on $\{\pi(j)\}_{j\in T}$,  $\pi(S\setminus T)$ and fixing of the randomness of $\query$ to $R$, $j$ is a fixed quantity. Thus, $\pi^{-1}(j)$ is a uniformly random element of $S\setminus T$, as required.
+\end{proof}
+Given Claim~\ref{cl:uniform}, since the elements of $S_i$ appear with frequency $100^i$ in $S\backslash T$, they are more likely to be returned by Bob. Indeed, as long as $T_{i^*}\le m/2$, at least $m/2$ elements remain in $S_{i^*}\backslash T_{i^*}$, implying Bob's output $(i,a,r)$ satisfies
 \begin{equation}
 \Pr(i = i^*) \ge \frac{\frac m2\cdot 100^{i^*}}{\frac m2\cdot 100^{i^*} + m\cdot \sum_{i=1}^{i^*-1} 100^i} = \frac{\frac 12\cdot 100^{i^*}}{\frac 12\cdot 100^{i^*} + \frac {100}{99}(100^{i^*-1} - 1)} > \frac{49}{50} . \label{eqn:istar-likely}
 \end{equation}
@@ -120,12 +130,13 @@ Meanwhile, as long as the \textbf{while} loop has not ended, for any $1\le j< i^
 \Pr(i = j) \le \frac{m\cdot 100^j}{\frac m2\cdot 100^{i^*}} \le 2\cdot 100^{-(i^*-j)} \le 50^{-(i^*-j)} . \label{eqn:others-unlikely}
 \end{equation}
 
-Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{E}_T$ be the probabilistic event that $\query(M, \mathbf{1}_T)$ succeeds in returning a uniformly random element in $S\backslash T$, and let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/2^{i^*-i}$. Let $\mathcal{F}$ be the event that in the first $m$ iterations of the \textbf{while} loop of Algorithm~\ref{algo:diane1}, Diane never stores a set $T\notin\mathcal{T}$. Let $\mathcal{G}$ be the event that the \textbf{while} loop terminates within the first $m$ iterations. Then note that $(\wedge_{T\in\mathcal T} \mathcal E_T) \wedge \mathcal F\wedge \mathcal G$ occurring implies that Diane succeeds in recovering $S_{i^*}$. It then suffices to show $\Pr(\neg((\wedge_{T\in\mathcal T} \mathcal E_T) \wedge \mathcal F\wedge \mathcal G)) < 1/3$. We show this via the union bound.
+We now define the set of {\bf typical intermediate sets}, which plays a crucial role in our analysis.  Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/2^{i^*-i}$. We will show that for most $\pi$'s Algorithm~\ref{algo:diane1} {\bf (a)} never leaves the set $\mathcal{T}$ and {\bf (b)} successfully terminates. 
 
-\medskip
-
-\noindent $\mathbf{(\wedge_{T\in\mathcal T} \mathcal E_T):}$ $\Pr(\neg(\wedge_{T\in\mathcal T} \mathcal E_T)) \le \delta\cdot |\mathcal T|$, again by the union bound. Then
-\allowdisplaybreaks
+We first prove 
+\begin{claim}\label{cl:size-of-t}
+For the set $\mathcal{T}$ defined above one has $|\mathcal{T}|=2^{O(m)}$.
+\end{claim}
+\begin{proof}
 \begin{align*}
 |\mathcal T| &\le 2^m \cdot \prod_{i=1}^{i^*-1}\left(\sum_{r=0}^{\frac m{2^{i^*-i}}} \binom mr\right)\text{ (the }2^m\text{ term comes from }S_{i^*}\text{)}\\
 {}&\le 2^m \cdot \prod_{i=1}^{i^*-1} \binom{m + \frac m{2^{i^* - i}}}{\frac m{2^{i^* - i}}}\\
@@ -133,20 +144,48 @@ Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal
 {}&\le 2^{O(m)} \cdot 2^{m\cdot O(\sum_{j=1}^\infty j 2^{-j})} \\
 {}& \le 2^{O(m)}
 \end{align*}
-Thus $\delta \cdot |\mathcal T| \le 1/20$ for $m = c\log(1/\delta)$ for $c$ a sufficiently small constant.
+\end{proof}
+
+For every $T\subset S$ and every $\pi$ let $\mathcal{E}_T(\pi)$ be the probabilistic event (over the choice of $\query$'s random string $R$) that $\query(M, \mathbf{1}_{\pi(T)}, R)$ succeeds in returning an element in $S\backslash T$.  We let 
+$$
+\mathcal{E}_{\mathcal T}(\pi):=\wedge_{T\in\mathcal T} \mathcal E_T(\pi)
+$$
+to simplify notation. Using Claim~\ref{cl:size-of-t} we have for every $\pi$
+$$
+\Pr_R(\neg(\mathcal E_{\mathcal T}(\pi))) \le \delta\cdot |\mathcal T|\leq 1/20
+$$
+as long as for $m = c\log(1/\delta)$ for $c$ a sufficiently small constant.
+
+
+\noindent  
+
+
+%For every bijective mapping $\pi$ from 
+%$A = \bigcup_{i=1}^L (\{i\} \times [u_i]\times [100^i])$ (see~\eqref{eq:pi-origin}) to $[n]$
+
+
+Let $R$ denote the random string used by $\query$. Let $\mathcal{F}$ be the event  over the choice of $\pi$ and $R$ that in the first $m$ iterations of the \textbf{while} loop of Algorithm~\ref{algo:diane1}, Diane never stores a set $T\notin\mathcal{T}$. 
+
+Let $\mathcal{G}$ be the event over the choice of $\pi$ and $R$ that the \textbf{while} loop terminates within the first $m$ iterations. Then note that ${\mathcal E}_{\mathcal{T}}(\pi) \wedge \mathcal F\wedge \mathcal G$ occurring implies that Diane succeeds in recovering $S_{i^*}$. It then suffices to show $\Pr_{\pi, R}(\neg{ \mathcal E}_{\mathcal T}(\pi) \wedge \mathcal F\wedge \mathcal G) < 1/3$. We show this via the union bound.
 
 \medskip
 
-\noindent $\mathbf{(\mathcal F)}:$ By \eqref{eqn:others-unlikely}, the expected number of items recovered by Bob from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/2^{i^*-i}$ items from $S_i$ is at most $(1/25)^{i^*-i}$ by Markov's inequality.  Thus
-$$
-\Pr(\neg\mathcal F) \le \sum_{i=1}^{i^*-1}\left(\frac 1{25}\right)^{i^*-i} < \frac 1{24}
-$$
-
-\noindent $\mathbf{(\mathcal G)}:$ By \eqref{eqn:istar-likely}, we expect at most $m/50$ of the first $m$ iterations to fail to reveal an element of $S_i\backslash T_{i^*}$ from Bob's query. Thus the probability that more than $m/2$ iterations fail to do so is at most $1/25$ by Markov's inequality. Thus $\Pr(\neg\mathcal{G}) \le 1/25$.
 
 \medskip
 
-We have thus established that $\Pr(\neg((\wedge_{T\in\mathcal T} \mathcal E_T) \wedge \mathcal F\wedge \mathcal G)) \le 1/20 + 1/24 + 1/25 < 1/3$, as desired, showing the following theorem.
+\noindent $\mathbf{(\mathcal F\wedge \neg{ \mathcal E}_{\mathcal T}(\pi))}$: Select $\pi$ uniformly at random, then select the random string $R$ used by $\query$. With probability at least $1-1/20$ event ${ \mathcal E}_{\mathcal T}(\pi)$ occurs, in which case the sketch correctly outputs an element of $S\setminus T$ for all $T\in {\mathcal T}$.  In that case by \eqref{eqn:others-unlikely}, the expected number of items recovered by Bob from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/2^{i^*-i}$ items from $S_i$ is at most $(1/25)^{i^*-i}$ by Markov's inequality.  Thus
+$$
+\Pr(\neg\mathcal F\vee \neg{ \mathcal E}_{\mathcal T}(\pi) ) \le 1/20+\sum_{i=1}^{i^*-1}\left(1/25\right)^{i^*-i} < 1/20+1/24
+$$
+
+
+
+
+\noindent $\mathbf{\mathcal G}\wedge \neg{ \mathcal E}_{\mathcal T}(\pi):$ Select $\pi$ uniformly at random, then select the random string $R$ used by $\query$. With probability at least $1-1/20$ event ${ \mathcal E}_{\mathcal T}(\pi)$ occurs, in which case the sketch correctly outputs an element of $S\setminus T$ for all $T\in {\mathcal T}$.  In that case by \eqref{eqn:istar-likely}, we expect at most $m/50$ of the first $m$ iterations to fail to reveal an element of $S_i\backslash T_{i^*}$ from Bob's query. Thus the probability that more than $m/2$ iterations fail to do so is at most $1/25$ by Markov's inequality. Thus $\Pr(\neg\mathcal{G}\vee \neg{ \mathcal E}_{\mathcal T}(\pi)) \le 1/25+1/20$.
+
+\medskip
+
+We have thus established that $\Pr(\neg((\wedge_{T\in\mathcal T} \mathcal E_T) \wedge \mathcal F\wedge \mathcal G)) \le 1/20 + 1/24 + 1/25+1/20 < 1/3$, as desired, showing the following theorem.
 
 \begin{theorem}
 For any $0<\delta<1/2$ and integer $n\ge 1$ with $\log \frac 1{\delta} < n/(4e)$, $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) \ge \randcom^{\rightarrow,pub}_{1/3}(\aug_N)$ for $N = \Theta(\log\frac 1{\delta} \log^2 \frac n{\log \frac 1{\delta}})$.
