@@ -121,14 +121,20 @@ For every random string $R$ of $\query$ one has that in every iteration of Algor
 \begin{proof}
 We condition on the values $\{\pi(j)\}_{j\in T}$ and $\pi(S\setminus T)$. Let $U:=\pi(T)$ and $V:=\pi(S\setminus T)$. Let $j:=\query(M, \mathbf{1}_{\pi(T)}, R)=\query(M, \mathbf{1}_{U}, R)$. If the protocol does not fail, then $j\in V\setminus U$. It remains to note that by conditioning on $\{\pi(j)\}_{j\in T}$,  $\pi(S\setminus T)$ and fixing of the randomness of $\query$ to $R$, $j$ is a fixed quantity. Thus, $\pi^{-1}(j)$ is a uniformly random element of $S\setminus T$, as required.
 \end{proof}
-Given Claim~\ref{cl:uniform}, since the elements of $S_i$ appear with frequency $100^i$ in $S\backslash T$, they are more likely to be returned by Bob. Indeed, as long as $T_{i^*}\le m/2$, at least $m/2$ elements remain in $S_{i^*}\backslash T_{i^*}$, implying Bob's output $(i,a,r)$ satisfies
+Suppose $T$ and the choice of $\query$'s random string $R$ and choice of $\pi(T)$. Then given Claim~\ref{cl:uniform}, since the elements of $S_i$ appear with frequency $100^i$ in $S\backslash T$, they are more likely to be returned by Bob. Indeed, as long as $T_{i^*}\le m/2$, at least $m/2$ elements remain in $S_{i^*}\backslash T_{i^*}$, implying Bob's output $(i,a,r)$ satisfies
 \begin{equation}
-\Pr(i = i^*) \ge \frac{\frac m2\cdot 100^{i^*}}{\frac m2\cdot 100^{i^*} + m\cdot \sum_{i=1}^{i^*-1} 100^i} = \frac{\frac 12\cdot 100^{i^*}}{\frac 12\cdot 100^{i^*} + \frac {100}{99}(100^{i^*-1} - 1)} > \frac{49}{50} . \label{eqn:istar-likely}
+\begin{split}
+\Pr(i = i^* \text{~or~}\query(M, \mathbf{1}_{\pi(T)})\text{~fails}) &\ge \frac{\frac m2\cdot 100^{i^*}}{\frac m2\cdot 100^{i^*} + m\cdot \sum_{i=1}^{i^*-1} 100^i}\\
+& = \frac{\frac 12\cdot 100^{i^*}}{\frac 12\cdot 100^{i^*} + \frac {100}{99}(100^{i^*-1} - 1)}\\
+& > \frac{49}{50} , \label{eqn:istar-likely}
+\end{split}
 \end{equation}
+where the probability is over the choice of $\pi(S\setminus T)$.
 Meanwhile, as long as the \textbf{while} loop has not ended, for any $1\le j< i^*$
 \begin{equation}
 \Pr(i = j) \le \frac{m\cdot 100^j}{\frac m2\cdot 100^{i^*}} \le 2\cdot 100^{-(i^*-j)} \le 50^{-(i^*-j)} . \label{eqn:others-unlikely}
 \end{equation}
+Here again the probability is over the choice of $\pi(S\setminus T)$, conditioned on $\pi(T)$ and random string $R$.
 
 We now define the set of {\bf typical intermediate sets}, which plays a crucial role in our analysis.  Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/2^{i^*-i}$. We will show that for most $\pi$'s Algorithm~\ref{algo:diane1} {\bf (a)} never leaves the set $\mathcal{T}$ and {\bf (b)} successfully terminates. 
 
@@ -173,7 +179,7 @@ Let $\mathcal{G}$ be the event over the choice of $\pi$ and $R$ that the \textbf
 
 \medskip
 
-\noindent $\mathbf{(\mathcal F\wedge \neg{ \mathcal E}_{\mathcal T}(\pi))}$: Select $\pi$ uniformly at random, then select the random string $R$ used by $\query$. With probability at least $1-1/20$ event ${ \mathcal E}_{\mathcal T}(\pi)$ occurs, in which case the sketch correctly outputs an element of $S\setminus T$ for all $T\in {\mathcal T}$.  In that case by \eqref{eqn:others-unlikely}, the expected number of items recovered by Bob from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/2^{i^*-i}$ items from $S_i$ is at most $(1/25)^{i^*-i}$ by Markov's inequality.  Thus
+\noindent $\mathbf{(\mathcal F\wedge \neg{ \mathcal E}_{\mathcal T}(\pi))}$: Select $\pi$ uniformly at random, then select the random string $R$ used by $\query$. With probability at least $1-1/20$ event ${ \mathcal E}_{\mathcal T}(\pi)$ occurs, in which case the sketch correctly outputs an element of $S\setminus T$ for all $T\in {\mathcal T}$ when bijection $\pi$ is used.  In that case by \eqref{eqn:others-unlikely}, the expected number of items recovered by Bob from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/2^{i^*-i}$ items from $S_i$ is at most $(1/25)^{i^*-i}$ by Markov's inequality.  Thus
 $$
 \Pr(\neg\mathcal F\vee \neg{ \mathcal E}_{\mathcal T}(\pi) ) \le 1/20+\sum_{i=1}^{i^*-1}\left(1/25\right)^{i^*-i} < 1/20+1/24
 $$
