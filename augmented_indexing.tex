@@ -99,7 +99,7 @@ We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies
   \caption{Behavior of Diane in $\mathcal P'$ for $\ur^\subset$.} \label{algo:diane1}
   \begin{algorithmic}[1]
     \Procedure{$\diane$}{$M$}
-    \State $T \leftarrow \pi\left(\bigcup_{i=i^*+1}^L (\{i\} \times S_i \times [100^i])\right)$
+    \State $T \leftarrow \bigcup_{i=i^*+1}^L (\{i\} \times S_i \times [100^i])$
     \State $T_{i^*}\leftarrow \emptyset$
     \While {$|T_{i^*}| < \frac m2$}
       \State $(i,a,r)\leftarrow \pi^{-1}(\query(M, \mathbf{1}_{\pi(T)}))$
