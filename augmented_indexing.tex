@@ -103,7 +103,7 @@ We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies
     \State $T_{i^*}\leftarrow \emptyset$
     \While {$|T_{i^*}| < \frac m2$}
       \State $(i,a,r)\leftarrow \pi^{-1}(\query(M, \mathbf{1}_{\pi(T)}))$
-      \State $T\leftarrow T \cup ((i,a) \times [100^i])$
+      \State $T\leftarrow T \cup (\{(i,a)\} \times [100^i])$
       \If {$i=i^*$} 
         \State $T_{i^*} \leftarrow T_{i^*}\cup \{a\}$
       \EndIf
