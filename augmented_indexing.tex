@@ -126,6 +126,7 @@ Now condition on the values of $R$, $\{\pi(j)\}_{j\in T}$ and $\pi(S\setminus T)
 
 Fix any protocol $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ (not necessarily the one that Charlie and Diane use; see analysis of the idealized process $\widetilde{\mathcal{P}}$ below). Now fix $T$ together with values of $R$, $\{\pi(j)\}_{j\in T}$ and $\pi(S\setminus T)$ such that  $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ succeeds.  
 
+\if 0
 \paragraph{Elements in $S_{i^*}$ are likely to be recovered.}   Given Claim~\ref{cl:uniform}, since the elements of $S_i$ appear with frequency $100^i$ in $S\backslash T$, they are more likely to be returned by $\pi^{-1}(\widetilde{\query}(M, \mathbf{1}_{\pi(T)}))$. Indeed, as long as $T_{i^*}\le m/2$, at least $m/2$ elements remain in $S_{i^*}\backslash T_{i^*}$, implying the output of $(i, a, r)$ of $\pi^{-1}(\widetilde{\query}(M, \mathbf{1}_{\pi(T)}))$ satisfies
 \begin{equation}
 \begin{split}
@@ -135,6 +136,7 @@ Fix any protocol $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ (not necessarily t
 \end{split}
 \end{equation}
 where the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\to \pi(S\setminus T)$ (recall that we condition on the image $\pi(S\setminus T)$ under $\pi$, but not on the actual mapping).
+\fi
 
 
 \paragraph{Elements in $S_{j}, j<i^*,$ are unlikely to be recovered.} At the same time as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, for any $1\le j< i^*$
