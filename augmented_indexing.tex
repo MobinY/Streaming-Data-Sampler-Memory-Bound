@@ -167,7 +167,7 @@ We will show that for most choices of $\pi$ and shared random string $R$ Algorit
 
 
 {\bf Step 1: proving that $\widetilde{\mathcal{P}}$ succeeds in recovering $T_{i^*}$ and never leaves $\mathcal{T}$ with high probability.}
-Choose $\pi$ uniformly at random. By \eqref{eqn:others-unlikely}, as long as as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, the expected number of items recovered by $\widetilde{\query}$ from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/2^{i^*-i}$ items from $S_i$ is at most $(1/25)^{i^*-i}$ by Markov's inequality. Note that the probability is over the choice of $\pi$ only, as $\widetilde{\query}$ is assumed to succeed with probability $1$ by definition of $\widetilde{\mathcal{P}}$. 
+Choose $\pi$ uniformly at random. By \eqref{eqn:others-unlikely}, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, the expected number of items recovered by $\widetilde{\query}$ from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/2^{i^*-i}$ items from $S_i$ is at most $(1/25)^{i^*-i}$ by Markov's inequality. Note that the probability is over the choice of $\pi$ only, as $\widetilde{\query}$ is assumed to succeed with probability $1$ by definition of $\widetilde{\mathcal{P}}$. 
 Thus
 $$
 \Pr( \widetilde{\mathcal{P}}\text{~leaves~}\mathcal{T}) \le \sum_{i=1}^{i^*-1}\left(1/25\right)^{i^*-i} < 1/24.
