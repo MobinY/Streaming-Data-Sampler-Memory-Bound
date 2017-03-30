@@ -66,13 +66,6 @@ $\randcom^{\rightarrow,pub}_{1/3}(\aug_N) = \Theta(N)$.
 
 We show that if there is an $s$-bit communication protocol $\mathcal P$ for $\ur^\subset$ on $n$-bit vectors with failure probability $\delta$ (or for $\ur_k$ with constant failure probability), that implies the existence of an $s$-bit protocol $\mathcal P'$ for $\aug_N$ for some $N=\Theta(\log\frac 1{\delta}\log^2\frac n{\log\frac 1{\delta}})$ (or $N=\Theta(k\log^2(n/k))$ for $\ur_k$). The lower bound on $s$ then follows from Theorem~\ref{thm:mnsw}.
 
-We also make use of the following lemma.
-
-\begin{lemma}{\cite{JowhariST11}}\label{lem:rand-ur}
-Any public coin protocol for $\ur^\subset$ can be turned into one that outputs every index $i\in[n]$ with $x_i\neq y_i$ with the same probability. The number of bits sent, failure probability, and number of rounds do not change. Similarly, any $\ur_k^\subset$ protocol can be turned into one in which all subsets of $[n]$ of size $\min\{k, \|x-y\|_0\}$ on which $x, y$ differ are equally likely to be output.
-\end{lemma}
-
-Henceforth we assume $\mathcal P$ outputs random differing indices, which is without loss of generality by Lemma~\ref{lem:rand-ur}.
 
 \subsection{Lower bound on $\randcom^{\rightarrow,pub}_\delta(\ur^\subset)$.}\label{sec:aug-delta}
 
@@ -164,7 +157,7 @@ For the set $\mathcal{T}$ defined above one has $|\mathcal{T}|=2^{O(m)}$.
 \end{proof}
 
 
-We will show that for most choices of $\pi$ and shared random string $R$ Algorithm~\ref{algo:diane1} {\bf (a)} never leaves the set $\mathcal{T}$ and {\bf (b)} successfully terminates.  Note that Algorithm~\ref{algo:diane1} is a random process whose sample space is the product of the set of all possible permutations $\pi$ and shared random strings $R$. Denote this process by $\mathcal{P}$. It is useful for analysis purposes to define another process $\widetilde{\mathcal{P}}$, which is an idealized version of $\mathcal{P}$. In this process instead of running  $\query(M, \mathbf{1}_{\pi(T)})$ Alice runs  $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$, which is guaranteed to output an element of $\pi(S\setminus T)$ for every choice of  $T\subset S$, shared random string $R$, $\{\pi(j)\}_{j\in T}$, and $\pi(S\setminus T)$. The proof proceeds in three steps.
+We will show that for most choices of $\pi$ and shared random string $R$ Algorithm~\ref{algo:diane1} {\bf (a)} never leaves the set $\mathcal{T}$ and {\bf (b)} successfully terminates.  Note that Algorithm~\ref{algo:diane1} is a random process whose sample space is the product of the set of all possible permutations $\pi$ and shared random strings $R$. As before, we denote this process by $\mathcal{P}'$. It is useful for analysis purposes to define another process $\widetilde{\mathcal{P}}$, which is an idealized version of $\mathcal{P}'$. In this process instead of running  $\query(M, \mathbf{1}_{\pi(T)})$ Alice runs  $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$, which is guaranteed to output an element of $\pi(S\setminus T)$ for every choice of  $T\subset S$, shared random string $R$, $\{\pi(j)\}_{j\in T}$, and $\pi(S\setminus T)$. The proof proceeds in three steps.
 
 
 
@@ -176,7 +169,7 @@ $$
 $$
 In particular this means that with probability at least $1-1/10$ at most $\sum_{i<i^*} m/4^{i^*-i}<m/2$ items from $\bigcup_{i<i^*} S_i$ are recovered in the first $m$ (or fewer, if the algorithm terminates earlier) iterations. This also implies that with probability at least $1-1/10$ if the algorithm proceeds for the entire $m$ iterations, it recovers at least $m/2$ elements of $T_{i^*}$ and hence terminates. We thus get that $\widetilde{\mathcal{P}}$ succeeds at least with probability $1-1/10$.
 
-{\bf Step 2: coupling $\widetilde{\mathcal{P}}$ to $\mathcal{P}$ on most of the probability space.}
+{\bf Step 2: coupling $\widetilde{\mathcal{P}}$ to $\mathcal{P}'$ on most of the probability space.}
 For every $T\subset S$ and every $\pi$ let $\mathcal{E}_T(\pi)$ be the probabilistic event (over the choice of $\query$'s random string $R$) that $\query(M, \mathbf{1}_{\pi(T)})$ succeeds in returning an element in $\pi(S\backslash T)$. Note that $\mathcal{E}_T(\pi)$ is a subset of the probability space of shared random strings $R$, and depends on $\pi$. We let 
 $$
 \mathcal{E}_{\mathcal T}(\pi):=\wedge_{T\in\mathcal T} \mathcal E_T(\pi)
@@ -192,9 +185,10 @@ Now recall that $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ is an idealized pro
 Note that with probability at least $1-1/20$ over the choice of $\pi$ and $R$ one has $\query(M, \mathbf{1}_{\pi(T)})=\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$, as required.
 
 
-{\bf Step 3: arguing that $\mathcal{P}$ succeeds with high probability.}  Choose $(\pi, R)$ uniformly at random. By {\bf Step 2} we have that with probability at least $1-1/20$ over this choice 
+{\bf Step 3: arguing that $\mathcal{P}'$ succeeds with high probability.}  Choose $(\pi, R)$ uniformly at random. By {\bf Step 2} we have that with probability at least $1-1/20$ over this choice 
 $\query(M, \mathbf{1}_{\pi(T)})=\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$. At the same time we have by {\bf Step 1} that with probability at least $1-1/10$ over the choice of $\pi$ the idealized process $\widetilde{\mathcal{P}}$ 
-succeeds in recovering $T_{i^*}$ and never leaves $\mathcal{T}$. Putting the two bounds together, we get that $\mathcal{P}$ succeeds with probability at least $1-1/20-1/10>2/3$, showing the following theorem.
+succeeds in recovering $T_{i^*}$ and never leaves $\mathcal{T}$. Putting the two bounds together, we get that $\mathcal{P}'$ succeeds with probability at least $1-1/20-1/10>2/3$, showing the following theorem.
+
 
 \begin{theorem}
 For any $0<\delta<1/2$ and integer $n\ge 1$ with $\log \frac 1{\delta} < n/(4e)$, $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) \ge \randcom^{\rightarrow,pub}_{1/3}(\aug_N)$ for $N = \Theta(\log\frac 1{\delta} \log^2 \frac n{\log \frac 1{\delta}})$.
@@ -206,7 +200,14 @@ For any $0<\delta<1/2$ and integer $n\ge 1$, $\randcom^{\rightarrow,pub}_\delta(
 
 \subsection{Lower bound on $\randcom^{\rightarrow,pub}_{\frac 15}(\ur_k^\subset)$.}\label{sec:aug-k}
 
-The idea for lower bounding $\randcom^{\rightarrow,pub}_{\frac 15}(\ur_k^\subset)$ is as in Section~\ref{sec:aug-delta}, but slightly simpler. That is because for the protocol $\mathcal P'$ for $\aug_N$, Diane will not make adaptive queries to Bob in the protocol $\mathcal P$ for $\ur_k^\subset$. Rather, she will only make one query using Bob and will be able to decide $\aug_N$ with good probability from that single query.
+The idea for lower bounding $\randcom^{\rightarrow,pub}_{\frac 15}(\ur_k^\subset)$ is as in Section~\ref{sec:aug-delta}, but slightly simpler. That is because for the protocol $\mathcal P'$ for $\aug_N$, Diane will not make adaptive queries to Bob in the protocol $\mathcal P$ for $\ur_k^\subset$. Rather, she will only make one query using Bob and will be able to decide $\aug_N$ with good probability from that single query. We  make use of the following lemma from~\cite{JowhariST11}, whose proof is similar to our analysis in Section~\ref{sec:aug-delta}.
+
+\begin{lemma}{\cite{JowhariST11}}\label{lem:rand-ur}
+Any public coin protocol for $\ur^\subset$ can be turned into one that outputs every index $i\in[n]$ with $x_i\neq y_i$ with the same probability. The number of bits sent, failure probability, and number of rounds do not change. Similarly, any $\ur_k^\subset$ protocol can be turned into one in which all subsets of $[n]$ of size $\min\{k, \|x-y\|_0\}$ on which $x, y$ differ are equally likely to be output.
+\end{lemma}
+
+Henceforth we assume $\mathcal P$ outputs random differing indices, which is without loss of generality by Lemma~\ref{lem:rand-ur}.
+
 
 Again Charlie receives $z\in\{0,1\}^N$ and Diane receives $j^*$ and $z_{j^*+1},\ldots,z_N$ and they want to solve $\aug_N$. Charlie views his input as consisting of $L$ blocks for $L = c\log(n/k)$ for a sufficiently small constant $c\in(0,1)$, and the $i$th block for $i\in[L]$ specifies a set $S_i \in \mathcal S_{u_i,m}$ for $m = ck$ and $u_i = n/(100^i L)$. As before, for $c$ sufficiently small we have $N = \Theta(L\cdot k\log(n/k)) = \Theta(k\log^2(n/k))$. The bijection $A$ and set $S$ are defined exactly as in Section~\ref{sec:aug-delta}, and Charlie simulates Alice to send the message $M$ to Diane that Alice would have sent to Bob on input $\mathbf{1}_S$. Again, Diane knows $S_i$ for $i>i^*$, where $j^*$ lies in the $i^*$th block of bits. Diane's algorithm to produce her output is then described in Algorithm~\ref{algo:diane2}.
 
