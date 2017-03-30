@@ -147,16 +147,16 @@ where the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\
 \end{equation}
 Here again the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\to \pi(S\setminus T)$ (recall that we condition on the image $\pi(S\setminus T)$ under $\pi$, but not on the actual mapping).
 
-We now define the set $\mathcal{T}$ of {\bf typical intermediate sets}, which plays a crucial role in our analysis.  Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/2^{i^*-i}$.  The following claim will be useful:
+We now define the set $\mathcal{T}$ of {\bf typical intermediate sets}, which plays a crucial role in our analysis.  Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/4^{i^*-i}$.  The following claim will be useful:
 \begin{claim}\label{cl:size-of-t}
 For the set $\mathcal{T}$ defined above one has $|\mathcal{T}|=2^{O(m)}$.
 \end{claim}
 \begin{proof}
 \begin{align*}
-|\mathcal T| &\le 2^m \cdot \prod_{i=1}^{i^*-1}\left(\sum_{r=0}^{\frac m{2^{i^*-i}}} \binom mr\right)\text{ (the }2^m\text{ term comes from }S_{i^*}\text{)}\\
-{}&\le 2^m \cdot \prod_{i=1}^{i^*-1} \binom{m + \frac m{2^{i^* - i}}}{\frac m{2^{i^* - i}}}\\
-{}&\le 2^m \cdot \prod_{i=1}^{i^*-1} (2e\cdot 2^{i^*-i})^{\frac m{2^{i^* - i}}}\text{ (using }\binom nk \le (en/k)^k\textrm{)}\\
-{}&\le 2^{O(m)} \cdot 2^{m\cdot O(\sum_{j=1}^\infty j 2^{-j})} \\
+|\mathcal T| &\le 2^m \cdot \prod_{i=1}^{i^*-1}\left(\sum_{r=0}^{\frac m{4^{i^*-i}}} \binom mr\right)\text{ (the }2^m\text{ term comes from }S_{i^*}\text{)}\\
+{}&\le 2^m \cdot \prod_{i=1}^{i^*-1} \binom{m + \frac m{4^{i^* - i}}}{\frac m{2^{i^* - i}}}\\
+{}&\le 2^m \cdot \prod_{i=1}^{i^*-1} (2e\cdot 4^{i^*-i})^{\frac m{4^{i^* - i}}}\text{ (using }\binom nk \le (en/k)^k\textrm{)}\\
+{}&\le 2^{O(m)} \cdot 2^{m\cdot O(\sum_{j=1}^\infty j 4^{-j})} \\
 {}& \le 2^{O(m)}
 \end{align*}
 \end{proof}
@@ -167,23 +167,15 @@ We will show that for most choices of $\pi$ and shared random string $R$ Algorit
 
 
 {\bf Step 1: proving that $\widetilde{\mathcal{P}}$ succeeds in recovering $T_{i^*}$ and never leaves $\mathcal{T}$ with high probability.}
-Choose $\pi$ uniformly at random. By \eqref{eqn:others-unlikely}, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, the expected number of items recovered by $\widetilde{\query}$ from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/2^{i^*-i}$ items from $S_i$ is at most $(1/25)^{i^*-i}$ by Markov's inequality. Note that the probability is over the choice of $\pi$ only, as $\widetilde{\query}$ is assumed to succeed with probability $1$ by definition of $\widetilde{\mathcal{P}}$. 
+Choose $\pi$ uniformly at random. By \eqref{eqn:others-unlikely}, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, the expected number of items recovered by $\widetilde{\query}$ from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/4^{i^*-i}$ items from $S_i$ is at most $(1/12)^{i^*-i}$ by Markov's inequality. Note that the probability is over the choice of $\pi$ only, as $\widetilde{\query}$ is assumed to succeed with probability $1$ by definition of $\widetilde{\mathcal{P}}$. 
 Thus
 $$
-\Pr( \widetilde{\mathcal{P}}\text{~leaves~}\mathcal{T}) \le \sum_{i=1}^{i^*-1}\left(1/25\right)^{i^*-i} < 1/24.
+\Pr( \widetilde{\mathcal{P}}\text{~leaves~}\mathcal{T}) \le \sum_{i=1}^{i^*-1}\left(1/12\right)^{i^*-i} < 1/10.
 $$
-It remains to argue that $\widetilde{\mathcal{P}}$ succeeds in recovering $T_{i^*}$. By \eqref{eqn:others-unlikely}, the expected number of items recovered by $\widetilde{\query}$ from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/4^{i^*-i}$ items from $S_i$ is at most $(2/25)^{i^*-i}$ by Markov's inequality.  Thus
-$$
-\Pr(\widetilde{\mathcal{P}}\text{~recovers more than $m/4^{i^*-i}$ elements from $S_i$ for any $i<i^*$}) \le \sum_{i=1}^{i^*-1}\left(2/25\right)^{i^*-i} < 1/10.
-$$
-In particular this means that with probability at least $1-1/10$ at least $1-\sum_{j\geq 1} 4^{-j}\geq 2/3$ fraction of the first $m$ iterations  recover an element from $S_{i^*}$, and hence
-$$
-\Pr(\widetilde{\mathcal{P}}\text{~fails to recover~}{T}_{i^*}) \le 1/10
-$$
-Putting the two bounds together, we get that $\widetilde{\mathcal{P}}$ succeeds at least with probability $1-1/24-1/10$.
+In particular this means that with probability at least $1-1/10$ at most $\sum_{i<i^*} m/4^{i^*-i}<m/2$ items from $\bigcup_{i<i^*} S_i$ are recovered in the first $m$ (or fewer, if the algorithm terminates earlier) iterations. This also implies that with probability at least $1-1/10$ if the algorithm proceeds for the entire $m$ iterations, it recovers at least $m/2$ elements of $T_{i^*}$ and hence terminates. We thus get that $\widetilde{\mathcal{P}}$ succeeds at least with probability $1-1/10$.
 
 {\bf Step 2: coupling $\widetilde{\mathcal{P}}$ to $\mathcal{P}$ on most of the probability space.}
-For every $T\subset S$ and every $\pi$ let $\mathcal{E}_T(\pi)$ be the probabilistic event (over the choice of $\query$'s random string $R$) that $\query(M, \mathbf{1}_{\pi(T)})$ succeeds in returning an element in $\pi(S\backslash T)$. Note that $\mathcal{E}(\pi)$ is a subset of the probability space of shared random strings $R$, and depends on $\pi$. We let 
+For every $T\subset S$ and every $\pi$ let $\mathcal{E}_T(\pi)$ be the probabilistic event (over the choice of $\query$'s random string $R$) that $\query(M, \mathbf{1}_{\pi(T)})$ succeeds in returning an element in $\pi(S\backslash T)$. Note that $\mathcal{E}_T(\pi)$ is a subset of the probability space of shared random strings $R$, and depends on $\pi$. We let 
 $$
 \mathcal{E}_{\mathcal T}(\pi):=\wedge_{T\in\mathcal T} \mathcal E_T(\pi)
 $$
@@ -193,14 +185,14 @@ $$
 $$
 as long as for $m = c\log(1/\delta)$ for $c$ a sufficiently small constant.
 
-Now recall that $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ is an idealized protocol, which is guaranteed to output an element of $\pi(S\setminus T)$ for every choice of  $T\subset S$, shared random string $R$, $\{\pi(j)\}_{j\in T}$, and $\pi(S\setminus T)$. We have just shown that with probability at least $1-1/20$ over the choice of $R$, for every $\pi$ the event ${\mathcal E_{\mathcal T}(\pi)}$ occurs. Now define $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ as equal to $\query(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$ (the typical set of intermediate sets) and $(\pi, R)$ such that $R\in {\mathcal E_{\mathcal T}(\pi)}$, and extend $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ to return an arbitrary element of $\pi(S\setminus T)$ for remaining tuples $(T, R, \pi(T),  \pi(S\setminus T))$. Note that $\widetilde{\query}$ defined in this way is a deterministic function once $T$, $R$, $\pi(T)$ and $\pi(S\setminus T)$ are fixed. {\bf MK: should we say more?}
+Now recall that $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ is an idealized protocol, which is guaranteed to output an element of $\pi(S\setminus T)$ for every choice of  $T\subset S$, shared random string $R$, $\{\pi(j)\}_{j\in T}$, and $\pi(S\setminus T)$. We have just shown that for every $\pi$ the event ${\mathcal E_{\mathcal T}(\pi)}$ occurs  with probability at least $1-1/20$ over the choice of $R$. Now define $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ as equal to $\query(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$ (the typical set of intermediate sets) and $(\pi, R)$ such that $R\in {\mathcal E_{\mathcal T}(\pi)}$, and extend $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ to return an arbitrary element of $\pi(S\setminus T)$ for remaining tuples $(T, R, \pi(T),  \pi(S\setminus T))$. Note that $\widetilde{\query}$ defined in this way is a deterministic function once $T$, $R$, $\pi(T)$ and $\pi(S\setminus T)$ are fixed. 
 
 Note that with probability at least $1-1/20$ over the choice of $\pi$ and $R$ one has $\query(M, \mathbf{1}_{\pi(T)})=\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$, as required.
 
 
 {\bf Step 3: arguing that $\mathcal{P}$ succeeds with high probability.}  Choose $(\pi, R)$ uniformly at random. By {\bf Step 2} we have that with probability at least $1-1/20$ over this choice 
-$\query(M, \mathbf{1}_{\pi(T)})=\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$. At the same time we have by {\bf Step 1} that with probability at least $1-1/24-1/10$ over the choice of $\pi$ the idealized process $\widetilde{\mathcal{P}}$ 
-succeeds in recovering $T_{i^*}$ and never leaves $\mathcal{T}$. Putting the two bounds together, we get that $\mathcal{P}$ succeeds with probability at least $1-1/20-1/24-1/10>2/3$, showing the following theorem.
+$\query(M, \mathbf{1}_{\pi(T)})=\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$. At the same time we have by {\bf Step 1} that with probability at least $1-1/10$ over the choice of $\pi$ the idealized process $\widetilde{\mathcal{P}}$ 
+succeeds in recovering $T_{i^*}$ and never leaves $\mathcal{T}$. Putting the two bounds together, we get that $\mathcal{P}$ succeeds with probability at least $1-1/20-1/10>2/3$, showing the following theorem.
 
 \begin{theorem}
 For any $0<\delta<1/2$ and integer $n\ge 1$ with $\log \frac 1{\delta} < n/(4e)$, $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) \ge \randcom^{\rightarrow,pub}_{1/3}(\aug_N)$ for $N = \Theta(\log\frac 1{\delta} \log^2 \frac n{\log \frac 1{\delta}})$.
