@@ -139,7 +139,7 @@ where the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\
 \fi
 
 
-\paragraph{Elements in $S_{j}, j<i^*,$ are unlikely to be recovered.} At the same time as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, for any $1\le j< i^*$
+\paragraph{Elements in $S_{j}, j<i^*,$ are unlikely to be recovered.} Given Claim~\ref{cl:uniform}, since the elements of $S_j$ appear with frequency $100^j$ in $S\backslash T$, they are less likely to be returned by $\pi^{-1}(\widetilde{\query}(M, \mathbf{1}_{\pi(T)}))$ when $j$ is small.  More precisely, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, for any $1\le j< i^*$
 \begin{equation}
 \begin{split}
 \Pr(i = j | (R, \{\pi(j)\}_{j\in T}, \pi(S\setminus T)) \text{~s.t.~}\widetilde{\query}(M, \mathbf{1}_{\pi(T)})\text{~succeeds})& \le \frac{m\cdot 100^j}{\frac m2\cdot 100^{i^*}}\\
