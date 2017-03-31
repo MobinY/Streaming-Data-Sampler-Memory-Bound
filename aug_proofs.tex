@@ -49,7 +49,11 @@ We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies
         \State $T_{i^*} \leftarrow T_{i^*}\cup \{a\}$
       \EndIf
     \EndWhile
-    \State \Return the unique $S\in \mathcal S_{u_{i^*},m}$ with $T_{i^*}\subset S$ 
+    \If {there exists $S\in\mathcal S_{u_{i^*},m}$ with $T_{i^*}\subset S$}
+      \State \Return the unique such $S$
+    \Else
+      \State \Return \textsf{Fail}
+    \EndIf
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
