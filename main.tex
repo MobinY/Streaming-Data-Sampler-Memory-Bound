@@ -1,8 +1,9 @@
-\section{Communication Lower Bound for $\ur^\subset$} \label{sec:optimal-lb}
+\section{Lower bounds via the adaptivity lemma}\label{sec:adaptive-proof}
+\subsection{Communication Lower Bound for $\ur^\subset$} \label{sec:optimal-lb}
 
 Consider a protocol $\mathcal{P}$ for $\ur^\subset$ with failure probability $\delta$, operating in the one-way public coin model. When Alice's input is $x$ and Bob's input is $y$, Alice sends $\sketch(x)$ to Bob, and Bob outputs $\query(\sketch(x), y)$, which with probability at least $1-\delta$ is in $\supp(x-y)$. As mentioned in Section~\ref{sec:overview}, we use $\mathcal{P}$ as a subroutine in a scheme for encoding/decoding elements of $\binom{[n]}m$ for $m = \lfloor \sqrt{n\log(1/\delta)}\rfloor$. In this section, we assume $\log \frac 1{\delta} \le n/64$, since for larger $n$ we have an $\Omega(n)$ lower bound.
 
-\subsection{Encoding/decoding scheme}
+\subsubsection{Encoding/decoding scheme}
 We now describe our encoding/decoding scheme $(\enc, \dec)$ for elements in ${[n] \choose m}$, which uses $\mathcal{P}$ in a black-box way. The parameters shared by $\enc$ and $\dec$ are given in Algorithm~\ref{algo:para}.
 
 As discussed in Section~\ref{sec:overview}, on input $S\in {[n] \choose m}$, $\enc$ computes $M \leftarrow \sketch(\mathbf{1}_S)$ as part of its output. Moreover, $\enc$ also outputs a subset $B\subseteq S$ computed as follows. Initially $B=S$ and $S_0=S$. $\enc$ proceeds in $R$ rounds.  In round $r\in[R]$, $\enc$ computes $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash S_{r-1}})$.  Let $b$ denote a binary string of length $R$, where $b_r$ records whether $\query$ succeeds in round $r$.  $\enc$ also outputs $b$.  If $s_r\in S_{r-1}$, i.e. $\query(M, \mathbf{1}_{S\backslash S_{r-1}})$ succeeds, $\enc$ sets $b_r=1$ and removes $s_r$ from $B$ (since the decoder can recover $s_r$ from the $\ur^\subset$-protocol, $\enc$ does not need to include it in $B$); otherwise $\enc$ sets $b_r=0$.  At the end of round $r$, $\enc$ picks a uniformly random set $S_r$ in $\binom{S_{r-1}\backslash \{s_r\}}{n_r}$.  In particular, $\enc$ uses its shared randomness with $\dec$ to generate $S_r$ in such a way that $\enc, \dec$ agree on the sets $S_r$ ($\dec$ will actually iteratively construct $C_r = S\backslash S_r$). We present $\enc$ in Algorithm~\ref{algo:enc}.
@@ -66,7 +67,7 @@ The decoding process is symmetric.  Let $C_0=\emptyset$ and $A=\emptyset$.  $\de
   \end{algorithmic}
 \end{algorithm}
 
-\subsection{Analysis}
+\subsubsection{Analysis}
 
 We have two random objects in our encoding/decoding scheme: (1) the random source used by $\mathcal{P}$, denoted by $X$, and (2) the random permutation $\pi$. These are independent.
 

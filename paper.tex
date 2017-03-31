@@ -20,8 +20,10 @@
 \DeclareMathOperator*{\Pr}{\mathbb{P}}
 \newcommand{\samp}{\textsf{SAMP}\xspace}
 \newcommand{\success}{\textsf{SUCC}\xspace}
+\newcommand{\diane}{\mathsf{Diane}}
 \newcommand{\enc}{\textsf{ENC}\xspace}
 \newcommand{\dec}{\textsf{DEC}\xspace}
+\newcommand{\aug}{\mathbf{AugIndex}\xspace}
 \newcommand{\s}{\textsf{s}\xspace}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\F}{\mathbb{F}}
@@ -34,10 +36,14 @@
 \newcommand{\findup}[1]{\textsf{FindDuplicate}$({#1})$\xspace}
 
 \title{Optimal lower bounds for universal relation, samplers, and finding duplicates}
-\author{Jelani Nelson\thanks{Harvard University. \texttt{minilek@seas.harvard.edu}. Supported by NSF grant IIS-1447471 and
+\author{
+  Michael Kapralov\thanks{EPFL. \texttt{michael.kapralov@epfl.ch}.}
+  \and Jelani Nelson\thanks{Harvard University. \texttt{minilek@seas.harvard.edu}. Supported by NSF grant IIS-1447471 and
    CAREER award CCF-1350670, ONR Young Investigator award N00014-15-1-2388, and a Google Faculty Research Award.}
   \and Jakub Pachocki\thanks{OpenAI. \texttt{jakub@openai.com}. Work done while affiliated with Harvard University, under the support of ONR grant N00014-15-1-2388.}
-  \and Zhengyu Wang\thanks{Harvard University. \texttt{zhengyuwang@g.harvard.edu}. Supported by NSF grant CCF-1350670.}}
+  \and Zhengyu Wang\thanks{Harvard University. \texttt{zhengyuwang@g.harvard.edu}. Supported by NSF grant CCF-1350670.}
+  \and David Woodruff\thanks{IBM Research Almaden. \texttt{dpwoodru@us.ibm.com.}}
+  \and Mobin Yahyazadeh\thanks{Sharif University of Technology. \texttt{mn.yahyazadeh@gmail.com}.}}
 
 \begin{document}
 
@@ -48,11 +54,15 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-In the communication problem $\ur$ ({\em universal relation}) \cite{KarchmerRW95}, Alice and Bob respectively receive $x$ and $y$ in $\{0,1\}^n$ with the promise that $x\neq y$. The last player to receive a message must output an index $i$ such that $x_i\neq y_i$. We prove that the randomized one-way communication complexity of this problem in the public coin model is exactly $\Theta(\min\{n, \log(1/\delta)\log^2(\frac{n}{\log(1/\delta)})\})$ bits for failure probability $\delta$.  We also show that for a more general problem $\ur_k$, in which the output must be $\min\{k, |\supp(x-y)|\}$ distinct indices $i$ such that $x_i\neq y_i$, the optimal randomized one-way communication complexity is $\Theta(\min\{n, t\log^2(n/t)\})$ bits where $t = \max\{k, \log(1/\delta)\}$. Our lower bounds hold even if promised $\supp(y)\subset \supp(x)$.
+In the communication problem $\ur$ (universal relation) [KRW95], Alice and Bob respectively receive $x, y \in\{0,1\}^n$ with the promise that $x\neq y$. The last player to receive a message must output an index $i$ such that $x_i\neq y_i$. We prove that the randomized one-way communication complexity of this problem in the public coin model is exactly $\Theta(\min\{n,\log(1/\delta)log^2(\frac n{\log(1/\delta)})\})$ bits for failure probability $\delta$. Our lower bound holds even if promised $\mathop{support}(y)\subset \mathop{support}(x)$. As a corollary, we obtain optimal lower bounds for $\ell_p$-sampling in strict turnstile streams for $0\le p < 2$, as well as for the problem of finding duplicates in a stream. Our lower bounds do not need to use large weights, and hold even if promised $x\in\{0,1\}^n$ at all points in the stream. 
 
-As a corollary, we obtain optimal lower bounds for sampling problems in strict turnstile streams, as well as for the problem of finding duplicates in a stream.  Specifically, consider a high-dimensional vector $x\in\R^n$ receiving streaming updates of the form ``$x_i\leftarrow x_i + \Delta$'', and in response to a query we must with probability $1-\delta$ recover {\em any} element $i\in\supp(x) = \{j : x_j \neq 0\}$. Our lower bound implies the first optimal $\Omega(\log(1/\delta)\log^2 n)$-bit space lower bound for any solution to this problem as long as $\delta > 2^{-n^{.99}}$, matching an upper bound of \cite{JowhariST11}. Our result thus implies optimal lower bounds for the so-called ``$\ell_p$-sampling'' problem for any $0\le p < 2$ in the strict turnstile model, as well as variations in which a query response must include $\min\{k, |\supp(x)|\}$ elements from $\supp(x)$.  Our lower bounds also do not need to use large weights, and hold even if it is promised that $x\in\{0,1\}^n$ at all points in the stream.
+We give two different proofs of our main result. The first proof demonstrates that any algorithm $\mathcal A$ solving sampling problems in turnstile streams in low memory can be used to encode subsets of $[n]$ of certain sizes into a number of bits below the information theoretic minimum. Our encoder makes adaptive queries to $\mathcal A$ throughout its execution, but done carefully so as to not violate correctness. This is accomplished by injecting random noise into the encoder's interactions with $\mathcal A$, which is loosely motivated by techniques in differential privacy. Our correctness analysis involves understanding the ability of $\mathcal A$ to correctly answer adaptive queries which have positive but bounded mutual information with $\mathcal A$'s internal randomness, and may be of independent interest in the newly emerging area of adaptive data analysis with a theoretical computer science lens. Our second proof is via reduction from Augmented Indexing \cite{MiltersenNSW98}, but again needs to interact with $\mathcal A$ adaptively, which we overcome by identifying certain likely interaction patterns and union bounding to guarantee correct interaction over all of them.
 
-More easily explained in the language of the above support-finding turnstile streaming problem, our lower bound operates by showing that any algorithm $\mathcal{A}$ solving that problem in low memory can be used to encode subsets of $[n]$ of certain sizes into a number of bits below the information theoretic minimum. Our encoder makes adaptive queries to $\mathcal{A}$ throughout its execution, but done carefully so as to not violate correctness. This is accomplished by injecting random noise into the encoder's interactions with $\mathcal{A}$, which is loosely motivated by techniques in differential privacy. Our correctness analysis involves understanding the ability of $\mathcal{A}$ to correctly answer adaptive queries which have positive but bounded mutual information with $\mathcal{A}$'s internal randomness, and may be of independent interest in the newly emerging area of adaptive data analysis with a theoretical computer science lens.
+% In the communication problem $\ur$ ({\em universal relation}) \cite{KarchmerRW95}, Alice and Bob respectively receive $x$ and $y$ in $\{0,1\}^n$ with the promise that $x\neq y$. The last player to receive a message must output an index $i$ such that $x_i\neq y_i$. We prove that the randomized one-way communication complexity of this problem in the public coin model is exactly $\Theta(\min\{n, \log(1/\delta)\log^2(\frac{n}{\log(1/\delta)})\})$ bits for failure probability $\delta$.  We also show that for a more general problem $\ur_k$, in which the output must be $\min\{k, |\supp(x-y)|\}$ distinct indices $i$ such that $x_i\neq y_i$, the optimal randomized one-way communication complexity is $\Theta(\min\{n, t\log^2(n/t)\})$ bits where $t = \max\{k, \log(1/\delta)\}$. Our lower bounds hold even if promised $\supp(y)\subset \supp(x)$.
+
+% As a corollary, we obtain optimal lower bounds for sampling problems in strict turnstile streams, as well as for the problem of finding duplicates in a stream.  Specifically, consider a high-dimensional vector $x\in\R^n$ receiving streaming updates of the form ``$x_i\leftarrow x_i + \Delta$'', and in response to a query we must with probability $1-\delta$ recover {\em any} element $i\in\supp(x) = \{j : x_j \neq 0\}$. Our lower bound implies the first optimal $\Omega(\log(1/\delta)\log^2 n)$-bit space lower bound for any solution to this problem as long as $\delta > 2^{-n^{.99}}$, matching an upper bound of \cite{JowhariST11}. Our result thus implies optimal lower bounds for the so-called ``$\ell_p$-sampling'' problem for any $0\le p < 2$ in the strict turnstile model, as well as variations in which a query response must include $\min\{k, |\supp(x)|\}$ elements from $\supp(x)$.  Our lower bounds also do not need to use large weights, and hold even if it is promised that $x\in\{0,1\}^n$ at all points in the stream.
+
+% More easily explained in the language of the above support-finding turnstile streaming problem, our lower bound operates by showing that any algorithm $\mathcal{A}$ solving that problem in low memory can be used to encode subsets of $[n]$ of certain sizes into a number of bits below the information theoretic minimum. Our encoder makes adaptive queries to $\mathcal{A}$ throughout its execution, but done carefully so as to not violate correctness. This is accomplished by injecting random noise into the encoder's interactions with $\mathcal{A}$, which is loosely motivated by techniques in differential privacy. Our correctness analysis involves understanding the ability of $\mathcal{A}$ to correctly answer adaptive queries which have positive but bounded mutual information with $\mathcal{A}$'s internal randomness, and may be of independent interest in the newly emerging area of adaptive data analysis with a theoretical computer science lens.
 \end{abstract}
 
 \newpage
@@ -60,6 +70,7 @@ More easily explained in the language of the above support-finding turnstile str
 \input{intro.tex}
 \input{main.tex}
 \input{more_samples.tex}
+\input{aug_proofs.tex}
 
 \section*{Acknowledgments}
 Initially the authors were focused on proving optimal lower bounds for samplers, but we thank Vasileios Nakos for pointing out that our $\ur^\subset$ lower bound immediately implies a tight lower bound for finding a duplicate in data streams as well. Also, initially our proof of Lemma~\ref{lem:information} incurred an additive $1$ in the numerator of the right hand side of \eqref{eqn:adaptivity}. This is clearly suboptimal for small $I(X; Y)$ (for example, consider $I(X; Y) = 0$, in which case the right hand side should be $\delta$ and not $1/\log(1/\delta)$)). We thank T.S.\ Jayram for pointing out that a slight modification of our proof could actually replace the additive $1$ with the binary entropy function (and also for showing us a different proof of this lemma, which resembles the standard proof of Fano's inequality).
