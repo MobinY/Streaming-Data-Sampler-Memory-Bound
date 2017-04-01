@@ -20,17 +20,17 @@ spanner computation [AGM12b]: suppfind_k for k = n^{1/t}, for a t-spanner, delta
 
 spectral sparsifiers [AGM13]: same as cut-sparsifier
 
-maximal matching [CCHM15]: (ell_0)_k where k is the size of maximum matching
+maximal matching [CCHM15]: (ell_0)_k where k is the size of maximum matching, delta = 1/k
 
 maximum matching [AGM12a]: needs multiple passes
 
 maximum matching [BS15]: (ell_0)_k where k = O(eps^{-2} log n a(G) n / T), here a(G) is the arboricity of G, and T is a threshold of shallow edges
 
-maximum matching [Kon15]: (ell_0)_k where k is matching size 
+maximum matching [Kon15]: suppfind_k where k is matching size, delta = 1/k
 
-maximum matching [AKLY16]: (ell_0)_k where k is matching size 
+maximum matching [AKLY16]: (ell_0)_1, delta = 1/poly(n)
 
-maximum matching [CCE+16]: they describe a subgraph sampling primitive using (ell_0)_1, delta is not explicitly specified
+maximum matching [CCE+16]: they describe a subgraph sampling primitive using (ell_0)_1, delta=1/poly(n)
 
 "Given a dynamic graph stream, the behavior of an `l0-sampler algorithm
 is defined as follows: It returns FAIL with probability at most delta and otherwise, it returns an edge chosen
@@ -41,19 +41,21 @@ the `0-sampler returns NULL."
 maximum matching [AKL17] ??
 
 vertex cover [CCHM15]: same as maximal matching
-vertex cover [CCE+ 16]: seems that they use the primative
+vertex cover [CCE+ 16]: seems that they use the same primative
 hitting set [CCE+ 16]
 b-matching [CCE+ 16]
 disjoint paths [CCE+ 16]
 k-colorable subgraph [CCE+ 16]
 several other maximum subgraph problems [CCE+ 16]
 
-densest subgraph [BHNT15]: (ell_0)_1, need O_tilde(n) copies. Use bucketing to bring down update time to O_tilde(1)
+densest subgraph [BHNT15]: (ell_0)_1, delta = 1/poly(n), need O_tilde(n) instances. Use bucketing to bring down update time to O_tilde(1)
 
-densest subgraph [MTVV15]: (ell_0)_1 
+densest subgraph [MTVV15]: (ell_0)_k where k = eps^{-2} n log n, constant delta
 
-densest subgraph [EHW16]: (ell_0)_k for k = O_tilde(n) (universe size is {n \choose 2})
+densest subgraph [EHW16]: (ell_0)_k for k = O_tilde(n) (universe size is {n \choose 2}) constant delta
 
 vertex and hyperedge connectivity [GMT15]: suppfind_1 with delta=1/poly(n)
+In particular, for k-vertex connectivity, they want to obtain some spanning forestest. And for hypergraphs, they want to obtain some k-skeletons for hypergraphs, which generate the concept of forests. 
 
-graph degeneracy [FT16]: (ell_0)_1 with delta_1=const, delta_2=1/n^{Omeaga(1)}, it uses (eps^{-2} n log n) samplers (n is vertex size) to get (1+eps)-approx degeneracy with fail-prob 1/n^{Omega(1)}
+graph degeneracy [FT16]: (ell_0)_1 with delta = 1/poly(n), it uses (eps^{-2} n log n) such samplers (n is vertex size) to get (1+eps)-approx degeneracy 
+In fact, similar to [MTVV15], [FT16] actually needs (ell_0)_k where k = eps^{-2} n log n, constant delta
