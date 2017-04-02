@@ -11,15 +11,15 @@ As discussed in Section~\ref{sec:overview}, on input $S\in {[n] \choose m}$, $\e
 The decoding process is symmetric.  Let $C_0=\emptyset$ and $A=\emptyset$.  $\dec$ proceeds in $R$ rounds.  On round $r\in[R]$, $\dec$ obtains $s_r\in S\backslash C_{r-1}$ by invoking $\query(M, \mathbf{1}_{C_{r-1}})$.  By construction of $C_{r-1}$ (to be described later), it is guaranteed that $S_{r-1}=S\backslash C_{r-1}$.  Therefore, $\dec$ recovers exactly the same $s_r$ as $\enc$.  $\dec$ initially assigns $C_r\leftarrow C_{r-1}$.  If $b_r=1$, $\dec$ adds $s_r$ to both $A$ and $C_r$.  At the end of round $r$, $\dec$ inserts many random items from $B$ into $C_r$ so that $C_r=S\backslash S_r$.  $\dec$ can achieve this because of the shared random permutation $\pi$ when constructing $S_r$.  In the end, $\dec$ outputs $B\cup A$.  We present $\dec$ in Algorithm~\ref{algo:dec}.
 
 \begin{algorithm}[H] 
-  \caption{Variables Shared by encoder $\enc$ and decoder $\dec$.} \label{algo:para}
+  \caption{Variables shared by encoder $\enc$ and decoder $\dec$.} \label{algo:para}
   \begin{algorithmic}[1] 
     \State $m\leftarrow \lfloor \sqrt{n \log\frac{1}{\delta}} \rfloor$ 
     \State $K\leftarrow \lfloor \frac{1}{16}\log \frac{1}{\delta} \rfloor$
     \State $R\leftarrow \lfloor K\log(m/4K) \rfloor$
     \For {$r = 0, \ldots, R$}
-      \State $n_r\leftarrow \lfloor m \cdot 2^{-\frac{r}{K}} \rfloor$ \Comment{$|S_r|=n_r$, and we have $n_r-n_{r+1}\ge 2$}
+      \State $n_r\leftarrow \lfloor m \cdot 2^{-\frac{r}{K}} \rfloor$ \Comment{$|S_r|=n_r$, and $\forall r\ n_r-n_{r+1}\ge 2$}
     \EndFor
-    \State Let $\pi$ be a random permutation on $[n]$ \Comment{Used to generate $S_r$ and $C_r$}
+    \State $\pi$ is a random permutation on $[n]$ \Comment{Used to generate $S_r$ and $C_r$}
   \end{algorithmic}
 \end{algorithm}
 
@@ -28,19 +28,19 @@ The decoding process is symmetric.  Let $C_0=\emptyset$ and $A=\emptyset$.  $\de
   \begin{algorithmic}[1]
     \Procedure{$\enc$}{$S$}
     \State $M \leftarrow \sketch(\mathbf{1}_S)$
-    \State $A\leftarrow \emptyset$
-    \State $S_0 \leftarrow S$
+    \State $A\leftarrow \emptyset$ \Comment{the set $\dec$ recovers just from $M$}
+    \State $S_0 \leftarrow S$ \Comment{at end of round $r$, $\dec$ still needs to recover $S_r$}
     \For {$r=1,\ldots,R$}
-      \State $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash S_{r-1}})$
+      \State $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash S_{r-1}})$ \Comment{$s_r\mathbin{\stackrel{\rm ?}{\in}} S_{r-1}$ found in round $r$}
       \State $S_r\leftarrow S_{r-1}$
       \If {$s_r\in S_{r-1}$} \Comment{i.e. if $s_r$ is a valid sample}
-        \State $b_r\leftarrow 1$ \Comment{$b$ is a binary string of length $R$, indicating if $\query$ succeeds on round $r$}
+        \State $b_r\leftarrow 1$ \Comment{$b\in\{0,1\}^R$ indicating which rounds succeed}
         \State $A\leftarrow A \cup \{s_r\}$
         \State $S_r\leftarrow S_r \backslash \{s_r\}$
       \Else 
         \State $b_r\leftarrow 0$
       \EndIf
-      \State Remove $|S_r|-n_r$ elements from $S_r$ with smallest $\pi_a$'s among $a\in S_r$ \Comment{So that $|S_r|=n_r$}
+      \State Remove $|S_r|-n_r$ elements from $S_r$ with smallest $\pi_a$'s among $a\in S_r$ \Comment{now $|S_r|=n_r$}
     \EndFor
     \State \Return ($M$, $S\backslash A$, $b$) 
     \EndProcedure
@@ -51,16 +51,20 @@ The decoding process is symmetric.  Let $C_0=\emptyset$ and $A=\emptyset$.  $\de
   \caption{Decoder $\dec$.} \label{algo:dec}
   \begin{algorithmic}[1]
     \Procedure{$\dec$}{$M$, $B$, $b$}
-    \State $A\leftarrow \emptyset$
-    \State $C_0 \leftarrow \emptyset$
-    \For {$r=1,\ldots,R$}
+    \Statex \ \ \ \ \ $\triangleright$ $M$ is $\sketch(\mathbf{1}_S)$
+    \Statex \ \ \ \ \ $\triangleright$ $b\in\{0,1\}^R$ indicates rounds in which Bob succeeds
+    \Statex \ \ \ \ \ $\triangleright$ $B$ contains all elements of $S$ that $\dec$ doesn't recover via $M$
+    \State $A\leftarrow \emptyset$ \Comment{the subset of $S$ $\dec$ recovers just from $M$}
+    \State $C_0 \leftarrow \emptyset$ \Comment{subset of $S$ we have built up so far}
+    \For {$r=1,\ldots,R$} \Comment{each iteration tries to recover $1$ element via $M$}
       \State $C_r\leftarrow C_{r-1}$
-      \If{$b_r=1$}
+      \If{$b_r=1$} \Comment{this means Bob succeeds in round $r$}
         \State $s_r\leftarrow \query(M, \mathbf{1}_{C_{r-1}})$ \Comment{Invariant: $C_r=S \backslash S_r$ ($S_r$ is defined in $\enc$)}
         \State $A\leftarrow A \cup \{s_r\}$
         \State $C_r\leftarrow C_r \cup \{s_r\}$
       \EndIf
        \State Insert $m-n_r-|C_r|$ items into $C_r$ with smallest $\pi_a$'s among $a\in B\backslash C_r$
+       \Statex \Comment{Random masking ``Differential Privacy'' step. Still $n_r$ elements left to recover.}
     \EndFor
     \State \Return $B\cup A$ 
     \EndProcedure
