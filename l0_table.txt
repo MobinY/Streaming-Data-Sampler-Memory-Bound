@@ -2,11 +2,11 @@ For each problem/paper, figure out what they need. To get failure probability 1/
 
 euclidean MST [FIS05]: l0_k, k depends on some epsilon (for estimation via sampling)
 
-connectivity [AGM12a]: suppfind_1, delta = .01
+connectivity [AGM12a]: suppfind_1, delta = .01 [I think delta should be 1/poly(n)]
 
-k-connectivity [AGM12a]: suppfind_1, says delta = .01 but it seems we need delta = O(1/lg k) (???)
+k-connectivity [AGM12a]: suppfind_1, says delta = .01 but it seems we need delta = O(1/lg k) (???)[I think delta should be 1/poly(n)]
 
-bipartiteness [AGM12a]: suppfind_1, delta = .01
+bipartiteness [AGM12a]: suppfind_1, delta = .01[I think delta should be 1/poly(n)]
 
 minimum spanning tree [AGM12a]: suppfind_1, delta ~ epsilon/lg(W) where all edge weights are in [W] and we want the approx MST weight up to 1+epsilon
 
@@ -16,7 +16,7 @@ minimum cut [AGM12b]: suppfind_1, uses lg n k-conn. structures (so delta = 1/(lg
 
 cut-sparsifier [AGM12b]: same as min cut
 
-spanner computation [AGM12b]: suppfind_k for k = n^{1/t}, for a t-spanner, delta constant
+spanner computation [AGM12b]: suppfind_k for k = n^{1/t}, for a t-spanner, delta constant [I think delta should be 1/poly(n)]
 
 spectral sparsifiers [AGM13]: same as cut-sparsifier
 
