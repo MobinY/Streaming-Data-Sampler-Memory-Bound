@@ -3,9 +3,61 @@ In turnstile $\ell_0$-sampling, a vector $z\in\R^n$ starts as the zero vector an
 
 Given the rising importance of $\ell_0$-sampling in algorithm design, a clear task is to understand the exact complexity of this problem. The work \cite{JowhariST11} gave an $\Omega(\log^2 n)$-bit space lower bound for data structures solving even the case $M=1$ which fail with constant probability, and otherwise whose query responses are $(1/3)$-close to uniform in statistical distance. They also gave an upper bound for $M \le \poly(n)$ with failure probability $\delta$, which in fact gave $\min\{\|z\|_0, \Theta(\log(1/\delta))\}$ uniform samples from the support of $z$, using space $O(\log^2 n \log(1/\delta))$ bits (here $\|z\|_0$ denotes $|\supp(z)|$). Thus we say their data structure actually solves the harder problem of $\ell_0$-sampling$_k$ for $k =\Theta(\log(1/\delta))$ with failure probability $\delta$, where in $\ell_0$-sampling$_k$ the goal is to recover $\min\{\|z\|_0, k\}$ uniformly random elements, without replacement, from $\supp(z)$.  The upper and lower bounds in \cite{JowhariST11} thus match up to a constant factor for $k = 1$ and $\delta$ is a constant.
 
+
 \paragraph{Universal relation.} The work of \cite{JowhariST11} obtains its lower bound for $\ell_0$-sampling (and some other problems) via reductions from {\em universal relation} ($\ur$). The problem $\ur$ was first defined in \cite{KarchmerRW95} and arose in connection with work of Karchmer and Wigderson on circuit depth lower bounds \cite{KarchmerW90}. For $f:\{0,1\}^n\rightarrow\{0,1\}$, $D(f)$ is the minimum depth of a fan-in $2$ circuit over the basis $\{\neg, \vee, \wedge\}$ computing $f$. Meanwhile, the (deterministic) communication complexity $C(f)$ is defined as the minimum number of bits that need to be communicated in a correct protocol for Alice and Bob to solve the following communication problem: Alice receives $x\in f^{-1}(0)$ and Bob receives $y\in f^{-1}(1)$ (and hence in particular $x\neq y$), and they must both agree on an index $i\in[n]$ such that $x_i\neq y_i$. It is shown in \cite{KarchmerW90} that $D(f) = C(f)$, where they then used this correspondence to show a tight $\Omega(\log^2 n)$ depth lower bound for monotone circuits solving undirected $s$-$t$ connectivity. The work of \cite{KarchmerRW95} then proposed a strategy to separate the complexity classes $\mathbf{NC}^1$ and $\mathbf{P}$: start with a function $f$ on $\log n$ bits requiring depth $\Omega(\log n)$, then ``compose'' it with itself $k = \log n / \log\log n$ times (see \cite{KarchmerW90} for a precise definition of composition). If one could prove a strong enough direct sum theorem for communication complexity after composition, even for a random $f$, such a $k$-fold composition would yield a function that is provably in $\mathbf{P}$ (and in fact, even in $\mathbf{NC}^2$), but not in $\mathbf{NC}^1$. Proving such a direct sum theorem is still wide open, and the statement that it is true is known as the ``KRW conjecture''; see for example the recent works \cite{GavinskyMWW14,DinurM16} toward resolving this conjecture. As a toy problem en route to resolving it, \cite{KarchmerRW95} suggested proving a direct sum theorem for $k$-fold composition of a particular function $\ur$ that they defined. That task was positively resolved in \cite{EIRS91} (see also \cite{HastadW90}).
 
 The problem $\ur$ abstracts away the function $f$, and Alice and Bob are simply given $x,y\in\{0,1\}^n$ with the promise that $x\neq y$. The players must then agree on any index $i$ with $x_i\neq y_i$. The deterministic communication complexity of $\ur$ is nearly completely understood, with upper and lower bounds that match up to an additive $3$ bits, even if one imposes an upper bound on the number of rounds of communication \cite{TardosZ97}. Henceforth we also consider a generalized problem $\ur_k$, where the output must be $\min\{k, \|x-y\|_0\}$ distinct indices on which $x, y$ differ. We also use $\ur^{\subset}, \ur_k^{\subset}$ to denote the variants when promised $\supp(y)\subset \supp(x)$, and also Bob knows $\|x\|_0$. Clearly $\ur, \ur_k$ can only be harder than $\ur^\subset, \ur_k^\subset$, respectively.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+reference & problem & distribution & $k>1$? & $\delta = o(1)$?\\
+\hline
+\cite{FrahlingIS08} & Euclidean MST & $\ell_0$ & yes &\\
+\hline
+\cite{AhnGM12a} & connectivity & any & & yes\\
+\hline
+\cite{AhnGM12a} & $k$-connectivity & any & & yes\\
+\hline
+\cite{AhnGM12a} & bipartiteness & any & & yes\\
+\hline
+\cite{AhnGM12a} & MST & any & & yes\\
+\hline
+\cite{AhnGM12b} & subgraph counting & $\ell_0$ & yes & \\
+\hline
+\cite{AhnGM12b} & minimum cut & any &  & yes\\
+\hline
+\cite{AhnGM12b} & cut sparsifiers & any &  & yes\\
+\hline
+\cite{AhnGM12b} & spanners & any & yes & yes\\
+\hline
+\cite{AhnGM12b} & spectral sparsifiers & any &  & yes\\
+\hline
+\cite{ChitnisCHM15} & maximal matching & $\ell_0$ & yes & yes\\
+\hline
+\cite{BuryS15} & maximum matching & $\ell_0$ & yes & \\
+\hline
+\cite{Konrad15} & maximum matching & any & yes & yes \\
+\hline
+\cite{AssadiKLY16} & maximum matching & $\ell_0$ & & yes \\
+\hline
+\cite{ChitnisCEHMMV16} & maximum matching & $\ell_0$ & & yes \\
+\hline
+\cite{BhattacharyaHNT15} & densest subgraph & $\ell_0$ & & yes \\
+\hline
+\cite{McGregorTVV15} & densest subgraph & $\ell_0$ & yes & yes \\
+\hline
+\cite{EsfandiariHW16} & densest subgraph & $\ell_0$ & yes & \\
+\hline
+\cite{GuhaMT15} & vertex connectivity & any & & yes\\
+\hline
+\cite{FarachColtonT16} & graph degeneracy & $\ell_0$ & yes & \\
+\hline
+\end{tabular}
+\caption{Guarantees needed by various works using samplers as subroutines. The last two columns indicate whether the work needs to use $\ell_0$-sampling$_k$ with $k>1$ or subconstant $\delta$ even to achieve failure probability $1/3$ in the main application. The ``distribution'' column indicates the output distribution needed from the sampler (``any'' means a \suppfind{} subroutine is sufficient).}
+\end{center}
+\end{figure}
 
 More than twenty years after its initial introduction in connection with circuit depth lower bounds, Jowhari et al.\ in \cite{JowhariST11} demonstrated the relevance of $\ur$ in the randomized one-way communication model for obtaining space lower bounds for certain streaming problems, such as various sampling problems and finding duplicates in streams. In the one-way version, Bob simply needs to find such an index $i$ after a single message from Alice, and we only charge Alice's single message's length as the communication cost. If $\randcom^{\rightarrow,pub}_\delta(f)$ denotes the randomized one-way communication complexity of $f$ in the public coin model with failure probability $\delta$, \cite{JowhariST11} showed that the space complexity of \findup{n} with failure probability $\delta$ is at least $\randcom^{\rightarrow,pub}_{\frac 78 + \frac{\delta}8}(\ur)$. In \findup{n}, one is given a length-$(n+1)$ stream of integers in $[n]$, and the algorithm must output some element $i\in[n]$ which appeared at least twice in the stream (note that at least one such element must exist, by the pigeonhole principle). The work \cite{JowhariST11} then showed a reduction demonstrating that any solution to $\ell_0$-sampling with failure probability $\delta$ in turnstile streams immediately implies a solution to \findup{n} with failure probability at most $(1+\delta)/2$ in the same space (and thus the space must be at least $\randcom^{\rightarrow,pub}_{\frac{15}{16} + \frac{\delta}{16}}(\ur)$). The same result is shown for $\ell_p$-sampling for any $p>0$, in which the output index should equal $i$ with probability $|x_i|^p/(\sum_j |x_j|^p)$, and a similar result is shown even if the distribution on $i$ only has to be close to this $\ell_p$-distribution in variational distance (namely, the distance should be bounded away from $1$). It is then shown in \cite{JowhariST11} that $\randcom^{\rightarrow,pub}_\delta(\ur) = \Omega(\log^2 n)$ for any $\delta$ bounded away from $1$. The approach used though unfortunately does not provide an improved lower bound for $\delta\downarrow 0$.
 
