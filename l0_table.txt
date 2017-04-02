@@ -12,7 +12,7 @@ minimum spanning tree [AGM12a]: suppfind_1, delta ~ epsilon/lg(W) where all edge
 
 subgraph counting [AGM12b]: (ell_0)_k for k ~ eps^{-2} lg(1/delta), and failure prob. delta
 
-minimum cut [AGM12b]: suppfind_1, uses lg n k-conn. structures (so delta = 1/(lg n lg k)?) for k = O(eps^{-2} lg n)
+minimum cut [AGM12b]: suppfind_1, uses lg n k-conn. structures (so delta = 1/poly(n)?) for k = O(eps^{-2} lg n)
 
 cut-sparsifier [AGM12b]: same as min cut
 
