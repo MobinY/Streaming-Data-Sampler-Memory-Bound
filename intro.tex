@@ -116,8 +116,8 @@ In $\aug_N$, Charlie views his input as $L = \Theta(\log \frac n{\log(1/\delta)}
 Now we explain the reduction. We assume some protocol $\mathcal P$ for $\ur^\subset$, and we give a protocol $\mathcal P'$ for $\aug_N$. First, we define the universe $A = \bigcup_{i=1}^L (\{i\} \times [u_i]\times [100^i])$, which has size $n$. Charlie then defines a set $S = \bigcup_{i=1}^L (\{i\} \times S_i \times [100^i])$. Charlie and
 Diane use the public random coin to define a uniformly random permutation $\pi:[n] \rightarrow [n]$. Charlie can compute
 $\pi(S)$. Also, since Diane knows $S_i$ for $i > i^*$, she can define $T =  \bigcup_{i=i^*+1}^L (\{i\} \times S_i \times [100^i])$
-and compute $\pi(T)$. Then $\pi(S)$ and $\pi(T)$ are the ``effective inputs'' to Alice and Bob in the protocol $\mathcal P$
-for $\ur^\subset$. Charlie then sends Diane the message Alice would have sent Bob in $\mathcal P$ if her input had been $\pi(S)$.
+and compute $\pi(T)$. Then $\pi(S)$ and $\pi(T)$ are the inputs to the players Alice and Bob in the protocol $\mathcal P$
+for $\ur^\subset$ that Charlie and Diane are simulating. Charlie then sends Diane the message Alice would have sent Bob in $\mathcal P$ if her input had been $\pi(S)$.
 
 Importantly, Alice and Bob do not know anything about $\pi$ at this point other than that $\pi(S) = S$ and $\pi(T) = T$. Thus,
 the protocol $\mathcal P$ for $\ur^\subset$, if it succeeds, outputs an arbitrary element $j \in \pi(S) \backslash \pi(T)$, which is a 
@@ -133,7 +133,7 @@ every such computation path Alice and Bob succeed on that path, over their rando
 into one in which a uniformly random element of $S \backslash T$ is output, here we must use this idea adaptively, slowly revealing
 information about $\pi$ and arguing that this property is maintained for each of Bob's successive queries.  
 
-The key property is that due to the geometrically increasing repetitions of items for increasing $i$, a uniformly random element in $S\backslash T$ is roughly $100$ times more likely to correspond to an item in $S_{i^*}$ than to an item in $S_i$ for $i<i^*$. Thus if Diane simulates Bob in $\mathcal P$ to recover a random element in $S\backslash T$, it is most likely to recover an element $j$ of $S_{i^*}$. She can then tell Bob to include $\pi(j)$ and its $100^{i^*}$ redundant copies to $\pi(T)$ and iterate.
+Due to the geometrically increasing repetitions of items for increasing $i$, a uniformly random element in $S\backslash T$ is roughly $100$ times more likely to correspond to an item in $S_{i^*}$ than to an item in $S_i$ for $i<i^*$. Thus if Diane simulates Bob in $\mathcal P$ to recover a random element in $S\backslash T$, it is most likely to recover an element $j$ of $S_{i^*}$. She can then tell Bob to include $\pi(j)$ and its $100^{i^*}$ redundant copies to $\pi(T)$ and iterate.
 
 There are several obstacles to overcome to make this work. First, iterating means using $\mathcal P$ adaptively, which was the same issue that arose in Section~\ref{sec:adaptivity-intro}. Second, a constant fraction of the time ($1/100$), we expect to obtain an element {\em not} in $S_{i^*}$, but rather from some $S_i$ for $i<i^*$. If this happened too often, then Diane would need to execute many 
 queries to recover a sufficiently large number of elements from $S_{i^*}$ in order to solve $\aug_N$. This would then require a union bound over too many possible computation paths, which would not be possible as Alice likely would fail on one
