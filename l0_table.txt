@@ -38,7 +38,7 @@ uniformly at random amongst the edges that have been inserted and not deleted. I
 the `0-sampler returns NULL." 
 (because it's strict turnstile and there is no multiple edges, it is sufficient to maintain a counter to make false positive 0)
 
-maximum matching [AKL17] ??
+maximum matching [AKL17]: uses either [AKLY16] or [CCE+16] as a subroutine, so (ell_0)_1, delta = 1/poly(n)
 
 vertex cover [CCHM15]: same as maximal matching
 vertex cover [CCE+ 16]: seems that they use the same primative
