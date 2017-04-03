@@ -36,17 +36,17 @@ maximum matching [CCE+16]: they describe a subgraph sampling primitive using (el
 is defined as follows: It returns FAIL with probability at most delta and otherwise, it returns an edge chosen
 uniformly at random amongst the edges that have been inserted and not deleted. If there are no such edges,
 the `0-sampler returns NULL." 
-(because it's strict turnstile and there is no multiple edges, it is sufficient to maintain a counter to make false positive 0)
+(because it's dynamic graph stream and there is no multiple edges, it is sufficient to maintain a counter to make false positive 0)
 
 maximum matching [AKL17]: uses either [AKLY16] or [CCE+16] as a subroutine, so (ell_0)_1, delta = 1/poly(n)
 
 vertex cover [CCHM15]: same as maximal matching
-vertex cover [CCE+ 16]: seems that they use the same primative
-hitting set [CCE+ 16]
-b-matching [CCE+ 16]
-disjoint paths [CCE+ 16]
-k-colorable subgraph [CCE+ 16]
-several other maximum subgraph problems [CCE+ 16]
+vertex cover [CCE+ 16]: (ell_0)_1 delta = 1/poly(n)
+hitting set [CCE+ 16]: (ell_0)_1 delta = 1/poly(n)
+b-matching [CCE+ 16]: (ell_0)_1 delta = 1/poly(n)
+disjoint paths [CCE+ 16]: (ell_0)_1 delta = 1/poly(n)
+k-colorable subgraph [CCE+ 16]: (ell_0)_1 delta = 1/poly(n)
+several other maximum subgraph problems [CCE+ 16]: (ell_0)_1 delta = 1/poly(n)
 
 densest subgraph [BHNT15]: (ell_0)_1, delta = 1/poly(n), need O_tilde(n) instances. Use bucketing to bring down update time to O_tilde(1)
 
