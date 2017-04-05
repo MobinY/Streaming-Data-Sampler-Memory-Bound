@@ -1,6 +1,6 @@
 \section{Appendix}
 
-\subsection{A tight upper bound for $\randcom^{\rightarrow,pub}_\delta(\ur_k)$}
+\subsection{A tight upper bound for $\randcom^{\rightarrow,pub}_\delta(\ur_k)$}\label{sec:upper-bound}
 
 In \cite[Proposition 1]{JowhariST11} it is shown that $\randcom^{\rightarrow,pub}_\delta(\ur_k) = O(\min\{n,t\log^2 n\})$ for $t = \max\{k,\log(1/\delta)\}$. Here we show that a minor modification of their protocol in fact shows the correct complexity $\randcom^{\rightarrow,pub}_\delta(\ur_k) = O(\min\{n,t\log^2(n/t)\})$, which given our new lower bound, is optimal up to a constant factor for the full range of $n,k,\delta$ as long as $\delta$ is bounded away from $1$.
 
@@ -72,3 +72,22 @@ $$
 $$
 Setting $N = \sqrt{(u/(2em))^{m/2} - 1}$ so that ${N \choose 2}\leq N^2=(u/(2em))^{m/2} - 1$, by a union bound with positive probability $|S_i\cap S_j| < m/2$ for all $i\neq j$, simultaneously, as desired. Note for this choice of $N$, we have $\log|\mathcal S_{u,m}| = \log N = \Theta(m\log(u/m))$.
 \end{proof}
+
+\subsection{Another variant of samplers, with applications}\label{sec:variant}
+
+In this section we define another variant of the $\ell_0$-sampling problem and provide a solution for it (though the solution is just a minor modification of the $\ell_0$-sampling algorithm of \cite{JowhariST11}).
+
+\begin{definition}
+In the turnstile streaming problem {\em $\ell_0$-sampling$_k$($\delta_1,\delta_2$)}, there is a vector $z\in\R^n$ receiving turnstile streaming updates, and the answer to \text{query}() must behave as follows:
+\begin{itemize}
+\item With probability at most $\delta_1$, the output can be \textsf{Fail}.
+\item With probability at most $\delta_2$, the output can be arbitrary.
+\item Otherwise, the output should be a uniformly random subset of size $\min\{k,\|z\|_0\}$, without replacement, from $\supp(z)$.
+\end{itemize}
+\end{definition}
+
+One can define the \suppfind{k}$(\delta_1,\delta_2)$ problem analogously, as well as similar variants for other desired output distributions. The important distinction is that there are two types of failures, which are allowed to happen with different probabilities.
+
+As mentioned in Footnote~\ref{notejst}, it is apparent from the correctness analysis of the connectivity algorithm in \cite{AhnGM12a} that their algorithm actually only needs a \suppfind{1}$(\delta_1,\delta_2)$ data structure for $\delta_1$ a small but universal constant, and $\delta_2 = 1/\mathop{poly}(n)$. As we sketch below, $\ell_0$-sampling$_k(\delta_1,\delta_2)$ can be solved in the general turnstile model in $O((t\log n + \log(n/\delta_2)) \log n)$ bits of space for $t = \max\{k, \log(1/\delta_1)\}$, based on modifying the algorithm of \cite{JowhariST11}.
+
+We now sketch the modification to the algorithm of \cite{JowhariST11} which solves the above variant of $\ell_0$-sampling with the desired space complexity. First we describe the algorithm without regard for the space needed to store hash functions. For fixed $k$ and $\delta_2$, we give an algorithm which achieves failure probability $\delta_1 = \exp(-\Theta(k))$. The algorithm of \cite{JowhariST11} is then as the upper bound in Section~\ref{sec:upper-bound} (see also \cite{CormodeF14}). The hash functions $h_0,\ldots,h_L$ in that section could be implemented by a single hash function $h:[n]\rightarrow[n]$ where we then interpret the event ``$h_j(i) = 1$'' as occurring when the least significant bit of $h(i)$ is equal to $j$. Here we set $L = \Theta(\log(n/\delta_1))$. We then at each level, as in Section~\ref{sec:upper-bound}, 
