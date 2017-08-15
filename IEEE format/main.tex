@@ -140,7 +140,9 @@ $$I(X;Y)\ge \E(f(X,Y))\cdot \log\frac{1}{\delta}-H_2(\delta).$$
 By definition of mutual entropy $I(X;Y)=H(X)-H(X|Y)$, where $H(X)=b$ and we must show
 \begin{equation}
 \begin{split}
-H(X|Y)\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+ \\ \E(f(X,Y))\cdot (b-\log\frac{1}{\delta}) = b+H_2(\delta)-\E(f(X,Y))\cdot \log\frac{1}{\delta}.
+H(X|Y)&\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+ \\ 
+&\E(f(X,Y))\cdot (b-\log\frac{1}{\delta})\\
+& = b+H_2(\delta)-\E(f(X,Y))\cdot \log\frac{1}{\delta}.
 \end{split}
 \end{equation}
   The upper bound for $H(X|Y)$ is obtained by considering the following one-way communication problem: Alice knows both $X$ and $Y$ while Bob only knows $Y$, and Alice must send a single message to Bob so that Bob can recover $X$. The expected message length in an optimal protocol is exactly $H(X|Y)$.  Thus, any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: Alice prepends a $1$ bit to her message iff $f(X,Y) = 1$ (taking $H_2(\delta)$ bits in expectation). Then if $f(X,Y)=0$, Alice sends $X$ directly (taking $b$ bits). Otherwise, when $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^b)=b-\log\frac{1}{\delta}$ bits).  
