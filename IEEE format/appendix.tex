@@ -53,9 +53,11 @@ $$
 \forall \delta > 0,\ \Pr(X > (1+\delta) \E X) < \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^{\E X} .
 $$
 Then by a union bound over $j\ge j^*$ and applying \eqref{eqn:geometric},
+\begin{equation}
 $$
 \Pr(\neg \mathcal{E}) = \Pr(\exists j\ge j^*: \|a_j\|_0 > 16k) < \sum_{j=j^*}^\infty (e^{-Ck})^{j-j^*} = O(e^{-Ck}) .
 $$
+\end{equation}
 
 \begin{remark}\label{rem:recov}
 \textup{
@@ -68,9 +70,12 @@ As already mentioned, the protocol given above and the one described in \cite{Jo
 For any integers $u\ge 1$ and $1\le m\le u/(4e)$, there exists a collection $\mathcal S_{u,m} \subset \binom{[u]}m$ with $\log |\mathcal{S}_{u,m}| = \Theta(m\log(u/m))$ such that for all $S\neq S'\in \mathcal S_{u,m}$, $|S\cap S'| < m/2$.
 \begin{proof}
 The proof is via the probabilistic method. We pick $S_1,\ldots,S_N$ independently, each one uniformly at random from $\binom{[u]}m$. Fix $i\neq j\in[N]$. Imagine $S_i$ being fixed and picking the $m$ elements of $S_j$ one by one. Let $X_k$ denote the indicator random variable for the event that the $k$th element picked is also in $S_i$. Then $|S_i\cap S_j| = \sum_{k=1}^m X_k$, and we set $\mu:= \E |S_i\cap S_j|$, which is $m^2/u$ by linearity of expectation. We have $\Pr(|S_i \cap S_j| \ge m/2) = \Pr(|S_i\cap S_j| \ge (1+\delta)\mu)$ for $\delta = u/(2m) - 1$. The $X_k$ are not independent, but they are negatively dependent. Thus the Chernoff bound yields
+\begin{equation}
 $$
 \Pr(|S_i\cap S_j| \ge (1+\delta)\mu) \le \left(\frac{e^{\delta}}{(1+\delta)^{1+\delta}}\right)^\mu \le \left(\frac{e^{\frac u{2m} - 1}}{(\frac u{2m})^{\frac u{2m}}}\right)^{m^2/u} \le \left(\frac u{2em}\right)^{-\frac m2} .
 $$
+\end{equation}
+
 Setting $N = \sqrt{(u/(2em))^{m/2} - 1}$ so that ${N \choose 2}\leq N^2=(u/(2em))^{m/2} - 1$, by a union bound with positive probability $|S_i\cap S_j| < m/2$ for all $i\neq j$, simultaneously, as desired. Note for this choice of $N$, we have $\log|\mathcal S_{u,m}| = \log N = \Theta(m\log(u/m))$.
 \end{proof}
 

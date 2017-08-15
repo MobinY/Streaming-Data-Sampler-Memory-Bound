@@ -1,6 +1,7 @@
 
 %
 \documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
 \usepackage{blindtext, graphicx}
 
 \usepackage{fullpage}
@@ -70,7 +71,8 @@
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
 
-\title{Optimal lower bounds for universal relation, and for samplers and finding duplicates in streams\thanks{This paper is a merger of \cite{NelsonPW17},
+
+\title{ Optimal lower bounds for universal relation, and for samplers and finding duplicates in streams\thanks{This paper is a merger of \cite{NelsonPW17},
     and of work of Kapralov, Woodruff, and Yahyazadeh.}}
 
 \begin{document}
@@ -83,36 +85,39 @@
 % author names and affiliations
 % use a multiple column layout for up to three different
 % affiliations
- \author{\IEEEauthorblockN{Michael Shell}
- \IEEEauthorblockA{School of Electrical and\\Computer Engineering\\
- Georgia Institute of Technology\\
- Atlanta, Georgia 30332--0250\\
- Email: http://www.michaelshell.org/contact.html}
- \and
- \IEEEauthorblockN{Homer Simpson}
- }
+% \author{\IEEEauthorblockN{Michael Shell}
+% \IEEEauthorblockA{School of Electrical and\\Computer Engineering}
+% \and
+% \IEEEauthorblockN{Michael Kapralov\thanks{EPFL. \texttt{michael.kapralov@epfl.ch}.}}
+% \and
+% \IEEEauthorblockN{Jelani Nelson\thanks{Harvard University. \texttt{minilek@seas.harvard.edu}. Supported by NSF grant IIS-1447471 and
+%   CAREER award CCF-1350670, ONR Young Investigator award N00014-15-1-2388, and a Google Faculty Research Award.}}
+%   \and \IEEEauthorblockN{Jakub Pachocki\thanks{OpenAI. \texttt{jakub@openai.com}. Work done while affiliated with Harvard University, under the support of ONR grant N00014-15-1-2388.}}
+%   \and \IEEEauthorblockN{Zhengyu Wang\thanks{Harvard University. \texttt{zhengyuwang@g.harvard.edu}. Supported by NSF grant CCF-1350670.}}
+%   \and \IEEEauthorblockN{David P. Woodruff\thanks{IBM Research Almaden. \texttt{dpwoodru@us.ibm.com.}}}
+%   \and \IEEEauthorblockN{Mobin Yahyazadeh\thanks{Sharif University of Technology. \texttt{mn.yahyazadeh@gmail.com}. Work done while an intern at EPFL.}}
+% }
 
-% conference papers do not typically use \thanks and this command
-% is locked out in conference mode. If really needed, such as for
-% the acknowledgment of grants, issue a \IEEEoverridecommandlockouts
-% after \documentclass
+
 
 % for over three affiliations, or if they all won't fit within the width
 % of the page, use this alternative format:
 
-% \author{\IEEEauthorblockN{Michael Shell\IEEEauthorrefmark{1},
-% Homer Simpson\IEEEauthorrefmark{2},
-% James Kirk\IEEEauthorrefmark{3}, 
-% Montgomery Scott\IEEEauthorrefmark{3} and
-% Eldon Tyrell\IEEEauthorrefmark{4}}
-% \IEEEauthorblockA{\IEEEauthorrefmark{1}School of Electrical and Computer Engineering\\
-% Georgia Institute of Technology,
-% Atlanta, Georgia 30332--0250\\ Email: see http://www.michaelshell.org/contact.html}
-% \IEEEauthorblockA{\IEEEauthorrefmark{2}Twentieth Century Fox, Springfield, USA\\
-% Email: homer@thesimpsons.com}
-% \IEEEauthorblockA{\IEEEauthorrefmark{3}Starfleet Academy, San Francisco, California 96678-2391\\
-% Telephone: (800) 555--1212, Fax: (888) 555--1212}
-% \IEEEauthorblockA{\IEEEauthorrefmark{4}Tyrell Inc., 123 Replicant Street, Los Angeles, California 90210--4321}}
+\author{\IEEEauthorblockN{Michael Kapralov\IEEEauthorrefmark{1},
+Jelani Nelson\IEEEauthorrefmark{2},
+Jakub Pachocki\IEEEauthorrefmark{3}, \\
+Zhengyu Wang\IEEEauthorrefmark{4},
+David P. Woodruff\IEEEauthorrefmark{5} and
+Mobin Yahyazadeh \IEEEauthorrefmark{6}}
+\IEEEauthorblockA{\IEEEauthorrefmark{1}\texttt{EPFL.} michael.kapralov@epfl.ch.}
+\IEEEauthorblockA{\IEEEauthorrefmark{2}\texttt{Harvard University.} minilek@seas.harvard.edu.\\
+\texttt{Supported by NSF grant IIS-1447471 and
+   CAREER award CCF-1350670,\\ ONR Young Investigator award N00014-15-1-2388, and a Google Faculty Research Award.}}
+\IEEEauthorblockA{\IEEEauthorrefmark{3}\texttt{ OpenAI.} jakub@openai.com. \texttt{Work done while affiliated with Harvard University, under the support of ONR grant N00014-15-1-2388.}}
+\IEEEauthorblockA{\IEEEauthorrefmark{4}\texttt{Harvard University.} zhengyuwang@g.harvard.edu. \texttt{Supported by NSF grant CCF-1350670.}}
+\IEEEauthorblockA{\IEEEauthorrefmark{5}\texttt{IBM Research Almaden.} dpwoodru@us.ibm.com.}
+\IEEEauthorblockA{\IEEEauthorrefmark{6} \texttt{Sharif University of Technology.} mn.yahyazadeh@gmail.com. \\ \texttt{Work done while an intern at EPFL.}}
+}
 
 \setcounter{page}{0}
 
