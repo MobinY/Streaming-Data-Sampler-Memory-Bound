@@ -67,23 +67,25 @@ The decoding process is symmetric.  Let $C_0=\emptyset$ and $A=\emptyset$.  $\de
     \begin{flushright} $\triangleright$ $M$ is $\sketch(\mathbf{1}_S)$ \end{flushright}
      $\triangleright$ $b\in\{0,1\}^R$ indicates rounds in which Bob succeeds
     \newline $\triangleright$ $B$ contains all elements of $S$ that $\dec$ doesn't recover via $M$
-    \State $A\leftarrow \emptyset$ \Comment{the subset of $S$ $\dec$ recovers just from $M$}
+    \State $A\leftarrow \emptyset$ \begin{flushright}\Comment{the subset of $S$ $\dec$ recovers just from $M$} \end{flushright}
     \State $C_0 \leftarrow \emptyset$ \Comment{subset of $S$ we have built up so far}
-    \For {$r=1,\ldots,R$} \Comment{each iteration tries to recover $1$ element via $M$}
+    \For {$r=1,\ldots,R$} \begin{flushright}\Comment{each iteration tries to recover $1$ element via $M$} \end{flushright}
       \State $C_r\leftarrow C_{r-1}$
-      \If{$b_r=1$} \Comment{this means Bob succeeds in round $r$}
-        \State $s_r\leftarrow \query(M, \mathbf{1}_{C_{r-1}})$ \Comment{Invariant: $C_r=S \backslash S_r$ ($S_r$ is defined in $\enc$)}
+      \If{$b_r=1$} \begin{flushright}\Comment{this means Bob succeeds in round $r$} \end{flushright}
+        \State $s_r\leftarrow \query(M, \mathbf{1}_{C_{r-1}})$ \begin{flushright}\Comment{Invariant: $C_r=S \backslash S_r$ ($S_r$ is defined in $\enc$)} \end{flushright}
         \State $A\leftarrow A \cup \{s_r\}$
         \State $C_r\leftarrow C_r \cup \{s_r\}$
       \EndIf
-       \State Insert $m-n_r-|C_r|$ items into $C_r$ with smallest $\pi_a$'s among $a\in B\backslash C_r$
-       \Statex \Comment{Random masking ``Differential Privacy'' step. Still $n_r$ elements left to recover.}
+      \State Insert $m-n_r-|C_r|$ items into $C_r$ with smallest $\pi_a$'s among $a\in B\backslash C_r$
+      \Statex \Comment{Random masking ``Differential Privacy'' step. Still $n_r$ elements left to recover.} 
     \EndFor
     \State \Return $B\cup A$ 
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
 \subsubsection{Analysis}
+
+
 
 We have two random objects in our encoding/decoding scheme: (1) the random source used by $\mathcal{P}$, denoted by $X$, and (2) the random permutation $\pi$. These are independent.
 
@@ -137,7 +139,9 @@ $$
 $$I(X;Y)\ge \E(f(X,Y))\cdot \log\frac{1}{\delta}-H_2(\delta).$$
 By definition of mutual entropy $I(X;Y)=H(X)-H(X|Y)$, where $H(X)=b$ and we must show
 \begin{equation}
-H(X|Y)\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\delta}) = b+H_2(\delta)-\E(f(X,Y))\cdot \log\frac{1}{\delta}.
+\begin{split}
+H(X|Y)\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+ \\ \E(f(X,Y))\cdot (b-\log\frac{1}{\delta}) = b+H_2(\delta)-\E(f(X,Y))\cdot \log\frac{1}{\delta}.
+\end{split}
 \end{equation}
   The upper bound for $H(X|Y)$ is obtained by considering the following one-way communication problem: Alice knows both $X$ and $Y$ while Bob only knows $Y$, and Alice must send a single message to Bob so that Bob can recover $X$. The expected message length in an optimal protocol is exactly $H(X|Y)$.  Thus, any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: Alice prepends a $1$ bit to her message iff $f(X,Y) = 1$ (taking $H_2(\delta)$ bits in expectation). Then if $f(X,Y)=0$, Alice sends $X$ directly (taking $b$ bits). Otherwise, when $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^b)=b-\log\frac{1}{\delta}$ bits).  
 \end{proof}
