@@ -1,0 +1,4 @@
+
+% use section* for acknowledgement
+\section*{Acknowledgment}
+Initially the authors were focused on proving optimal lower bounds for samplers, but we thank Vasileios Nakos for pointing out that our $\ur^\subset$ lower bound immediately implies a tight lower bound for finding a duplicate in data streams as well. Also, initially our proof of Lemma~\ref{lem:information} incurred an additive $1$ in the numerator of the right hand side of \eqref{eqn:adaptivity}. This is clearly suboptimal for small $I(X; Y)$ (for example, consider $I(X; Y) = 0$, in which case the right hand side should be $\delta$ and not $1/\log(1/\delta)$)). We thank T.S.\ Jayram for pointing out that a slight modification of our proof could actually replace the additive $1$ with the binary entropy function (and also for showing us a different proof of this lemma, which resembles the standard proof of Fano's inequality).

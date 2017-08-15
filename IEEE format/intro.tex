@@ -1,0 +1,209 @@
+\section{Introduction}\label{sec:intro}
+In turnstile $\ell_0$-sampling, a vector $z\in\R^n$ starts as the zero vector and receives coordinate-wise updates of the form ``$z_i \leftarrow z_i + \Delta$'' for $\Delta\in\{-M,-M+1,\ldots,M\}$. During a query, one must return a uniformly random element from $\supp(x) = \{i : z_i\neq 0\}$. The problem was first defined in \cite{FrahlingIS08}, where a data structure (or ``sketch'') for solving it was used to estimate the Euclidean minimum spanning tree, and to provide $\eps$-approximations of a point set $P$ in a geometric space (that is, one wants to maintain a subset $S\subset P$ such that for any set $R$ in a family of bounded VC-dimension, such as the set of all axis-parallel rectangles, $||R\cap S|/|S| - |R\cap P|/|P|| < \eps$). Sketches for $\ell_0$-sampling were also used to solve various dynamic graph streaming problems in \cite{AhnGM12a} and since then have been crucially used in almost all known dynamic graph streaming algorithms\footnote{\label{specfootnote}The spectral sparsification algorithm of \cite{KapralovLMMS14} is a notable exception.}, such as for: connectivity, $k$-connectivity, bipartiteness, and minimum spanning tree \cite{AhnGM12a}, subgraph counting, minimum cut, and cut-sparsifier and spanner computation \cite{AhnGM12b}, spectral sparsifiers \cite{AhnGM13}, maximal matching \cite{ChitnisCHM15}, maximum matching \cite{AhnGM12a,BuryS15,Konrad15,AssadiKLY16,ChitnisCEHMMV16,AssadiKL17}, vertex cover \cite{ChitnisCHM15,ChitnisCEHMMV16}, hitting set, $b$-matching, disjoint paths, $k$-colorable subgraph, and several other maximum subgraph problems \cite{ChitnisCEHMMV16}, densest subgraph \cite{BhattacharyaHNT15,McGregorTVV15,EsfandiariHW16}, vertex and hyperedge connectivity \cite{GuhaMT15}, and graph degeneracy \cite{FarachColtonT16}. For an introduction to the power of $\ell_0$-sketches in designing dynamic graph stream algorithms, see the recent survey of McGregor \cite[Section 3]{McGregor14}. Such sketches have also been used outside streaming, such as in distributed algorithms \cite{HegemanPPSS15,Pandurangan0S16} and data structures for dynamic connectivity \cite{KapronKM13,Wang15,GibbKKT15}.
+
+
+
+\begin{figure*}[t]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+reference & problem & distribution & $k>1$? & $\delta = o(1)$?\\
+\hline
+\cite{FrahlingIS08} & Euclidean minimum spanning tree & $\ell_0$ & yes &\\
+\hline
+\cite{AhnGM12a} & connectivity\footnotemark & any & & yes\\
+\hline
+\cite{AhnGM12a} & $k$-connectivity\footnotemark[\getrefnumber{notejst}] & any & & yes\\
+\hline
+\cite{AhnGM12a} & bipartiteness\footnotemark[\getrefnumber{notejst}] & any & & yes\\
+\hline
+\cite{AhnGM12a} & minimum spanning tree & any & & yes\\
+\hline
+\cite{AhnGM12b} & subgraph counting & $\ell_0$ & yes & \\
+\hline
+\cite{AhnGM12b} & minimum cut & any &  & yes\\
+\hline
+\cite{AhnGM12b} & cut sparsifiers & any &  & yes\\
+\hline
+\cite{AhnGM12b} & spanners & any & yes & yes\\
+\hline
+\cite{AhnGM12b} & spectral sparsifiers & any &  & yes\\
+\hline
+\cite{ChitnisCHM15} & maximal matching & $\ell_0$ & yes & yes\\
+\hline
+\cite{BuryS15} & maximum matching (unweighted) & $\ell_0$ & yes & \\
+& maximum matching (weighted) & $\ell_0$ & yes & yes \\
+\hline
+\cite{Konrad15} & maximum matching & any & yes & yes \\
+\hline
+\cite{AssadiKLY16} & maximum matching & $\ell_0$ & & yes \\
+\hline
+\cite{AssadiKL17} & maximum matching & $\ell_0$ & & yes \\
+\hline
+\cite{ChitnisCEHMMV16} & maximum matching & $\ell_0$ & & yes \\
+& vertex cover &  & &  \\
+& hitting set &  & &  \\
+& $b$-matching &  & &  \\
+& disjoint paths &  & &  \\
+& $k$-colorable subgraph & & & \\
+\hline
+\cite{BhattacharyaHNT15} & densest subgraph & $\ell_0$ & & yes \\
+\hline
+\cite{McGregorTVV15} & densest subgraph & $\ell_0$ & yes & yes \\
+\hline
+\cite{EsfandiariHW16} & densest subgraph & $\ell_0$ & yes & \\
+\hline
+\cite{GuhaMT15} & vertex connectivity & any & & yes\\
+ & hyperedge connectivity &  & & \\
+\hline
+\cite{FarachColtonT16} & graph degeneracy & $\ell_0$ & yes & \\
+\hline
+\end{tabular}
+\caption{Guarantees needed by various works using samplers as subroutines. The last two columns indicate whether the work needs to use a sampler that returns $k$ samples at a time when queried for some $k>1$, or for some subconstant failure probability $\delta$ even to achieve failure probability $1/3$ in the main application. The ``distribution'' column indicates the output distribution needed from the sampler for the application (``any'' means a \suppfind{} subroutine is sufficient, i.e.\ it suffices for a query to return any index $i$ for which $z_i\neq 0$).}\label{fig:table}
+\end{center}
+\end{figure*}
+
+Given the rising importance of $\ell_0$-sampling in algorithm design, a clear task is to understand the exact complexity of this problem. The work \cite{JowhariST11} gave an $\Omega(\log^2 n)$-bit space lower bound for data structures solving even the case $M=1$ which fail with constant probability, and otherwise whose query responses are $(1/3)$-close to uniform in statistical distance. They also gave an upper bound for $M \le \poly(n)$ with failure probability $\delta$, which in fact gave $\min\{\|z\|_0, \Theta(\log(1/\delta))\}$ uniform samples from the support of $z$, using space $O(\log^2 n \log(1/\delta))$ (here $\|z\|_0$ denotes $|\supp(z)|$). Thus we say their data structure actually solves the harder problem of $\ell_0$-sampling$_k$ for $k =\Theta(\log(1/\delta))$ with failure probability $\delta$, where in $\ell_0$-sampling$_k$ the goal is to recover $\min\{\|z\|_0, k\}$ uniformly random elements, without replacement, from $\supp(z)$.  The upper and lower bounds in \cite{JowhariST11} thus match up to a constant factor for $k = 1$ and $\delta$ a constant. We note though in many settings, even if the final application desires constant failure probability, $\ell_0$-sampling$_k$ with either failure probability $o(1)$ or $k>1$ (or both) is needed as a subroutine (see Figure~\ref{fig:table}).
+
+
+
+\vspace{-.1in}\paragraph{Universal relation.} The work of \cite{JowhariST11} obtains its lower bound for $\ell_0$-sampling (and some other problems) via reductions from {\em universal relation} ($\ur$). This problem was defined in \cite{KarchmerRW95} and arose in connection with the work \cite{KarchmerW90} on circuit depth lower bounds. For $f:\{0,1\}^n\rightarrow\{0,1\}$, $D(f)$ is the minimum depth of a fan-in $2$ circuit over basis $\{\neg, \vee, \wedge\}$ computing $f$. Meanwhile, $C(f)$ is defined as the minimum number of bits that need to be communicated in a correct deterministic protocol for Alice and Bob to solve the following communication problem: Alice receives $x\in f^{-1}(0)$ and Bob receives $y\in f^{-1}(1)$ (implying $x\neq y$), and they must agree on an index $i\in[n]$ such that $x_i\neq y_i$. It is shown in \cite{KarchmerW90} that $D(f) = C(f)$, which they then used to show a tight $\Omega(\log^2 n)$ depth lower bound for monotone circuits solving undirected $s$-$t$ connectivity. The work of \cite{KarchmerRW95} then proposed a strategy to separate the complexity classes $\mathbf{NC}^1$ and $\mathbf{P}$: start with a function $f$ on $\log n$ bits requiring depth $\Omega(\log n)$, then ``compose'' it with itself $k = \log n / \log\log n$ times (see \cite{KarchmerW90} for the definition of composition). If one could prove a strong enough direct sum theorem for communication complexity after composition, even for a random $f$, this construction would yield a function that is provably in $\mathbf{P}$ (in fact even in $\mathbf{NC}^2$), but not $\mathbf{NC}^1$. Proving such a direct sum theorem is still open, and the statement that it is true is known as the ``KRW conjecture''; see for example the recent works \cite{GavinskyMWW14,DinurM16} on this conjecture. As a toy problem en route to resolving it, \cite{KarchmerRW95} suggested proving a direct sum theorem for $k$-fold composition of a particular function $\ur$ that they defined. That task was positively resolved in \cite{EIRS91} (see also \cite{HastadW90}).
+
+\footnotetext{\label{notejst}\cite{AhnGM12a} describes these algorithms as only needing $\delta$ a constant, but for a different definition of \suppfind{}: when the data structure fails, it should output \textsf{Fail} instead of behaving arbitrarily. They then cite \cite{JowhariST11} as providing the sampler they use, but unfortunately \cite{JowhariST11} does not solve this variant of this problem. This issue can be avoided by using \cite{JowhariST11} with $\delta < 1/\mathop{poly}(n)$ so that whp no failures occur throughout their algorithm, very slightly worsening their final space bound in the main application by a $\lg n$ factor. Alternatively, one could use another variant of sampling which we define in Section~\ref{sec:variant} and which can be solved via a minor modification of \cite{JowhariST11}, which allows retaining the bounds of \cite{AhnGM12a} for connectivity, $k$-connectivity, and bipartiteness testing.}
+
+The problem $\ur$ abstracts away the function $f$, and Alice and Bob are simply given $x,y\in\{0,1\}^n$ with the promise that $x\neq y$. The players must then agree on any index $i$ with $x_i\neq y_i$. The deterministic communication complexity of $\ur$ is nearly completely understood, with upper and lower bounds that match up to an additive $3$ bits, even if one imposes an upper bound on the number of rounds of communication \cite{TardosZ97}. Henceforth we also consider a generalized problem $\ur_k$, where the output must be $\min\{k, \|x-y\|_0\}$ distinct indices on which $x, y$ differ. We also use $\ur^{\subset}, \ur_k^{\subset}$ to denote the variants when promised $\supp(y)\subset \supp(x)$, and also Bob knows $\|x\|_0$. Clearly $\ur, \ur_k$ can only be harder than $\ur^\subset, \ur_k^\subset$, respectively.
+
+More than twenty years after its initial introduction in connection with circuit depth lower bounds, Jowhari et al.\ in \cite{JowhariST11} demonstrated the relevance of $\ur$ in the randomized one-way communication model for obtaining space lower bounds for certain streaming problems, such as various sampling problems and finding duplicates in streams. In the one-way version, Bob simply needs to find such an index $i$ after a single message from Alice, and we only charge Alice's single message's length as the communication cost. If $\randcom^{\rightarrow,pub}_\delta(f)$ denotes the randomized one-way communication complexity of $f$ in the public coin model with failure probability $\delta$, \cite{JowhariST11} showed that the space complexity of \findup{n} with failure probability $\delta$ is at least $\randcom^{\rightarrow,pub}_{\frac 78 + \frac{\delta}8}(\ur)$. In \findup{n}, one is given a length-$(n+1)$ stream of integers in $[n]$, and the algorithm must output some element $i\in[n]$ which appeared at least twice in the stream (note that at least one such element must exist, by the pigeonhole principle). The work \cite{JowhariST11} then showed a reduction demonstrating that any solution to $\ell_0$-sampling with failure probability $\delta$ in turnstile streams immediately implies a solution to \findup{n} with failure probability at most $(1+\delta)/2$ in the same space (and thus the space must be at least $\randcom^{\rightarrow,pub}_{\frac{15}{16} + \frac{\delta}{16}}(\ur)$). The same result is shown for $\ell_p$-sampling for any $p>0$, in which the output index should equal $i$ with probability $|x_i|^p/(\sum_j |x_j|^p)$, and a similar result is shown even if the distribution on $i$ only has to be close to this $\ell_p$-distribution in variational distance (namely, the distance should be bounded away from $1$). It is then shown in \cite{JowhariST11} that $\randcom^{\rightarrow,pub}_\delta(\ur) = \Omega(\log^2 n)$ for any $\delta$ bounded away from $1$. The approach used though unfortunately does not provide an improved lower bound for $\delta\downarrow 0$.
+
+Seemingly unnoticed in \cite{JowhariST11}, we first point out here that the lower bound proof for $\ur$ in that work actually proves the same lower bound for the promise problem $\ur^\subset$. This observation has several advantages. First, it makes the reductions to the streaming problems trivial (they were already quite simple when reducing from $\ur$, but now they are even simpler). Second, a simple reduction from $\ur^\subset$ to sampling problems provides space lower bounds even in the strict turnstile model, and even for the simpler {\em \suppfind{}} streaming problem for which when queried is allowed to return {\em any} element of $\supp(z)$, without any requirement on the distribution of the index output. Both of these differences are important for the meaningfulness of the lower bound. This is because in dynamic graph streaming applications, typically $z$ is indexed by $\binom{n}{2}$ for some graph on $n$ vertices, and $z_e$ is the number of copies of edge $e$ in some underlying multigraph. Edges then are not deleted unless they had previously been inserted, thus only requiring correctness for strict turnstile streams. Also, for every single application mentioned in the first paragraph of Section~\ref{sec:intro} (except for the two applications in \cite{FrahlingIS08}), the known algorithmic solutions which we cited as using $\ell_0$-sampling as a subroutine actually only need a subroutine for the easier \suppfind{} problem. Finally, third and most relevant to our current work's main focus, the straightforward reductions from $\ur^\subset$ to the streaming problems we are considering here do not suffer any increase in failure probability, allowing us to transfer lower bounds on $\randcom^{\rightarrow,pub}_{\delta}(\ur^\subset)$ for small $\delta$ to lower bounds on various streaming problems for small $\delta$. The work \cite{JowhariST11} could not provide lower bounds for the streaming problems considered there in terms of $\delta$ for small $\delta$.
+
+We now show simple reductions from $\ur^\subset$ to \findup{n} and from $\ur_k^\subset$ to \suppfind{k}. In \suppfind{k} we must report $\min\{k,\|z\|_0\}$ elements in $\supp(z)$. In the claims below, $\delta$ is the failure probability for the considered streaming problem.
+
+\begin{claim}
+Any one-pass streaming algorithm for \findup{n} must use $\randcom^{\rightarrow,pub}_{\delta}(\ur^\subset)$ space.
+\end{claim}
+\begin{proof}
+  We reduce from $\ur^\subset$. Suppose there were a space-$S$ algorithm $\mathcal{A}$ for \findup{n}. Alice creates a stream consisting of all elements of $\supp(x)$ and runs $\mathcal{A}$ on those elements, then sends the memory contents of $\mathcal{A}$ to Bob. Bob then continues running $\mathcal{A}$ on $n+1-\|x\|_0$ arbitrarily chosen elements of $[n]\backslash\supp(y)$. Then there must be a duplicate in the resulting concatenated stream, $i$ satisfies $x_i\neq y_i$ iff $i$ is a duplicate.
+\end{proof}
+
+\begin{claim}
+Any one-pass streaming algorithm for \suppfind{k} in the strict turnstile model must use $\randcom^{\rightarrow,pub}_{\delta}(\ur_k^\subset)$ bits of space, even if promised that $z\in\{0,1\}^n$ at all points in the stream.
+\end{claim}
+\begin{proof}
+This is again via reduction from $\ur_k^\subset$. Let $\mathcal{A}$ be a space-$S$ algorithm for \suppfind{k} in the strict turnstile model. For each $i\in\supp(x)$, Alice sends the update $z_i \leftarrow z_i + 1$ to $\mathcal{A}$. Alice then sends the memory contents of $\mathcal{A}$ to Bob. Bob then for each $i\in\supp(y)$ sends the update $z_i\leftarrow z_i - 1$ to $\mathcal{A}$. Now note that $z$ is exactly the indicator vector of the set $\{i : x_i\neq y_i\}$.
+\end{proof}
+
+\begin{claim}
+Any one-pass streaming algorithm for $\ell_p$-sampling for any $p\ge 0$ in the strict turnstile model must use $\randcom^{\rightarrow,pub}_{\delta}(\ur_k^\subset)$ bits of space, even if promised $z\in\{0,1\}^n$ at all points in the stream.
+\end{claim}
+\begin{proof}
+This is via straightforward reduction from \suppfind{k}, since reporting $\min\{k,\|z\|_0\}$ elements of $\supp(z)$ satisfying some distributional requirements is only a harder problem than finding {\em any} $\min\{k,\|z\|_0\}$ elements of $\supp(z)$.
+\end{proof}
+
+The reductions above thus raise the question: what is the asymptotic behavior of $\randcom^{\rightarrow,pub}_\delta(\ur_k^\subset)$?
+
+\paragraph{Our main contribution:} We prove for any $\delta$ bounded away from $1$ and $k\in[n]$, $\randcom^{\rightarrow,pub}_\delta(\ur_k^\subset) = \Theta(\min\{n, t\log^2(n/t)\})$ where $t = \max\{k,\log(1/\delta)\}$. Given known upper bounds in \cite{JowhariST11}, our lower bounds are optimal for \findup{n}, \suppfind{}, and $\ell_p$-sampling for any $0\le p<2$ for nearly the full range of $n, \delta$ (namely, for $\delta > 2^{-n^{.99}}$). Also given an upper bound of \cite{JowhariST11}, our lower bound is optimal for $\ell_0$-sampling$_k$ for nearly the full range of parameters $n, k, \delta$ (namely, for $t < n^{.99}$). Previously no lower bounds were known in terms of $\delta$ (or $k$). Our main theorem:
+
+\begin{theorem}\label{thm:main}
+For any $\delta$ bounded away from $1$ and $1\le k\le n$, $\randcom^{\rightarrow,pub}_\delta(\ur_k^\subset) = \Theta(\min\{n, t\log^2(n/t)\})$.
+\end{theorem}
+
+We give two different proofs of Theorem~\ref{thm:main} (in Sections \ref{sec:adaptive-proof} and \ref{sec:aug-proof}). Our upper bound is also new, though follows by minor modifications of the upper bound in \cite{JowhariST11} and thus we describe it in the appendix. The previous upper bound was $O(\min\{n, t\log^2 n\})$. We also mention here that it is known that the upper bound for both $\ur_k$ and $\ell_0$-sampling$_k$ in two rounds (respectively, two passes) is only $O(t\log n)$ \cite{JowhariST11}. Thus, one cannot hope to extend our new lower bound to two or more passes, since it simply is not true.
+
+
+\vspace{-.1in}\subsection{Related work}
+The question of whether $\ell_0$-sampling is possible in low memory in turnstile streams was first asked in \cite{CormodeMR05,FrahlingIS08}. The work \cite{FrahlingIS08} applied $\ell_0$-sampling as a subroutine in approximating the cost of the Euclidean minimum spanning tree of a subset $S$ of a discrete geometric space subject to insertions and deletions. The algorithm given there used space $O(\log^3 n)$ bits to achieve failure probability $1/\poly(n)$ (though it is likely that the space could be improved to $O(\log^2 n\log\log n)$ with a worse failure probability, by replacing a subroutine used there with a more recent $\ell_0$-estimation algorithm of \cite{KaneNW10}). As mentioned, the currently best known upper bound solves $\ell_0$-sampling$_k$ using $O(t\log^2 n)$ bits \cite{JowhariST11}, which Theorem~\ref{thm:main} shows is tight.
+
+For $\ell_p$-sampling, conditioned on not failing, the data structure should output $i$ with probability $(1\pm\eps)|x_i|^p/\|x\|_p^p$. The first work to realize its importance came even earlier than for $\ell_0$-sampling: \cite{CoppersmithK04} showed that an $\ell_2$-sampler using small memory would lead to a nearly space-optimal streaming algorithm for multiplicatively estimating $\|x\|_3$ in the turnstile model, but did not know how to implement such a data structure. The first implementation was given in \cite{MonemizadehW10}, achieving space $\poly(\eps^{-1}\log n)$ with $\delta = 1/\poly(n)$. . For $1\le p\le 2$ the space was improved to $O(\eps^{-p}\log^3 n)$ bits for constant $\delta$ \cite{AndoniKO11}. In \cite{JowhariST11} this bound was improved to $O(\eps^{-\max\{1,p\}}\log(1/\delta)\log^2 n)$ bits for failure probability $\delta$ when $0<p<2$ and $p\neq 1$. For $p=1$ the space bound achieved by \cite{JowhariST11} was a $\log(1/\eps)$ factor worse: $O(\eps^{-1}\log(1/\eps)\log(1/\delta)\log^2 n)$ bits.
+
+For finding a duplicate item in a stream, the question of whether a space-efficient randomized algorithm exists was asked in \cite{Muthukrishnan05,Tarui07}. The question was positively resolved in \cite{GopalanR09}, which gave an $O(\log^3 n)$-space algorithm with constant failure probability. An improved algorithm was given in \cite{JowhariST11}, using $O(\log(1/\delta) \log^2 n)$ bits of space for failure probability $\delta$.
+
+\vspace{-.1in}\section{Overview of techniques}\label{sec:overview}
+We now describe our two proofs of Theorem~\ref{thm:main}. For the upper bound, \cite{JowhariST11} achieved $O(t\log^2n)$, but in the appendix we show that slight modifications to their approach yield $O(\min\{n,t\log^2(n/t)\})$. Our main contribution is in proving an improved lower bound. Assume $t < cn$ for some sufficiently small constant $c$ (since otherwise we already obtain an $\Omega(n)$ lower bound). In both our lower bound proofs in this regime, the proof is split into two parts: we show $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\log \frac 1{\delta}\log^2 \frac n{\log\frac 1{\delta}})$ and $\randcom^{\rightarrow,pub}_{.99}(\ur_k^\subset)=\Omega(k\log^2\frac nk)$ separately. We give an overview the former here, which is the more technically challenging half. Our two proofs of the latter are in Sections~\ref{sec:k-samples-lb} and \ref{sec:aug-k}.
+
+\subsection{Lower bound proof via encoding subsets and an adaptivity lemma}\label{sec:adaptivity-intro}
+
+Our first proof of the lower bound on $\randcom^{\rightarrow,pub}_\delta(\ur^\subset)$ is via an encoding argument. Fix $m$. A randomized encoder is given a set $S\subset[n]$ with $|S| = m$ and must output an encoding $\enc(S)$, and a decoder sharing public randomness with the encoder must be able to recover $S$ given only $\enc(S)$. We consider such schemes in which the decoder must succeed with probability $1$, and the encoding length is a random variable. Any such encoding must use $\Omega(\log(^n_m)) = \Omega(m\log \frac nm)$ bits in expectation for some $S$.
+
+There is a natural, but sub-optimal approach to using a public-coin one-way protocol $\mathcal{P}$ for $\ur^\subset$ to devise such an encoding/decoding scheme.  The encoder pretends to be Alice with input $x$ being the indicator set of $S$, then lets $\enc(S)$ be the message $M$ Alice would have sent to Bob. The decoder attempts to recover $S$ by iteratively pretending to be Bob $m$ times, initially pretending to have input $y=0\in\{0,1\}^n$, then iteratively adding elements found in $S$ to $y$'s support. Henceforth let $\mathbf{1}_T\in\{0,1\}^n$ denote the indicator vector of a set $T\subset[n]$.
+
+\begin{algorithm}[H] 
+  \caption{Simple Decoder.} \label{algo:wrong}
+  \begin{algorithmic}[1]
+    \Procedure{$\dec$}{$M$}
+    \State $T\leftarrow \emptyset$
+    \For {$r=1,\ldots,m$} 
+      \State Let $i$ be Bob's output upon receiving message $M$ from Alice when Bob's input is $\mathbf{1}_T$
+      \State $T \leftarrow T \cup\{i\}$
+    \EndFor
+    \State \Return $T$
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+One might hope to say that if the original failure probability were $\delta < 1/m$, then by a union bound, with constant probability every iteration succeeds in finding a new element of $S$ (or one could even first apply some error-correction to $x$ so that the decoder could recover $S$ even if only a constant fraction of iterations succeeded). The problem with such thinking though is that this decoder chooses $y$'s adaptively! To be specific, $\mathcal{P}$ being a correct protocol means
+\begin{equation}
+\forall x,y\in\{0,1\}^n,\ \Pr_s(\mathcal{P}\text{ is correct on inputs }x,y) \ge 1-\delta , \label{eqn:correct}
+\end{equation}
+where $s$ is the public random string that both Alice and Bob have access to. The issue is that even in the second iteration (when $r=2$), Bob's ``input'' $\mathbf{1}_T$ {\em depends on $s$}, since $T$ depends on the outcome of the first iteration! Thus the guarantee of \eqref{eqn:correct} does not apply.
+
+One way around the above issue is to realize that as long as every iteration succeeds, $T$ is always a subset of $S$. Thus it suffices for the following event $\mathcal{E}$ to occur: $\forall T\subset S,\ \mathcal{P}\text{ is correct on inputs }\mathbf{1}_S, \mathbf{1}_T$. Then $\Pr_s(\neg \mathcal{E}) \le 2^m\delta$ by a union bound, which is at most $1/2$ for $m = \lfloor \log_2(1/\delta)\rfloor - 1$. We have thus just shown that $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\min\{n, \log(^n_m)\}) = \Omega(\min\{n, \log\frac 1{\delta}\log \frac n{\log(1/\delta)}\})$.
+
+Our improvement is as follows. Our new decoder again iteratively tries to recover elements of $S$ as before. We will give up though on having $m$ iterations and hoping for all (or even most) of them to succeed. Instead, we will only have $R = \Theta(\log \frac 1{\delta}\log \frac n{\log \frac 1{\delta}})$ iterations, and our aim is for the decoder to succeed in finding a new element in $S$ for at least a constant fraction of these $R$ iterations. Simplifying things for a moment, let us pretend for now that all $R$ iterations do succeed in finding a new element. $\enc(S)$ will then be Alice's message $M$, together with the set $B\subset S$ of size $m-R$ not recovered during the $R$ rounds, explicitly written using $\lceil\log{n \choose |B|}\rceil$ bits. If the decoder can then recover these $R$ remaining elements, this then implies the decoder has recovered $S$, and thus we must have $|M| = \Omega(\log{n\choose m} - \log{n \choose |B|}) = \Omega(R\log \frac nm)$. The decoder proceeds as follows. Just as before, initially the decoder starts with $T = \emptyset$ and lets $i$ be the output of Bob on $\mathbf{1}_T$ and adds it to $T$. Then in iteration $r$, before proceeding to the next iteration, the decoder randomly picks some elements from $B$ and adds them into $T$, so that the number of elements left to be uncovered is some fixed number $n_r$. These extra elements being added to $T$ should be viewed as ``random noise'' to mask information about the random string $s$ used by $\mathcal{P}$, an idea very loosely inspired by ideas in differential privacy. For intuition, as an example suppose the iteration $r=1$ succeeds in finding some $i\in S$. If the decoder were then to add $i$ to $T$, as well as $\approx m/2$ random elements from $B$ to $T$, then the resulting $T$ reveals only $\approx 1$ bit of information about $i$ (and hence about $s$). This is as opposed to the $\log m$ bits $T$ could have revealed if the masking were not performed. Thus the next query in round $r=2$, although correlated with $s$, has very weak correlation after masking and we thus might hope for it to succeed. This intuition is captured in the following lemma, which we prove in Section~\ref{sec:optimal-lb}:
+\begin{lemma}\label{lem:information}
+  Consider $f$: $\{0,1\}^b\times \{0,1\}^q\rightarrow \{0,1\}$ and $X\in\{0,1\}^b$ uniformly random. If $\forall y\in \{0,1\}^q,\ \Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any random variable $Y$ supported on $\{0,1\}^q$,
+  \begin{align}
+    \Pr(f(X,Y)=1)\le \frac{I(X;Y)+H_2(\delta)}{\log \frac{1}{\delta}}, \label{eqn:adaptivity}
+  \end{align}
+  where $I(X;Y)$ is the mutual information between $X$ and $Y$, and $H_2$ is the binary entropy function.
+\end{lemma}
+Fix some $x\in\{0,1\}^n$. One should imagine here that $f(X,y)$ is $1$ iff $\mathcal{P}$ fails when Alice has input $x$ and Bob has input $y$ in a $\ur^\subset$ instance, and the public random string is $X=s$. Then the lemma states that if $y=Y$ is not arbitrary, but rather random (and correlated with $X$), then the failure probability of the protocol is still bounded as long as the mutual information between $X$ and $Y$ is bounded. It is also not hard to see that this lemma is sharp up to small additive terms. Consider the case $x,y\in[n]$, and $f(x,y) = 1$ iff $x = y$. Then if $X$ is uniform, for all $y$ we have $\Pr(f(X,y) = 1) = 1/n$. Now consider the case where $Y$ is random and equal to $X$ with probability $t/\log n$ and is uniform in $[n]$ with probability $1 - t/\log n$. Then in expectation $Y$ reveals $t$ bits of $X$, so that $I(X;Y) = t$. It is also not hard to see that $\Pr(f(X,Y) = 1) \approx t/\log n + 1/n$.
+
+In light of the strategy stated so far and Lemma~\ref{lem:information}, the path forward is clear: at each iteration $r$, we should add enough random masking elements to $T$ to keep the mutual information between $T$ and all previously added elements below, say, $\frac 12 \log \frac 1{\delta}$. Then we expect a constant fraction of iterations to succeed. The encoder knows which iterations do not succeed since it shares public randomness with the decoder (and can thus simulate it), so it can simply tell the decoder which rounds are the failed ones, then explicitly include in $M$ correct new elements of $S$ for the decoder to use in the place of Bob's wrong output in those rounds. A calculation shows that if one adds a $(1-1/K)\approx 2^{-1/K}$ fraction of the remaining items in $S$ to $T$ after drawing one more support element from Bob, the mutual information between the next query to Bob and the randomness used by $\mathcal{P}$ will be $O(K)$ (see Lemma~\ref{lemma:mutual-entropy-bound}). Thus we do this for $K$ a sufficiently small constant times $\log \frac 1{\delta}$. We will then have $n_r \approx (1 - 1/K)^r m$. Note that we cannot continue in this way once $n_r < K$ (since the number of ``random noise'' elements we inject should at least be one). Thus we are forced to stop after $R = \Theta(K\log(m/K)) = \Theta(\log\frac 1{\delta} \log\frac n{\log \frac 1{\delta}})$ iterations. We then set $m = \sqrt{n\log(1/\delta)}$, so that $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(|R|\log \frac nm) = \Omega(\min\{n, \log\frac 1{\delta}\log^2 \frac n{\log \frac 1{\delta}}\})$ as desired.
+
+The argument for lower bounding $\randcom^{\rightarrow,pub}_\delta(\ur_k^\subset)$ is a bit simpler, and in particular does not rely on Lemma~\ref{lem:information}. Both the idea and rigorous argument can be found in Section~\ref{sec:k-samples-lb}, but again the idea is to use a protocol for this problem to encode appropriately sized subsets of $[n]$.
+ 
+As mentioned above, our lower bounds use protocols for $\ur^\subset$ and $\ur^\subset_k$ to establish protocols for encoding subsets of some fixed size $m$ of $[n]$. These encoders always consist of some message $M$ Alice would have sent in a $\ur^\subset$ or $\ur^\subset_k$ protocol, together with a random subset $B\subset S$ (using $\lceil \log_2|B|\rceil + \lceil\log{n\choose |B|}\rceil$ bits, to represent both $|B|$ and the set $B$ itself). Here $|B|$ is a random variable. These encoders are thus {\em Las Vegas}: the length of the encoding is a random variable, but the encoder/decoder always succeed in compressing and recovering the subset. The final lower bounds then come from the following simple lemma, which follows from the source coding theorem. 
+
+\begin{lemma} \label{lemma:lb-meta}
+  Let $\s$ denote the number of bits used by the $\ur^\subset$ or $\ur^\subset_k$ protocol, and let $\s'$ denote the expected number of bits to represent $B$. Then $(1+\s+\s') \ge \log (^n_m)$. In particular, $s \ge \log(^n_m) - s' - 1$.
+\end{lemma}
+
+Section~\ref{sec:optimal-lb} provides our first proof that $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\min\{n, \log^2(\frac n{\log(1/\delta)}) \log \frac{1}{\delta}\})$. We extend our results in Section~\ref{sec:k-samples-lb} to $\ur_k^\subset$ for $k\ge 1$, proving a lower bound of $\Omega(k\log^2(n/k))$ communication even for constant failure probability.
+
+\subsection{Lower bound proof via reduction from $\aug_N$}
+
+Our second lower bound proof for $\ur^\subset$ is via a randomized reduction from $\aug_N$ \cite{MiltersenNSW98}. In this problem, Charlie receives $z\in\{0,1\}^N$ and Diane receives $j^*\in[N]$ together with $z_j$ for $j=j^*+1,\ldots,N$, and Diane must output $z_{j^*}$. It is shown in \cite{MiltersenNSW98} that $\randcom^{\rightarrow, pub}_\delta(\aug_N) = \Omega(N)$ for any $\delta$ bounded away from $1/2$. In our reduction, $N = \Theta(\log(1/\delta)\log^2\frac n{\log(1/\delta)})$.
+
+For $\ur^\subset$, we can also think of the problem as Alice being given $S\subseteq[n]$ and Bob being given $T\subsetneq S$, and Bob must output some element of $S\backslash T$. %In our reduction from $\aug_N$ to $\ur^\subset$, we use an idea from \cite{JowhariST11} which shows that it can be assumed without loss of generality that any public coin $\ur$ $\mathcal P$ can be made into one in which the index $i\in S\backslash T$ output is uniformly random in $S\backslash T$.
+% -David: will incorporate this statement differently below
+In $\aug_N$, Charlie views his input as $L = \Theta(\log \frac n{\log(1/\delta)})$ blocks of bits of nearly equal size, where the $i$th block represents a subset $S_i$ of $[u_i]$ in some collection $\mathcal S_{u_i,m}$ of sets, for some carefully chosen universe sizes $u_i$ per block. Here $\mathcal S_{u_i,m}$ is a collection of subsets of $[u_i]$ of size $m$ of maximal size such any two sets in the collection have intersection size strictly less than $m/2$. Furthermore,  Diane's index $j^*$ is in some particular block of bits corresponding to some set $S_{i^*}$, and Diane also knows $S_i$ for $i>j$.
+
+Now we explain the reduction. We assume some protocol $\mathcal P$ for $\ur^\subset$, and we give a protocol $\mathcal P'$ for $\aug_N$. First, we define the universe $A = \bigcup_{i=1}^L (\{i\} \times [u_i]\times [100^i])$, which has size $n$. Charlie then defines $S = \bigcup_{i=1}^L (\{i\} \times S_i \times [100^i])$. Charlie and
+Diane use public randomness to define a uniformly random permutation $\pi$ on $[n]$. Charlie can compute
+$\pi(S)$. Also, since Diane knows $S_i$ for $i > i^*$, she can define $T =  \bigcup_{i=i^*+1}^L (\{i\} \times S_i \times [100^i])$
+and compute $\pi(T)$. Then $\pi(S)$ and $\pi(T)$ are the inputs to Alice and Bob in the protocol $\mathcal P$
+for $\ur^\subset$. Charlie sends Diane the message Alice would have sent Bob in $\mathcal P$ if her input had been $\pi(S)$, and Diane simulates Bob to recover an element in $\pi(S)\backslash \pi(T)$.
+Importantly, Alice and Bob do not know anything about $\pi$ at this point other than that $\pi(S) = S$ and $\pi(T) = T$. Thus,
+the protocol $\mathcal P$ for $\ur^\subset$, if it succeeds, outputs an arbitrary element $j \in \pi(S) \backslash \pi(T)$, which is a 
+deterministic function of the labels of elements in $\pi(S)$ and $\pi(T)$ and the randomness $R$ that Alice and Bob share, which is independent from the randomness in $\pi$. Since $\pi$ is still a uniformly random map conditioned on $\pi(S) = S$
+and $\pi(t) = t$ for each $t \in T$, and $j \in \pi(S) \backslash \pi(T)$, it follows that $\pi^{-1}(t)$ is a uniformly random element
+of $S \setminus T$. After receiving $\pi^{-1}(j)$, if $(i, a, r) = \pi^{-1}(j)$, then
+Charlie and Diane reveal the pairs $((i, a, z), \pi((i,a,z)))$ for each $z \in [100^i]$ to Alice and Bob and Bob updates
+his set $\pi(T)$ to include $\pi(i,a,z)$ for each $z \in [100^i]$. One can show that at each step in this process, if Alice and Bob
+succeed in outputting an arbitrary item $j$ from $\pi(S) \setminus \pi(T)$, then this is a uniformly random item from
+$\pi(S) \setminus \pi(T)$. The fact that this item is uniformly random is crucial for arguing the number of computation paths
+of the protocol of Alice and Bob is $o(1/\delta)$ with good probability, over $\pi$, so that one can argue (see below) that with good probability on
+every such computation path Alice and Bob succeed on that path, over their randomness $R$. Although the idea of using a random permutation appeared in \cite{JowhariST11} to show that any public coin $\ur$ protocol can be made
+into one in which a uniformly random element of $S \backslash T$ is output, here we must use this idea adaptively, slowly revealing
+information about $\pi$ and arguing that this property is maintained for each of Bob's successive queries.  
+
+Due to geometrically increasing repetitions of items for increasing $i$, a uniformly random element in $S\backslash T$ is roughly $100$ times more likely to correspond to an item in $S_{i^*}$ than in $S_i$ for $i<i^*$. Thus if Diane simulates Bob to recover a random element in $S\backslash T$, it is most likely to recover an element $j$ of $S_{i^*}$. She can then tell Bob to include $\pi(j)$ and its $100^{i^*}$ redundant copies to $\pi(T)$ and iterate.
+
+There are several obstacles to overcome to make this work. First, iterating means using $\mathcal P$ adaptively, which was the same issue that arose in Section~\ref{sec:adaptivity-intro}. Second, a constant fraction of the time ($1/100$), we expect to obtain an element {\em not} in $S_{i^*}$, but rather from some $S_i$ for $i<i^*$. If this happened too often, then Diane would need to execute many 
+queries to recover a sufficiently large number of elements from $S_{i^*}$ in order to solve $\aug_N$. This would then require a union bound over too many possible computation paths, which would not be possible as Alice likely would fail on one
+of them (over the choice of $R$). 
+However, since the random permutation argument above ensures that at each step we receive
+a uniformly random item from the current set $S \setminus T$, if we continue for $m$ iterations, we can argue that with large probability, our sequence of inputs $T$ over the iterations with which Diane invokes Bob's output are all likely to come from a family $\mathcal T$ of size at most $2^{O(m)}$. Here we need to carefully
+construct this family to contain a smaller number of sets from levels $i$ for which $i^*-i$
+is larger so that the overall number of sets is small. Given this, we can union bound over all such $T$, for total failure probability $\delta |\mathcal T| \ll 1$. Furthermore, we can also argue that after $m$ iterations, it is likely that we have recovered at least $m/2$ of the elements from $S_{i^*}$, which is enough to uniquely identify $S_{i^*}\in \mathcal S_{u_i,m}$ by the limited intersection property of $\mathcal S_{u_i,m}$.

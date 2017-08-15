@@ -1,0 +1,207 @@
+\section{Lower bounds proofs via augmented indexing}\label{sec:aug-proof}
+
+Here we show another route to proving $\randcom^{\rightarrow,pub}_\delta(\ur_k^\subset) = \Omega(\min\{n, t\log^2(n/t)\}$ via reduction from augmented indexing. We again separately prove lower bounds for $\randcom^{\rightarrow,pub}_\delta(\ur^\subset)$ and $\randcom^{\rightarrow,pub}_{\frac 15}(\ur_k^\subset)$. Both proofs make use of the following standard lemma. The proof can be found in the appendix (see Section~\ref{sec:code}).
+
+\begin{lemma}\label{lem:code}
+For any integers $u\ge 1$ and $1\le m\le u/(4e)$, there exists a collection $\mathcal S_{u,m} \subset \binom{[u]}m$ with $\log |\mathcal{S}_{u,m}| = \Theta(m\log(u/m))$ such that for all $S\neq S'\in \mathcal S_{u,m}$, $|S\cap S'| < m/2$.
+\end{lemma}
+
+Both our lower bounds in Sections~\ref{sec:aug-delta} and \ref{sec:aug-k} reduce from augmented indexing (henceforth $\aug$) to either $\ur^\subset$ with low failure probability, or $\ur_k^\subset$ with constant failure probability, in the public coin one-way model of communication. We remind the reader of the setup for the $\aug_N$ problem. There are two players, Charlie and Diane. Charlie receives $z\in\{0,1\}^N$ and Diane receives $j^*\in[N]$ together with $z_{j^*+1},\ldots,z_N$. Charlie must send a single message to Diane such that Diane can then output $z_{j^*}$. The following theorem is known.
+
+\begin{theorem}{\cite{MiltersenNSW98}}\label{thm:mnsw}
+$\randcom^{\rightarrow,pub}_{1/3}(\aug_N) = \Theta(N)$.
+\end{theorem}
+
+We show that if there is an $s$-bit communication protocol $\mathcal P$ for $\ur^\subset$ on $n$-bit vectors with failure probability $\delta$ (or for $\ur_k$ with constant failure probability), that implies the existence of an $s$-bit protocol $\mathcal P'$ for $\aug_N$ for some $N=\Theta(\log\frac 1{\delta}\log^2\frac n{\log\frac 1{\delta}})$ (or $N=\Theta(k\log^2(n/k))$ for $\ur_k$). The lower bound on $s$ then follows from Theorem~\ref{thm:mnsw}.
+
+
+\subsection{Communication Lower Bound for $\ur^\subset$}\label{sec:aug-delta}
+
+Set $t = \log \frac 1{\delta}$. In this section we assume $t < n/(4e)$ and show $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(t\log^2(n/t))$. This implies a lower bound of $\Omega(\min\{n, t\log^2(n/t)\})$ for all $\delta>0$ bounded away from $1$.
+
+As mentioned, we assume we have an $s$-bit protocol $\mathcal P$ for $\ur^\subset$ with failure probability $\delta$, with players Alice and Bob.We use $\mathcal P$ to give an $s$-bit protocol $\mathcal P'$ for $\aug_N$, which has players Charlie and Diane, for $N = \Theta(t\log^2(n/t))$.
+
+The protocol $\mathcal P'$ operates as follows. Without loss of generality we may assume that, using the notation of Lemma~\ref{lem:code}, $|\mathcal S_{u,m}|$ is a power of $2$ for $u, m$ as in the lemma statement. This is accomplished by simply rounding $|\mathcal S_{u,m}|$ down to the nearest power of $2$ by removing elements arbitrarily. Also, define $L = c\log(n/t)$ for some sufficiently small constant $c\in(0,1)$ to be determined later. Now, Charlie partitions the bits of his input $z\in\{0,1\}^N$ into $L$ consecutive sequences of bits such that the $i$th chunk of bits for each $i\in[L]$ can be viewed as specifying an element $S_i\in \mathcal S_{u_i,m}$ for $u_i = \frac n{100^i\cdot L}$ and $m = ct$. Lemma~\ref{lem:code} gives $\log|\mathcal S_{u_i,m}| = \Theta(m\log(u_i/m))$, which is $\Theta(t\log(n/t))$ for $c < 1/14$. Thus $N = \Theta(L\cdot t\log(n/t)) = \Theta(t\log^2(n/t))$. Given these sets $S_1,\ldots,S_L$, we now discuss how Charlie generates a vector $x\in\{0,1\}^n$. Charlie then simulates Alice on $x$ to generate the message Alice would have send to Bob in protocol $\mathcal P$, then sends that same message to Diane.
+
+To generate $x\in\{0,1\}^n$, assume Charlie and Diane have sampled a bijection from 
+\begin{equation}\label{eq:pi-origin}
+A = \bigcup_{i=1}^L (\{i\} \times [u_i]\times [100^i])
+\end{equation}
+to $[n]$ uniformly at random. We denote this bijection by $\pi$. This is possible since $|A| = n$. Then Charlie defines $x$ to be the indicator vector $\mathbf{1}_{\pi(S)}$, where
+$$
+S = \bigcup_{i=1}^L (\{i\} \times S_i \times [100^i]),
+$$
+then sends a message $M$ to Diane, equal to Alice's message with input $\mathbf{1}_{\pi(S)}$. This completes the description of Charlie's behavior in the protocol $\mathcal P'$.
+
+We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies in some chunk $i^*\in[L]$. We now show how Diane can use $\mathcal P$ to recover $S_{i^*}$ with probability $2/3$ (and thus in particular recover $z_{j^*}$). Since Diane knows $z_j$ for $j>j^*$, she knows $S_i$ for $i>i^*$. She can then execute the following algorithm.
+
+
+\begin{algorithm}[H] 
+  \caption{Behavior of Diane in $\mathcal P'$ for $\ur^\subset$.} \label{algo:diane1}
+  \begin{algorithmic}[1]
+    \Procedure{$\diane$}{$M$}
+    \State $T \leftarrow \bigcup_{i=i^*+1}^L (\{i\} \times S_i \times [100^i])$
+    \State $T_{i^*}\leftarrow \emptyset$
+    \While {$|T_{i^*}| < \frac m2$}
+      \State $(i,a,r)\leftarrow \pi^{-1}(\query(M, \mathbf{1}_{\pi(T)}))$
+      \State $T\leftarrow T \cup ((i,a) \times [100^i])$
+      \If {$i=i^*$} 
+        \State $T_{i^*} \leftarrow T_{i^*}\cup \{a\}$
+      \EndIf
+    \EndWhile
+    \If {there exists $S\in\mathcal S_{u_{i^*},m}$ with $T_{i^*}\subset S$}
+      \State \Return the unique such $S$
+    \Else
+      \State \Return \textsf{Fail}
+    \EndIf
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+In Algorithm~\ref{algo:diane1} Diane is building up a subset $T_{i^*}$ of $S_{i^*}$. Once $|T_{i^*}| \ge |S_{i^*}|/2 = m/2$, Diane can uniquely recover $S_{i^*}$ by the limited intersection property of $\mathcal{S}_{u_i,m}$ guaranteed by Lemma~\ref{lem:code}. Until then, she uses $\mathcal P$ to recover elements of $S\backslash T$, which, as we now show, are chosen uniformly at random from $S\setminus T$. 
+
+\begin{claim}\label{cl:uniform}
+For every protocol for Alice and Bob that uses shared randomness with Bob's behaviour given by $\query(\cdot)$, for every choice of shared random string $R$ of Alice and Bob, for every $S, T\subset S$, the following conditions hold. If $\pi$ is a uniformly random permutation, the success or failure of $\query(M, \mathbf{1}_{\pi(T)})$ is determined by $\{\pi(j)\}_{j\in T}$ and the image $\pi(S\setminus T)$ of $S\setminus T$ under $\pi$. Conditioned on a choice of $R$, $\{\pi(j)\}_{j\in T}$ and $\pi(S\setminus T)$ such that $\query(M, \mathbf{1}_{\pi(T)})$ succeeds, one has that $\pi^{-1}(\query(M, \mathbf{1}_{\pi(T)}))$ is a uniformly random element of $S\setminus T$.
+\end{claim}
+\begin{proof}
+The first claim follows by noting that the message $M$ that Alice sends to Bob is solely a function of $R$ and $\pi(S)$. The behaviour of Bob is determined by $M$ and $\pi(T)$ (and the latter is determined by $\{\pi(j)\}_{j\in T}$).
+
+Now condition on the values of $R$, $\{\pi(j)\}_{j\in T}$ and $\pi(S\setminus T)$ such that  $\query(M, \mathbf{1}_{\pi(T)})$ succeeds, and let $j^*\in [n]$ denote the output. Note that by our conditioning $j^*$ is a fixed quantity. The only randomness left is the exact mapping of $S\setminus T$ to $\pi(S\setminus T)$. This mapping is independent of $\{\pi(j)\}_{j\in T}$ and $\pi(S\setminus T)$ and uniformly random, so $\pi^{-1}(j^*)$ is a uniformly random element of $S\setminus T$, as required.
+\end{proof}
+
+Fix any protocol $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ (not necessarily the one that Charlie and Diane use; see analysis of the idealized process $\widetilde{\mathcal{P}}$ below). Now fix $T$ together with values of $R$, $\{\pi(j)\}_{j\in T}$ and $\pi(S\setminus T)$ such that  $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ succeeds.  
+
+\if 0
+\paragraph{Elements in $S_{i^*}$ are likely to be recovered.}   Given Claim~\ref{cl:uniform}, since the elements of $S_i$ appear with frequency $100^i$ in $S\backslash T$, they are more likely to be returned by $\pi^{-1}(\widetilde{\query}(M, \mathbf{1}_{\pi(T)}))$. Indeed, as long as $T_{i^*}\le m/2$, at least $m/2$ elements remain in $S_{i^*}\backslash T_{i^*}$, implying the output of $(i, a, r)$ of $\pi^{-1}(\widetilde{\query}(M, \mathbf{1}_{\pi(T)}))$ satisfies
+\begin{equation}
+\begin{split}
+\Pr(i = i^* | (R, \{\pi(j)\}_{j\in T}, \pi(S\setminus T)) \text{~s.t.~}\widetilde{\query}(M, \mathbf{1}_{\pi(T)})\text{~succeeds}) &\ge \frac{\frac m2\cdot 100^{i^*}}{\frac m2\cdot 100^{i^*} + m\cdot \sum_{i=1}^{i^*-1} 100^i}\\
+& = \frac{\frac 12\cdot 100^{i^*}}{\frac 12\cdot 100^{i^*} + \frac {100}{99}(100^{i^*-1} - 1)}\\
+& > \frac{49}{50} , \label{eqn:istar-likely}
+\end{split}
+\end{equation}
+where the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\to \pi(S\setminus T)$ (recall that we condition on the image $\pi(S\setminus T)$ under $\pi$, but not on the actual mapping).
+\fi
+
+
+\paragraph{Elements in $S_{j}, j<i^*,$ are unlikely to be recovered.} Given Claim~\ref{cl:uniform}, since the elements of $S_j$ appear with frequency $100^j$ in $S\backslash T$, they are less likely to be returned by $\pi^{-1}(\widetilde{\query}(M, \mathbf{1}_{\pi(T)}))$ when $j$ is small.  More precisely, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, for any $1\le j< i^*$
+\begin{equation}
+\begin{split}
+\Pr(i = j | (R, \{\pi(j)\}_{j\in T}, \pi(S\setminus T)) \\ \text{~s.t.~}\widetilde{\query}(M, \mathbf{1}_{\pi(T)})\text{~succeeds})& \le \frac{m\cdot 100^j}{\frac m2\cdot 100^{i^*}}\\
+& \le 2\cdot 100^{-(i^*-j)} \\
+&\le 50^{-(i^*-j)} . \label{eqn:others-unlikely}
+\end{split}
+\end{equation}
+Here again the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\to \pi(S\setminus T)$ (recall that we condition on the image $\pi(S\setminus T)$ under $\pi$, but not on the actual mapping).
+
+We now define the set $\mathcal{T}$ of {\bf typical intermediate sets}, which plays a crucial role in our analysis.  Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/4^{i^*-i}$.  The following claim will be useful:
+\begin{claim}\label{cl:size-of-t}
+For the set $\mathcal{T}$ defined above one has $|\mathcal{T}|=2^{O(m)}$.
+\end{claim}
+\begin{proof}
+\begin{align*}
+|\mathcal T| &\le 2^m \cdot \prod_{i=1}^{i^*-1}\left(\sum_{r=0}^{\frac m{4^{i^*-i}}} \binom mr\right)\text{ (the }2^m\text{ term comes from }S_{i^*}\text{)}\\
+{}&\le 2^m \cdot \prod_{i=1}^{i^*-1} \binom{m + \frac m{4^{i^* - i}}}{\frac m{2^{i^* - i}}}\\
+{}&\le 2^m \cdot \prod_{i=1}^{i^*-1} (2e\cdot 4^{i^*-i})^{\frac m{4^{i^* - i}}}\text{ (using }\binom nk \le (en/k)^k\textrm{)}\\
+{}&\le 2^{O(m)} \cdot 2^{m\cdot O(\sum_{j=1}^\infty j 4^{-j})} \\
+{}& \le 2^{O(m)}
+\end{align*}
+\end{proof}
+
+
+We will show that for most choices of $\pi$ and shared random string $R$ Algorithm~\ref{algo:diane1} {\bf (a)} never leaves the set $\mathcal{T}$ and {\bf (b)} successfully terminates.  Note that Algorithm~\ref{algo:diane1} is a random process whose sample space is the product of the set of all possible permutations $\pi$ and shared random strings $R$. As before, we denote this process by $\mathcal{P}'$. It is useful for analysis purposes to define another process $\widetilde{\mathcal{P}}$, which is an idealized version of $\mathcal{P}'$. In this process instead of running  $\query(M, \mathbf{1}_{\pi(T)})$ Alice runs  $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$, which is guaranteed to output an element of $\pi(S\setminus T)$ for every choice of  $T\subset S$, shared random string $R$, $\{\pi(j)\}_{j\in T}$, and $\pi(S\setminus T)$. The proof proceeds in three steps.
+
+
+
+{\bf Step 1: proving that $\widetilde{\mathcal{P}}$ succeeds in recovering $T_{i^*}$ and never leaves $\mathcal{T}$ with high probability.}
+Choose $\pi$ uniformly at random. By \eqref{eqn:others-unlikely}, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, the expected number of items recovered by $\widetilde{\query}$ from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/4^{i^*-i}$ items from $S_i$ is at most $(1/12)^{i^*-i}$ by Markov's inequality. Note that the probability is over the choice of $\pi$ only, as $\widetilde{\query}$ is assumed to succeed with probability $1$ by definition of $\widetilde{\mathcal{P}}$. 
+Thus
+$$
+\Pr( \widetilde{\mathcal{P}}\text{~leaves~}\mathcal{T}) \le \sum_{i=1}^{i^*-1}\left(1/12\right)^{i^*-i} < 1/10.
+$$
+In particular this means that with probability at least $1-1/10$ at most $\sum_{i<i^*} m/4^{i^*-i}<m/2$ items from $\bigcup_{i<i^*} S_i$ are recovered in the first $m$ (or fewer, if the algorithm terminates earlier) iterations. This also implies that with probability at least $1-1/10$ if the algorithm proceeds for the entire $m$ iterations, it recovers at least $m/2$ elements of $T_{i^*}$ and hence terminates. We thus get that $\widetilde{\mathcal{P}}$ succeeds at least with probability $1-1/10$.
+
+{\bf Step 2: coupling $\widetilde{\mathcal{P}}$ to $\mathcal{P}'$ on most of the probability space.}
+For every $T\subset S$ and every $\pi$ let $\mathcal{E}_T(\pi)$ be the probabilistic event (over the choice of $\query$'s random string $R$) that $\query(M, \mathbf{1}_{\pi(T)})$ succeeds in returning an element in $\pi(S\backslash T)$. Note that $\mathcal{E}_T(\pi)$ is a subset of the probability space of shared random strings $R$, and depends on $\pi$. We let 
+$$
+\mathcal{E}_{\mathcal T}(\pi):=\wedge_{T\in\mathcal T} \mathcal E_T(\pi)
+$$
+to simplify notation. Using Claim~\ref{cl:size-of-t} and the union bound we have for every $\pi$
+$$
+\Pr_R(\neg(\mathcal E_{\mathcal T}(\pi))) \le \delta\cdot |\mathcal T|\leq 1/20
+$$
+as long as for $m = c\log(1/\delta)$ for $c$ a sufficiently small constant.
+
+Now recall that $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ is an idealized protocol, which is guaranteed to output an element of $\pi(S\setminus T)$ for every choice of  $T\subset S$, shared random string $R$, $\{\pi(j)\}_{j\in T}$, and $\pi(S\setminus T)$. We have just shown that for every $\pi$ the event ${\mathcal E_{\mathcal T}(\pi)}$ occurs  with probability at least $1-1/20$ over the choice of $R$. Now define $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ as equal to $\query(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$ (the typical set of intermediate sets) and $(\pi, R)$ such that $R\in {\mathcal E_{\mathcal T}(\pi)}$, and extend $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ to return an arbitrary element of $\pi(S\setminus T)$ for remaining tuples $(T, R, \pi(T),  \pi(S\setminus T))$. Note that $\widetilde{\query}$ defined in this way is a deterministic function once $T$, $R$, $\pi(T)$ and $\pi(S\setminus T)$ are fixed. 
+
+Note that with probability at least $1-1/20$ over the choice of $\pi$ and $R$ one has $\query(M, \mathbf{1}_{\pi(T)})=\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$, as required.
+
+
+{\bf Step 3: arguing that $\mathcal{P}'$ succeeds with high probability.}  Choose $(\pi, R)$ uniformly at random. By {\bf Step 2} we have that with probability at least $1-1/20$ over this choice 
+$\query(M, \mathbf{1}_{\pi(T)})=\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$. At the same time we have by {\bf Step 1} that with probability at least $1-1/10$ over the choice of $\pi$ the idealized process $\widetilde{\mathcal{P}}$ 
+succeeds in recovering $T_{i^*}$ and never leaves $\mathcal{T}$. Putting the two bounds together, we get that $\mathcal{P}'$ succeeds with probability at least $1-1/20-1/10>2/3$, showing the following theorem.
+
+
+\begin{theorem}
+For any $0<\delta<1/2$ and integer $n\ge 1$ with $\log \frac 1{\delta} < n/(4e)$, $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) \ge \randcom^{\rightarrow,pub}_{1/3}(\aug_N)$ for $N = \Theta(\log\frac 1{\delta} \log^2 \frac n{\log \frac 1{\delta}})$.
+\end{theorem}
+
+\begin{corollary}
+For any $0<\delta<1/2$ and integer $n\ge 1$, $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\min\{n, \log\frac 1{\delta} \log^2 \frac n{\log \frac 1{\delta}}\})$.
+\end{corollary}
+
+\subsection{Communication Lower Bound for $\ur_k^\subset$}\label{sec:aug-k}
+
+The idea for lower bounding $\randcom^{\rightarrow,pub}_{\frac 15}(\ur_k^\subset)$ is as in Section~\ref{sec:aug-delta}, but slightly simpler. That is because for the protocol $\mathcal P'$ for $\aug_N$, Diane will not make adaptive queries to Bob in the protocol $\mathcal P$ for $\ur_k^\subset$. Rather, she will only make one query using Bob and will be able to decide $\aug_N$ with good probability from that single query. We  make use of the following lemma from~\cite{JowhariST11}, whose proof is similar to our analysis in Section~\ref{sec:aug-delta}.
+
+\begin{lemma}{\cite{JowhariST11}}\label{lem:rand-ur}
+Any public coin protocol for $\ur^\subset$ can be turned into one that outputs every index $i\in[n]$ with $x_i\neq y_i$ with the same probability. The number of bits sent, failure probability, and number of rounds do not change. Similarly, any $\ur_k^\subset$ protocol can be turned into one in which all subsets of $[n]$ of size $\min\{k, \|x-y\|_0\}$ on which $x, y$ differ are equally likely to be output.
+\end{lemma}
+
+Henceforth we assume $\mathcal P$ outputs random differing indices, which is without loss of generality by Lemma~\ref{lem:rand-ur}.
+
+
+Again Charlie receives $z\in\{0,1\}^N$ and Diane receives $j^*$ and $z_{j^*+1},\ldots,z_N$ and they want to solve $\aug_N$. Charlie views his input as consisting of $L$ blocks for $L = c\log(n/k)$ for a sufficiently small constant $c\in(0,1)$, and the $i$th block for $i\in[L]$ specifies a set $S_i \in \mathcal S_{u_i,m}$ for $m = ck$ and $u_i = n/(100^i L)$. As before, for $c$ sufficiently small we have $N = \Theta(L\cdot k\log(n/k)) = \Theta(k\log^2(n/k))$. The bijection $A$ and set $S$ are defined exactly as in Section~\ref{sec:aug-delta}, and Charlie simulates Alice to send the message $M$ to Diane that Alice would have sent to Bob on input $\mathbf{1}_S$. Again, Diane knows $S_i$ for $i>i^*$, where $j^*$ lies in the $i^*$th block of bits. Diane's algorithm to produce her output is then described in Algorithm~\ref{algo:diane2}.
+
+\begin{algorithm}%[H] 
+  \caption{Behavior of Diane in $\mathcal P'$ for $\ur_k^\subset$.} \label{algo:diane2}
+  \begin{algorithmic}[1]
+    \Procedure{$\diane$}{$M$}
+    \State $T \leftarrow \bigcup_{i=i^*+1}^L (\{i\} \times S_i \times [100^i])$
+    \State $T_{i^*}\leftarrow \emptyset$
+    \State $B\leftarrow \query(M, \mathbf{1}_T)$
+    \For{$(i,a,r)\in B$}
+      \If {$i=i^*$ and $a\notin T$}
+        \State $T_{i^*} \leftarrow T_{i^*}\cup \{a\}$
+      \EndIf
+    \EndFor
+    \If {$|T_{i^*}| < \frac m2$}
+      \State \Return \textsf{Fail}
+    \Else
+      \State \Return the unique $S\in \mathcal S_{u_{i^*},m}$ with $T_{i^*}\subset S$ 
+    \EndIf
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+Recall Bob, when he succeeds, returns $\min\{k, |S\backslash T|\} = k$ uniformly random elements from $S\backslash T$. Meanwhile, $S_{i^*}$ only has $m = ck$ elements for some small constant $c$. As in Section~\ref{sec:aug-delta}, almost all of the support of $S\backslash T$ comes from items in block $i^*$, and hence we expect almost all our $k$ samples to come from (and be uniform in) items corresponding to elements of $S_{i^*}$. 
+
+We now provide a formal analysis. Henceforth we condition on Bob succeeding, which happens with probability $4/5$. The number of elements in $S\backslash T$ corresponding to an element of $S_{i^*}$ is $100^{i^*} m$, whereas the number of elements corresponding to an element of $S_i$ for $i < i^*$ is
+$$
+m\cdot \sum_{i=1}^{i^*-1} 100^i = \frac m{99}\cdot (100^{i^*} - 1) < \frac m{99}\cdot 100^{i^*}
+$$
+Thus, we expect at most $k/99$ elements in $B$ to correspond to elements in $S_i$ for $i\neq i^*$, and the probability that we have at least $k/9$ such elements in $B$ is less than $1/10$ by Markov's inequality. We henceforth condition on having less than $k/9$ such elements in $B$. Now we know $B$ contains at least $8k/9$ elements corresponding to $S_{i^*}$, chosen uniformly from $S_{i^*}\times [100^i]$. For any given element $a\in S_{i^*}$, the probability that none of the elements in $B$ from $S_{i^*}$ correspond to $a$ is $(1 - 1/m)^{\frac 89 k} \le e^{-(8/9)k/m} < 1/30$ for $c$ sufficiently small (where $m = ck$). Thus the expected number of $a\in S_{i^*}$ not covered by $B$ is less than $m/30$. Thus the probability that fewer than $m/2$ elements are covered by $B$ is a most $1/15$ by Markov's inequality (and otherwise, Diane succeeds). Thus, the probability that Diane succeeds is at least $4/5\cdot 9/10 \cdot 14/15 > 2/3$. We have thus shown the following theorem.
+
+\begin{theorem}
+For any integers $1\le k \le n$, $\randcom^{\rightarrow,pub}_{\frac 15}(\ur_k^\subset) \ge \randcom^{\rightarrow,pub}_{\frac 13}(\aug_N)$ for $N = \Theta(k\log^2(n/k))$.
+\end{theorem}
+
+\begin{corollary}
+For any integers $1\le k \le n$, $\randcom^{\rightarrow,pub}_{\frac 15}(\ur_k^\subset) = \Omega(\min\{n, k\log^2(n/k)\})$.
+\end{corollary}
+
+\begin{remark}
+\textup{
+One may wish to understand $\randcom^{\rightarrow,pub}_\delta(\ur_k^\subset)$ for $\delta$ near $1$ (or at least, larger than $1/2$). Such a lower bound is given in Theorem~\ref{thm:urk}. The proof given above as written would yield no lower bound in this regime for $\delta$ since $\aug$ is in fact easy when the failure probability is allowed to be least $1/2$ (Charlie can send no message at all, and Diane can simply guess $z_{j^*}$ via a coin flip). One can however get a handle on $\randcom^{\rightarrow,pub}_\delta(\ur_k^\subset)$ by instead directly reducing from the following variant of augmented indexing: Charlie receives $D\in \mathcal S_{u_1,m}\times \cdots \times \mathcal S_{u_L, m}$ and Diane receives $j^*\in[L]$ and $D_{j^*+1},\ldots,D_L$ and must output $D_{j^*}$, where the $u_i$ are as above. One can show that unless Charlie sends almost his entire input, Diane cannot have success probability significantly better than random guessing (which has success probability $O(\max_{i\in L} 1/|\mathcal S_{u_i, m}|)$). The proof is nearly identical to the analysis of augmented indexing over large domains \cite{ErgunJS10,JayramW13}. Indeed, the problem is even almost identical, except that here we consider Charlie receiving a vector whose entries come from different alphabet sizes (since the $|\mathcal S_{u_i,m}|$ are different), whereas in \cite{ErgunJS10,JayramW13} all the entries come from the same alphabet.
+}
+\end{remark}

@@ -1,0 +1,109 @@
+\section{Appendix}
+
+\subsection{A tight upper bound for $\randcom^{\rightarrow,pub}_\delta(\ur_k)$}\label{sec:upper-bound}
+
+In \cite[Proposition 1]{JowhariST11} it is shown that $\randcom^{\rightarrow,pub}_\delta(\ur_k) = O(\min\{n,t\log^2 n\})$ for $t = \max\{k,\log(1/\delta)\}$. Here we show that a minor modification of their protocol in fact shows the correct complexity $\randcom^{\rightarrow,pub}_\delta(\ur_k) = O(\min\{n,t\log^2(n/t)\})$, which given our new lower bound, is optimal up to a constant factor for the full range of $n,k,\delta$ as long as $\delta$ is bounded away from $1$.
+
+Recall Alice and Bob receive $x, y\in\{0,1\}^n$, respectively, and share a public random string. Alice must send a single message $M$ to Bob, from which Bob must recover $\min\{k, \|x-y\|_0\}$ indices $i\in[n]$ for which $x_i\neq y_i$. Bob is allowed to fail with probability $\delta$. The fact that $\randcom^{\rightarrow,pub}_\delta(\ur_k) \le n$ is obvious: Alice can simply send the message $M = x$, and Bob can then succeed with failure probability $0$. We thus now show $\randcom^{\rightarrow,pub}_{e^{-ck}}(\ur_k) \le k\log^2(n/k)$ for some constant $c>0$, which completes the proof of the upper bound. We assume $k\le n/2$ (otherwise, Alice sends $x$ explicitly).
+
+As mentioned, the protocol we describe is nearly identical to one in \cite{JowhariST11} (see also \cite{CormodeF14}). We will describe the new protocol here, then point out the two minor modifications that improve the $O(k\log^2 n)$ bound to $O(k\log^2(n/k))$ in Remark~\ref{rem:recov}. We first need the following lemma.
+
+\begin{lemma}\label{lem:sparse-recov}
+Let $\F_q$ be a finite field and $n>1$ an integer. Then for any $1\le k\le \frac n2$, there exists $\Pi_k\in \F_q^{m\times n}$ for $m = O(k\log_q(qn/k))$ s.t.\ for any $w\neq w'\in\F_q^n$ with $\|w\|_0, \|w'\|_0 \le k$, $\Pi_k w \neq \Pi_k w'$.
+\end{lemma}
+\begin{proof}
+The proof is via the probabilistic method. $\Pi_k w = \Pi_k w'$ iff $\Pi_k (w - w') = 0$. Note $v = w-w'$ has $\|v\|_0 \le 2k$. Thus it suffices to show that such a $\Pi_k$ exists with no $(2k)$-sparse vector in its kernel. The number of vectors $v\in\F_q^n$ with $\|v_0\| \le 2k$ is at most $\binom{n}{2k}\cdot q^{2k}$. For any fixed $v$, $\Pr(\Pi_k v = 0) = q^{-m}$. Thus 
+$$\Pr(\exists v, \|v\|_0 \le 2k: \Pi_k v = 0) \le \binom{n}{2k}\cdot q^{2k} \cdot q^{-m}$$ 
+by a union bound. The above is strictly less than $1$ for $m > 2k + \log_q\binom{n}{2k}$, yielding the claim.
+\end{proof}
+
+\begin{corollary}\label{cor:ksparse}
+Let $\F_q$ be a finite field and $n>1$ an integer. Then for any $1\le k\le \frac n2$, there exists $\Pi_k\in \F_q^{m\times n}$ for $m = O(k\log_q(qn/k))$ together with an algorithm $\mathcal{R}$ such that for any $w\in\F_q^n$ with $\|w\|_0 \le k$, $\mathcal{R}(\Pi_k w) = w$.
+\end{corollary}
+\begin{proof}
+Given Lemma~\ref{lem:sparse-recov}, a simple such $\mathcal{R}$ is as follows. Given some $y = \Pi_k w^*$ with $\|w^*\|_0 \le k$, $\mathcal{R}$ loops over all $w$ in $\F_q^n$ with $\|w\|_0 \le k$ and outputs the first one it finds for which $\Pi_k w = y$.
+\end{proof}
+
+The protocol for $\ur_k$ is now as follows. Alice and Bob use public randomness to pick commonly known random functions $h_0,\ldots,h_L:[n]\rightarrow\{0,1\}$ for $L = \lfloor\log_2(n/k)\rfloor$, such that for any $i\in[n]$ and for any $j$, $\Pr(h_j(i) = 1) = 2^{-j}$. They also agree on a matrix $\Pi_{16k}$ and $\mathcal{R}$ as described in Corollary~\ref{cor:ksparse} for a sufficiently large constant $C>0$ to be determined later, with $q = 3$. Thus $\Pi_{16k}$ has $m = O(k\log(n/k))$ rows. Alice then computes $v_j = \Pi_{16k} x|_{h_j^{-1}(1)}$ for $j=0,\ldots,L$ where $v_j\in\F_q^m$, and her message to Bob is $M = (v_0,\ldots,v_L)$. For $S\subseteq [n]$ and $x$ an $n$-dimensional vector, $x|_S$ denotes the $n$-dimensional vector with $(x|_S)_i = x_i$ for $i\in S$, and $(x|_S)_i = 0$ for $i\notin S$. Note Alice's message $M$ is $O(k\log^2(n/k))$ bits, as desired. Bob then executes the following algorithm and outputs the returned values.
+
+\begin{algorithm}[H] 
+  \caption{Bob's algorithm in the $\ur_k$ protocol.} \label{algo:bob-protocol}
+  \begin{algorithmic}[1]
+    \Procedure{Bob}{$v_0,\ldots,v_L$}
+    \For {$j=L,L-1,\ldots,0$}
+      \State $v_j \leftarrow v_j - \Pi_{16k} y|_{h_j^{-1}(1)}$
+      \State $w_j\leftarrow \mathcal{R}(v_j)$
+      \If {$\|w_j\|_0 \ge k$ or $j=0$}
+      \State \Return an arbitrary $\min\{k, \|w_j\|_0\}$ elements from $\supp(w_j)$
+      \EndIf
+    \EndFor
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+The correctness analysis is then as follows, which is nearly the same as the $\ell_0$-sampler of \cite{JowhariST11}. If Alice's input is $x$ and Bob's is $y$, let $a = x-y \in \{-1,0,1\}^n$, so that $a$ can be viewed as an element of $\F_3^n$. Also let $a_j = a|_{h_j^{-1}(1)}$. Then $\E \|v_j\|_0 = \|a\|_0\cdot 2^{-j}$, and since $0\le \|a\|_0 \le n$, there either (1) exists a unique $0\le j^*\le L$ such that $2k\le \E\|a_j\|_0\cdot 2^{-j^*}< 4k$, or (2) $\|a\|_0 < 2k$ (in which case we define $j^* = 0$). Let $\mathcal{E}$ be the event that $\|a_j\|_0 \le 16k$ simultaneously for all $j\ge j^*$. Let $\mathcal{F}$ be the event that {\it either} we are in case (2), or we are in case (1) and $\|a_{j^*}\|_0 \ge k$ holds. Note that conditioned on $\mathcal{E}, \mathcal{F}$ both occurring, Bob succeeds by Corollary~\ref{cor:ksparse}.
+
+We now just need to show $\Pr(\neg\mathcal{E} \wedge \neg\mathcal{F}) < e^{-\Omega(k)}$. We use the union bound. First, consider $\mathcal{F}$. If $j^* = 0$, then $\Pr(\neg\mathcal{F}) = 0$. If $j^*\neq 0$, then $\Pr(\neg\mathcal{F}) \le \Pr(\|a_{j^*}\|_0 < \frac 12 \cdot\E\|a_{j^*}\|_0)$, which is $e^{-\Omega(k)}$ by the Chernoff bound since $\E\|a_{j^*}\|_0 = \Theta(k)$. Next we bound $\Pr(\neg \mathcal{E})$. For $j\ge j^*$, we know $\E\|a_j\|_0 \le 4k/2^{j-j^*}$. Thus, letting $\mu$ denote $\E\|a_j\|_0$, 
+\begin{equation}
+$$\Pr(\|a_j\|_0 > 16k) < \left(\frac{e^{\frac{16k}{\mu} - 1}}{(\frac{16k}{\mu})^{\frac{16k}{\mu}}}\right)^\mu < \left(\frac{16k}{\mu}\right)^{-\Omega(k)} < (e^{-Ck})^{j-j^*}$$\label{eqn:geometric}
+\end{equation}
+
+for some constant $C>0$ by the Chernoff bound and the fact that $16k/\mu \ge 4 > e$. Recall that the Chernoff bound states that for $X$ a sum of independent Bernoullis,
+$$
+\forall \delta > 0,\ \Pr(X > (1+\delta) \E X) < \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^{\E X} .
+$$
+Then by a union bound over $j\ge j^*$ and applying \eqref{eqn:geometric},
+$$
+\Pr(\neg \mathcal{E}) = \Pr(\exists j\ge j^*: \|a_j\|_0 > 16k) < \sum_{j=j^*}^\infty (e^{-Ck})^{j-j^*} = O(e^{-Ck}) .
+$$
+
+\begin{remark}\label{rem:recov}
+\textup{
+As already mentioned, the protocol given above and the one described in \cite{JowhariST11} using $O(k\log^2 n)$ bits differ in minor points. First: the protocol there used $\lfloor\log_2 n\rfloor$ different hash functions $h_j$, but as seen above, only $\lfloor \log_2(n/k)\rfloor$ are needed. This already improves one $\log n$ factor to $\log(n/k)$. The other improvement comes from replacing the $k$-sparse recovery structure with $2k$ rows used in \cite{JowhariST11} with our Corollary~\ref{cor:ksparse}. Note the matrix $\Pi_k$ in our corollary has even {\it more} rows, but the key point is that the bit complexity is improved. Whereas using a $k$-sparse recovery scheme as described in \cite{JowhariST11} would use $2k$ linear measurements of a $k$-sparse vector $w\in\{-1,0,1\}^n$ with $\log n$ bits per measurement (for a total of $O(k\log n)$ bits), we use $O(k\log(n/k))$ measurements with only $O(1)$ bits per measurement. The key insight is that we can work over $\F_3^n$ instead of $\R^n$ when the entries of $w$ are in $\{-1,0,1\}$, which leads to our slight improvement.
+}
+\end{remark}
+
+\subsection{Proof of the existence of the desired $\mathcal S_{u,m}$}\label{sec:code}
+\noindent \textbf{Lemma~\ref{lem:code} (restated).}
+For any integers $u\ge 1$ and $1\le m\le u/(4e)$, there exists a collection $\mathcal S_{u,m} \subset \binom{[u]}m$ with $\log |\mathcal{S}_{u,m}| = \Theta(m\log(u/m))$ such that for all $S\neq S'\in \mathcal S_{u,m}$, $|S\cap S'| < m/2$.
+\begin{proof}
+The proof is via the probabilistic method. We pick $S_1,\ldots,S_N$ independently, each one uniformly at random from $\binom{[u]}m$. Fix $i\neq j\in[N]$. Imagine $S_i$ being fixed and picking the $m$ elements of $S_j$ one by one. Let $X_k$ denote the indicator random variable for the event that the $k$th element picked is also in $S_i$. Then $|S_i\cap S_j| = \sum_{k=1}^m X_k$, and we set $\mu:= \E |S_i\cap S_j|$, which is $m^2/u$ by linearity of expectation. We have $\Pr(|S_i \cap S_j| \ge m/2) = \Pr(|S_i\cap S_j| \ge (1+\delta)\mu)$ for $\delta = u/(2m) - 1$. The $X_k$ are not independent, but they are negatively dependent. Thus the Chernoff bound yields
+$$
+\Pr(|S_i\cap S_j| \ge (1+\delta)\mu) \le \left(\frac{e^{\delta}}{(1+\delta)^{1+\delta}}\right)^\mu \le \left(\frac{e^{\frac u{2m} - 1}}{(\frac u{2m})^{\frac u{2m}}}\right)^{m^2/u} \le \left(\frac u{2em}\right)^{-\frac m2} .
+$$
+Setting $N = \sqrt{(u/(2em))^{m/2} - 1}$ so that ${N \choose 2}\leq N^2=(u/(2em))^{m/2} - 1$, by a union bound with positive probability $|S_i\cap S_j| < m/2$ for all $i\neq j$, simultaneously, as desired. Note for this choice of $N$, we have $\log|\mathcal S_{u,m}| = \log N = \Theta(m\log(u/m))$.
+\end{proof}
+
+\subsection{Another variant of samplers, with applications}\label{sec:variant}
+
+In this section we define another variant of the $\ell_0$-sampling problem and provide a solution for it. The solution is a minor modification of the $\ell_0$-sampling algorithm of \cite{JowhariST11}.
+
+\begin{definition}
+In the turnstile streaming problem {\em $\ell_0$-sampling$_k$($\delta_1,\delta_2$)}, there is a vector $z\in\R^n$ receiving turnstile streaming updates, and the answer to \texttt{query}() must behave as follows:
+\begin{itemize}
+\item With probability at most $\delta_1$, the output can be ``\textsf{Fail}''.
+\item With probability at most $\delta_2$, the output can be arbitrary.
+\item Otherwise, the output should be a uniformly random subset of size $\min\{k,\|z\|_0\}$, without replacement, from $\supp(z)$.
+\end{itemize}
+\end{definition}
+
+One can define the \suppfind{k}$(\delta_1,\delta_2)$ problem analogously, as well as similar variants for other desired output distributions. The important distinction is that there are two types of failures, which are allowed to happen with different probabilities.
+
+The description of algorithm given in \cite{AhnGM12a} for outputting connected components is based on a \suppfind{} subroutine that always knows when it fails and outputs \textsf{Fail} at those times, and \cite{AhnGM12a} cites \cite{JowhariST11} for implementing this subroutine. Unfortunately, the algorithm of \cite{JowhariST11} does not provide this behavior and can behave arbitrarily when it fails. One can avoid this issue by simply conditioning on never failing, which would require \cite{AhnGM12a} to call the \cite{JowhariST11} subroutine with $\delta < 1/\mathop{poly}(n)$. This would worsen their claimed space for finding connected components from $O(n\log^3 n)$ bits to $O(n\log^4 n)$ bits. As mentioned in Footnote~\ref{notejst} though, it is apparent from the correctness analysis of the algorithm in \cite{AhnGM12a} that their algorithm actually only needs a \suppfind{1}$(\delta_1,\delta_2)$ data structure for $\delta_1$ a small but universal constant, and $\delta_2 = 1/\mathop{poly}(n)$. As we sketch below, $\ell_0$-sampling$_k(\delta_1,\delta_2)$ can be solved in the general turnstile model in $O((t\log n + \log(n/\delta_2)) \log (n/t))$ bits of space for $t = \max\{k, \log(1/\delta_1)\}$, based on modifying the algorithm of \cite{JowhariST11}. This leads to an implementation of the connectivity algorithm of \cite{AhnGM12a} using space $O(n\log^3 n)$ bits as they claim.
+
+We will need the following standard lemma.
+
+\begin{lemma}\label{lem:zero-test}
+There is a turnstile streaming algorithm for testing whether a vector $z\in\R^n$ updated in a stream is identically zero. If $z=0$, the algorithm outputs $z=0$. If $z\neq 0$, the algorithm outputs $z=0$ with probability at most $\delta$. The space consumption is $O(\log(nT/\delta))$ bits, assuming that the entries of $z$ are always integers bounded by $T$ in magnitude.
+\end{lemma}
+\begin{proof}
+We pick a prime $p$ larger than $T + n/\delta$. We then pick a random $r\in\mathbb{F}_p$ at the beginning of the stream, and throughout the stream we maintain a single number in memory: $q(r) = \sum_{i=1}^n z_i r^i\mod p$. That is, during an update ``$z_i\leftarrow z_i + \Delta$'', we add $\Delta \cdot r^i$ to our counter, where the addition, multiplication, and exponentiation are all in $\mathbb{F}_p$. Note if $z\neq 0$, $q$ is a non-zero degree-$n$ polynomial (since $p > T$) and thus has at most $n$ zeroes in $\mathbb{F}_p$, implying that $\Pr_r(q(r) = 0) \le n/p < \delta$.
+\end{proof}
+
+We now sketch the modification to the algorithm of \cite{JowhariST11} which solves the above variant of $\ell_0$-sampling with the desired space complexity. We assume that the vector $z$ always has integer entries and $\|z\|_\infty \le T = \mathop{poly}(n)$ throughout the stream. First we describe the algorithm without regard for the space needed to store hash functions. For fixed $k$ and $\delta_2$, we give an algorithm which achieves failure probability $\delta_1 = \exp(-\Theta(k))$ so that $t = \Theta(k)$. The algorithm of \cite{JowhariST11} is then similar to the upper bound for $\ur$ in Section~\ref{sec:upper-bound} (see also \cite{CormodeF14}). Here we set $L = \Theta(\log(n/k))$. We then at each level, as in Section~\ref{sec:upper-bound}, use a $Ck$-sparse recovery scheme for vectors in $\mathbb{F}_p^n$ for some prime $p > \max\{n,T\}$ and constant $C>0$ to arise in the analysis later (so that taking each entry of the recovered vector modulo $p$ still returns the same vector). Such a measurement matrix $\Pi_{Ck}$ only needs $2Ck$ measurements over $\mathbb{F}_p$ and thus the recovery scheme uses $O(k\log p) = O(k\log n)$ bits. For example, one can use $\Pi$ being a $2Ck\times n$ Vandermonde matrix, so that no $Ck$-sparse vector is in its kernel. Recovery can be done by brute force. Alternatively one can use syndrome decoding, which uses the same space but allows recovery in time $\mathop{poly}(k\log p)$ time (see \cite[Section E]{DodisORS08}). Now, suppose level $j^*$ is the level we return our output from, as per the scheme in Algorithm~\ref{algo:bob-protocol}. If $w_j$ denotes the output of the recovery scheme, before returning $w_j$ we first would like to check that $w_j = a_j$ with $a_j$ denoting $z|_{h_j^{-1}(1)}$, i.e. that $d_j = w_j - a_j$ is equal to zero. For this we use the zero-tester algorithm of Lemma~\ref{lem:zero-test} as a subroutine, with failure probability parameter $\delta_2$. Thus overall we obtain the desired guarantee with space $O((k\log n + \log(n/\delta_2))\log(n/k))$, as desired. The analysis of correctness is the same as in Section~\ref{sec:upper-bound}, based on the same events $\mathcal E, \mathcal F$. The difference is that $\mathcal E$ or $\mathcal F$ fail to hold, which happens with probability at most $\delta_1$, then if the level $j$ we base our output on does not provide us with a $k$-sparse vector, then we catch this with the zero-tester and say \textsf{Fail} (except with probability $\delta_2$).
+
+Now we must take into account the space to store the hash functions $h_0,\ldots,h_L$. We implement these hash functions by a single hash function $h:[n]\rightarrow[n]$ where we then interpret the event ``$h_j(i) = 1$'' as occurring when the least significant bit of $h(i)$ is equal to $j$. We now just need to derandomized the selection of this single hash function. For this, we need to make sure that $h$ is still chosen in such a way that $\Pr_h(\neg\mathcal E \vee \neg\mathcal F) < \delta_2$. For the purposes of this algorithm, we modify the definition of $\mathcal E$ to be stronger: here we consider it to be the event that $\sum_{j=j^*}^L \|a_j\|_0 \le Ck$ for some constant $C>0$, i.e.\ the {\em total} number of indices from $\supp(z)$ that hash to levels $j\ge j^*$ is $O(k)$. Then $\Pr(\neg \mathcal E) < \exp(-\Omega(k))$ is still true by a union bound and Chernoff bound as in Section~\ref{sec:upper-bound}, and $\mathcal F$ is not modified from that section, so we also have $\Pr(\neg\mathcal F) < \exp(-\Omega(k))$, as desired. Now, we cannot afford to store a truly random $h:[n]\rightarrow[n]$, so we instead determine $h$ using Nisan's pseudorandom generator (PRG) \cite{Nisan92}. More specifically, it suffices to fool the following two branching programs up to statistical distance $\delta_2$, one branching program for each of $\mathcal E, \mathcal F$. For $\mathcal E$, we have a branching program that sees the values $h(1),\ldots,h(n)$ in order and maintains a single word of memory which simply counts the number of items $i\in[n]$ that then hash to a level $j\ge j^*$. The space of this branching program is then $\log n$ bits which is certainly at most $S = \log(n/\delta_2)$, and the randomness needed is $R = n\log n$. Thus when using Nisan's PRG, the probability of $\mathcal E$ occurring changes by at most an additive $\exp(-\Omega(S)) < \delta_2$, and the required seed length for Nisan's PRG is $O(S\log(R/S)) = O(\log(n/\delta_2)\log n)$ bits. For the next branching program, recall that $\mathcal F$ is the event that $\|a_{j^*}\|_0 \ge k$. We thus set up a similar branching program, which sees $h(1),\ldots,h(n)$ in order and counts the number of $i\in[n]$ hashing to level $j^*$. The seed length and error are the same as for the first branching program. We have thus established the following theorem.
+
+\begin{theorem}
+For any $k\ge 1$ and $0<\delta_1,\delta_2<1$, there is a solution to the $\ell_0$-sampling$_k$($\delta_1,\delta_2$) in turnstile streams with space complexity $O((t\log n + \log(n/\delta_2))\log(n/t))$ bits, where $t = \max\{k, \log(1/\delta_1)\}$.
+\end{theorem}
