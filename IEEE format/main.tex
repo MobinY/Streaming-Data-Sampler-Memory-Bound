@@ -32,18 +32,14 @@ The decoding process is symmetric.  Let $C_0=\emptyset$ and $A=\emptyset$.  $\de
   \begin{algorithmic}[1]
     \Procedure{$\enc$}{$S$}
     \State $M \leftarrow \sketch(\mathbf{1}_S)$
-    \State $A\leftarrow \emptyset$       \newline
-    \Comment{the set $\dec$ recovers just from $M$}
-    \State $S_0 \leftarrow S$       \newline
-    \Comment{at end of round $r$, $\dec$ still needs to recover $S_r$}
+    \State $A\leftarrow \emptyset$        \Comment{the set $\dec$ recovers just from $M$}
+    \State $S_0 \leftarrow S$       
+   \State  \Comment{at end of round $r$, $\dec$ still needs to recover $S_r$}
     \For {$r=1,\ldots,R$}
-      \State $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash S_{r-1}})$       \newline
-        \Comment{$s_r\mathbin{\stackrel{\rm ?}{\in}} S_{r-1}$ found in round $r$}
+      \State $s_r\leftarrow \query(M, \mathbf{1}_{S\backslash S_{r-1}})$          \Comment{$s_r\mathbin{\stackrel{\rm ?}{\in}} S_{r-1}$ found in round $r$}
       \State $S_r\leftarrow S_{r-1}$
-      \If {$s_r\in S_{r-1}$}       \newline
-        \Comment{i.e. if $s_r$ is a valid sample}
-        \State $b_r\leftarrow 1$       \newline
-        \Comment{$b\in\{0,1\}^R$ indicating which rounds succeed}
+      \If {$s_r\in S_{r-1}$}            \Comment{i.e. if $s_r$ is a valid sample}
+        \State $b_r\leftarrow 1$         \Comment{$b\in\{0,1\}^R$ indicating which rounds succeed}
         \State $A\leftarrow A \cup \{s_r\}$
         \State $S_r\leftarrow S_r \backslash \{s_r\}$
       \Else 
@@ -135,7 +131,7 @@ $$
 $$I(X;Y)\ge \E(f(X,Y))\cdot \log\frac{1}{\delta}-H_2(\delta).$$
 By definition of mutual entropy $I(X;Y)=H(X)-H(X|Y)$, where $H(X)=b$ and we must show
 \begin{equation}
-$H(X|Y)\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\delta}) = b+H_2(\delta)-\E(f(X,Y))\cdot \log\frac{1}{\delta}.$
+H(X|Y)\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+\E(f(X,Y))\cdot (b-\log\frac{1}{\delta}) = b+H_2(\delta)-\E(f(X,Y))\cdot \log\frac{1}{\delta}.
 \end{equation}
   The upper bound for $H(X|Y)$ is obtained by considering the following one-way communication problem: Alice knows both $X$ and $Y$ while Bob only knows $Y$, and Alice must send a single message to Bob so that Bob can recover $X$. The expected message length in an optimal protocol is exactly $H(X|Y)$.  Thus, any protocol gives an upper bound for $H(X|Y)$, and we simply take the following protocol: Alice prepends a $1$ bit to her message iff $f(X,Y) = 1$ (taking $H_2(\delta)$ bits in expectation). Then if $f(X,Y)=0$, Alice sends $X$ directly (taking $b$ bits). Otherwise, when $f(X,Y)=1$, Alice sends the index of $X$ in $\{x|f(x,Y)=1\}$ (taking $\log (\delta 2^b)=b-\log\frac{1}{\delta}$ bits).  
 \end{proof}
