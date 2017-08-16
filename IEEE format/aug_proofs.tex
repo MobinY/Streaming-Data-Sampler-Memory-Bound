@@ -87,7 +87,7 @@ where the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\
 $\Pr(i = j | (R, \{\pi(j)\}_{j\in T}, \pi(S\setminus T)) \text{~s.t.~}\widetilde{\query}(M, \mathbf{1}_{\pi(T)})\text{~succeeds}) \le \frac{m\cdot 100^j}{\frac m2\cdot 100^{i^*}} \le 2\cdot 100^{-(i^*-j)} \le 50^{-(i^*-j)}$. %label{eqn:others-unlikely}
 Here again the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\to \pi(S\setminus T)$ (recall that we condition on the image $\pi(S\setminus T)$ under $\pi$, but not on the actual mapping).
 
-We now define the set $\mathcal{T}$ of {\bf typical intermediate sets}, which plays a crucial role in our analysis.  Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/4^{i^*-i}$, such that if $T$ contains $\{(i, a, b)\}$ for some $a\in S_i$ and $b\in [100^i]$, then $T$ contains $\{(i, b)\times [100^i]\}$.  The following claim is proven in the full version:
+We now define the set $\mathcal{T}$ of {\bf typical intermediate sets}, which plays a crucial role in our analysis.  Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/4^{i^*-i}$, such that if $T$ contains $(i, a, b)$ for some $a\in S_i$ and $b\in [100^i]$, then $T$ contains $(i, a)\times [100^i]$.  The following claim is proven in the full version:
 \begin{claim}\label{cl:size-of-t}
 The set $\mathcal{T}$ as above satisifies $|\mathcal{T}|=2^{O(m)}$.
 \end{claim}
