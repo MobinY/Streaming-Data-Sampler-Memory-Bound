@@ -15,26 +15,11 @@ $\randcom^{\rightarrow,pub}_{1/3}(\aug_N) = \Theta(N)$.
 We show that if there is an $s$-bit communication protocol $\mathcal P$ for $\ur^\subset$ on $n$-bit vectors with failure probability $\delta$ (or for $\ur_k$ with constant failure probability), that implies the existence of an $s$-bit protocol $\mathcal P'$ for $\aug_N$ for some $N=\Theta(\log\frac 1{\delta}\log^2\frac n{\log\frac 1{\delta}})$ (or $N=\Theta(k\log^2(n/k))$ for $\ur_k$). The lower bound on $s$ then follows from Theorem~\ref{thm:mnsw}.
 
 
-\subsection{Communication Lower Bound for $\ur^\subset$}\label{sec:aug-delta}
+%\subsection{Communication Lower Bound for $\ur^\subset$}\label{sec:aug-delta}
 
 Set $t = \log \frac 1{\delta}$. In this section we assume $t < n/(4e)$ and show $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(t\log^2(n/t))$. This implies a lower bound of $\Omega(\min\{n, t\log^2(n/t)\})$ for all $\delta>0$ bounded away from $1$.
 
 As mentioned, we assume we have an $s$-bit protocol $\mathcal P$ for $\ur^\subset$ with failure probability $\delta$, with players Alice and Bob.We use $\mathcal P$ to give an $s$-bit protocol $\mathcal P'$ for $\aug_N$, which has players Charlie and Diane, for $N = \Theta(t\log^2(n/t))$.
-
-The protocol $\mathcal P'$ operates as follows. Without loss of generality we may assume that, using the notation of Lemma~\ref{lem:code}, $|\mathcal S_{u,m}|$ is a power of $2$ for $u, m$ as in the lemma statement. This is accomplished by simply rounding $|\mathcal S_{u,m}|$ down to the nearest power of $2$ by removing elements arbitrarily. Also, define $L = c\log(n/t)$ for some sufficiently small constant $c\in(0,1)$ to be determined later. Now, Charlie partitions the bits of his input $z\in\{0,1\}^N$ into $L$ consecutive sequences of bits such that the $i$th chunk of bits for each $i\in[L]$ can be viewed as specifying an element $S_i\in \mathcal S_{u_i,m}$ for $u_i = \frac n{100^i\cdot L}$ and $m = ct$. Lemma~\ref{lem:code} gives $\log|\mathcal S_{u_i,m}| = \Theta(m\log(u_i/m))$, which is $\Theta(t\log(n/t))$ for $c < 1/14$. Thus $N = \Theta(L\cdot t\log(n/t)) = \Theta(t\log^2(n/t))$. Given these sets $S_1,\ldots,S_L$, we now discuss how Charlie generates a vector $x\in\{0,1\}^n$. Charlie then simulates Alice on $x$ to generate the message Alice would have send to Bob in protocol $\mathcal P$, then sends that same message to Diane.
-
-To generate $x\in\{0,1\}^n$, assume Charlie and Diane have sampled a bijection from 
-\begin{equation}\label{eq:pi-origin}
-A = \bigcup_{i=1}^L (\{i\} \times [u_i]\times [100^i])
-\end{equation}
-to $[n]$ uniformly at random. We denote this bijection by $\pi$. This is possible since $|A| = n$. Then Charlie defines $x$ to be the indicator vector $\mathbf{1}_{\pi(S)}$, where
-$$
-S = \bigcup_{i=1}^L (\{i\} \times S_i \times [100^i]),
-$$
-then sends a message $M$ to Diane, equal to Alice's message with input $\mathbf{1}_{\pi(S)}$. This completes the description of Charlie's behavior in the protocol $\mathcal P'$.
-
-We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies in some chunk $i^*\in[L]$. We now show how Diane can use $\mathcal P$ to recover $S_{i^*}$ with probability $2/3$ (and thus in particular recover $z_{j^*}$). Since Diane knows $z_j$ for $j>j^*$, she knows $S_i$ for $i>i^*$. She can then execute the following algorithm.
-
 
 \begin{algorithm}[H] 
   \caption{Behavior of Diane in $\mathcal P'$ for $\ur^\subset$.} \label{algo:diane1}
@@ -57,6 +42,18 @@ We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
+
+
+The protocol $\mathcal P'$ operates as follows. Without loss of generality we may assume that, using the notation of Lemma~\ref{lem:code}, $|\mathcal S_{u,m}|$ is a power of $2$ for $u, m$ as in the lemma statement. This is accomplished by simply rounding $|\mathcal S_{u,m}|$ down to the nearest power of $2$ by removing elements arbitrarily. Also, define $L = c\log(n/t)$ for some sufficiently small constant $c\in(0,1)$ to be determined later. Now, Charlie partitions the bits of his input $z\in\{0,1\}^N$ into $L$ consecutive sequences of bits such that the $i$th chunk of bits for each $i\in[L]$ can be viewed as specifying an element $S_i\in \mathcal S_{u_i,m}$ for $u_i = \frac n{100^i\cdot L}$ and $m = ct$. Lemma~\ref{lem:code} gives $\log|\mathcal S_{u_i,m}| = \Theta(m\log(u_i/m))$, which is $\Theta(t\log(n/t))$ for $c < 1/14$. Thus $N = \Theta(L\cdot t\log(n/t)) = \Theta(t\log^2(n/t))$. Given these sets $S_1,\ldots,S_L$, we now discuss how Charlie generates a vector $x\in\{0,1\}^n$. Charlie then simulates Alice on $x$ to generate the message Alice would have send to Bob in protocol $\mathcal P$, then sends that same message to Diane.
+
+To generate $x\in\{0,1\}^n$, assume Charlie and Diane have sampled a bijection from 
+$A = \bigcup_{i=1}^L (\{i\} \times [u_i]\times [100^i])$
+to $[n]$ uniformly at random. We denote this bijection by $\pi$. This is possible since $|A| = n$. Then Charlie defines $x$ to be the indicator vector $\mathbf{1}_{\pi(S)}$, where
+$S = \bigcup_{i=1}^L (\{i\} \times S_i \times [100^i])$,
+then sends a message $M$ to Diane, equal to Alice's message with input $\mathbf{1}_{\pi(S)}$. This completes the description of Charlie's behavior in the protocol $\mathcal P'$.
+
+We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies in some chunk $i^*\in[L]$. We now show how Diane can use $\mathcal P$ to recover $S_{i^*}$ with probability $2/3$ (and thus in particular recover $z_{j^*}$). Since Diane knows $z_j$ for $j>j^*$, she knows $S_i$ for $i>i^*$. She can then execute the following algorithm.
+
 
 In Algorithm~\ref{algo:diane1} Diane is building up a subset $T_{i^*}$ of $S_{i^*}$. Once $|T_{i^*}| \ge |S_{i^*}|/2 = m/2$, Diane can uniquely recover $S_{i^*}$ by the limited intersection property of $\mathcal{S}_{u_i,m}$ guaranteed by Lemma~\ref{lem:code}. Until then, she uses $\mathcal P$ to recover elements of $S\backslash T$, which, as we now show, are chosen uniformly at random from $S\setminus T$. 
 
@@ -87,18 +84,12 @@ where the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\
 
 
 \textbf{Elements in $S_{j}, j<i^*,$ are unlikely to be recovered.} Given Claim~\ref{cl:uniform}, since the elements of $S_j$ appear with frequency $100^j$ in $S\backslash T$, they are less likely to be returned by $\pi^{-1}(\widetilde{\query}(M, \mathbf{1}_{\pi(T)}))$ for small $j$.  Specifically, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, for any $j< i^*$
-\begin{equation}
-\begin{split}
- \Pr(i = j | (R, \{\pi(j)\}_{j\in T}, \pi(S\setminus T)) \\ \text{~s.t.~}\widetilde{\query}(M, \mathbf{1}_{\pi(T)})\text{~succeeds})& \le \frac{m\cdot 100^j}{\frac m2\cdot 100^{i^*}}\\
-& \le 2\cdot 100^{-(i^*-j)} \\
-&\le 50^{-(i^*-j)} . \label{eqn:others-unlikely}
-\end{split}
-\end{equation}
+$\Pr(i = j | (R, \{\pi(j)\}_{j\in T}, \pi(S\setminus T)) \text{~s.t.~}\widetilde{\query}(M, \mathbf{1}_{\pi(T)})\text{~succeeds}) \le \frac{m\cdot 100^j}{\frac m2\cdot 100^{i^*}} \le 2\cdot 100^{-(i^*-j)} \le 50^{-(i^*-j)}$. %label{eqn:others-unlikely}
 Here again the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\to \pi(S\setminus T)$ (recall that we condition on the image $\pi(S\setminus T)$ under $\pi$, but not on the actual mapping).
 
 We now define the set $\mathcal{T}$ of {\bf typical intermediate sets}, which plays a crucial role in our analysis.  Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/4^{i^*-i}$, such that if $T$ contains $\{(i, a, b)\}$ for some $a\in S_i$ and $b\in [100^i]$, then $T$ contains $\{(i, b)\times [100^i]\}$.  The following claim is proven in the full version:
 \begin{claim}\label{cl:size-of-t}
-For the set $\mathcal{T}$ defined above one has $|\mathcal{T}|=2^{O(m)}$.
+The set $\mathcal{T}$ as above satisifies $|\mathcal{T}|=2^{O(m)}$.
 \end{claim}
 % \begin{proof}
 % \allowdisplaybreaks
@@ -118,26 +109,19 @@ We will show that for most choices of $\pi$ and shared random string $R$ Algorit
 
 
 {\bf Step 1: proving that $\widetilde{\mathcal{P}}$ succeeds in recovering $T_{i^*}$ and never leaves $\mathcal{T}$ with high probability.}
-Choose $\pi$ uniformly at random. By \eqref{eqn:others-unlikely}, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, the expected number of items recovered by $\widetilde{\query}$ from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/4^{i^*-i}$ items from $S_i$ is at most $(1/12)^{i^*-i}$ by Markov's inequality. Note that the probability is over the choice of $\pi$ only, as $\widetilde{\query}$ is assumed to succeed with probability $1$ by definition of $\widetilde{\mathcal{P}}$. 
+Choose $\pi$ uniformly at random. By the upper bound on returning an element of $S_i$ above, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, the expected number of items recovered by $\widetilde{\query}$ from $S_i$ for $i<i^*$ in the first $m$ iterations is at most $m/50^{i^*-i}$. Thus the probability of recovering more than $m/4^{i^*-i}$ items from $S_i$ is at most $(1/12)^{i^*-i}$ by Markov's inequality. Note that the probability is over the choice of $\pi$ only, as $\widetilde{\query}$ is assumed to succeed with probability $1$ by definition of $\widetilde{\mathcal{P}}$. 
 Thus
-$$
-\Pr( \widetilde{\mathcal{P}}\text{~leaves~}\mathcal{T}) \le \sum_{i=1}^{i^*-1}\left(1/12\right)^{i^*-i} < 1/10.
-$$
+$\Pr( \widetilde{\mathcal{P}}\text{~leaves~}\mathcal{T}) \le \sum_{i=1}^{i^*-1}\left(1/12\right)^{i^*-i} < 1/10.$
 In particular this means that with probability at least $1-1/10$ at most $\sum_{i<i^*} m/4^{i^*-i}<m/2$ items from $\bigcup_{i<i^*} S_i$ are recovered in the first $m$ (or fewer, if the algorithm terminates earlier) iterations. This also implies that with probability at least $1-1/10$ if the algorithm proceeds for the entire $m$ iterations, it recovers at least $m/2$ elements of $T_{i^*}$ and hence terminates. We thus get that $\widetilde{\mathcal{P}}$ succeeds at least with probability $1-1/10$.
 
 {\bf Step 2: coupling $\widetilde{\mathcal{P}}$ to $\mathcal{P}'$ on most of the probability space.}
 For every $T\subset S$ and every $\pi$ let $\mathcal{E}_T(\pi)$ be the probabilistic event (over the choice of $\query$'s random string $R$) that $\query(M, \mathbf{1}_{\pi(T)})$ succeeds in returning an element in $\pi(S\backslash T)$. Note that $\mathcal{E}_T(\pi)$ is a subset of the probability space of shared random strings $R$, and depends on $\pi$. We let 
-$$
-\mathcal{E}_{\mathcal T}(\pi):=\wedge_{T\in\mathcal T} \mathcal E_T(\pi)
-$$
+$\mathcal{E}_{\mathcal T}(\pi):=\wedge_{T\in\mathcal T} \mathcal E_T(\pi)$
 to simplify notation. Using Claim~\ref{cl:size-of-t} and the union bound we have for every $\pi$
-$$
-\Pr_R(\neg(\mathcal E_{\mathcal T}(\pi))) \le \delta\cdot |\mathcal T|\leq 1/20
-$$
+$\Pr_R(\neg(\mathcal E_{\mathcal T}(\pi))) \le \delta\cdot |\mathcal T|\leq 1/20$
 as long as for $m = c\log(1/\delta)$ for $c$ a sufficiently small constant.
 
 Now recall that $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ is an idealized protocol, which is guaranteed to output an element of $\pi(S\setminus T)$ for every choice of  $T\subset S$, shared random string $R$, $\{\pi(j)\}_{j\in T}$, and $\pi(S\setminus T)$. We have just shown that for every $\pi$ the event ${\mathcal E_{\mathcal T}(\pi)}$ occurs  with probability at least $1-1/20$ over the choice of $R$. Now define $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ as equal to $\query(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$ (the typical set of intermediate sets) and $(\pi, R)$ such that $R\in {\mathcal E_{\mathcal T}(\pi)}$, and extend $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ to return an arbitrary element of $\pi(S\setminus T)$ for remaining tuples $(T, R, \pi(T),  \pi(S\setminus T))$. Note that $\widetilde{\query}$ defined in this way is a deterministic function once $T$, $R$, $\pi(T)$ and $\pi(S\setminus T)$ are fixed. 
-
 Note that with probability at least $1-1/20$ over the choice of $\pi$ and $R$ one has $\query(M, \mathbf{1}_{\pi(T)})=\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$ for all $T\in \mathcal{T}$, as required.
 
 
