@@ -1,5 +1,5 @@
 \section{Lower bounds via the adaptivity lemma}\label{sec:adaptive-proof}
-\subsection{Communication Lower Bound for $\ur^\subset$} \label{sec:optimal-lb}
+%\subsection{Communication Lower Bound for $\ur^\subset$} \label{sec:optimal-lb}
 
 Consider a protocol $\mathcal{P}$ for $\ur^\subset$ with failure probability $\delta$, operating in the one-way public coin model. When Alice's input is $x$ and Bob's is $y$, Alice sends $\sketch(x)$ to Bob, and Bob outputs $\query(\sketch(x), y)$, which with probability at least $1-\delta$ is in $\supp(x-y)$. As mentioned in Section~\ref{sec:overview}, we use $\mathcal{P}$ as a subroutine in a scheme for encoding/decoding elements of $\binom{[n]}m$ for $m = \lfloor \sqrt{n\log(1/\delta)}\rfloor$. We assume $\log \frac 1{\delta} \le n/64$, since for larger $n$ we have an $\Omega(n)$ lower bound.
 
@@ -10,7 +10,7 @@ As discussed in Section~\ref{sec:overview}, on input $S\in {[n] \choose m}$, $\e
 
 The decoding process is symmetric.  Let $C_0=\emptyset$ and $A=\emptyset$.  $\dec$ proceeds in $R$ rounds.  On round $r\in[R]$, $\dec$ obtains $s_r\in S\backslash C_{r-1}$ by invoking $\query(M, \mathbf{1}_{C_{r-1}})$.  By construction of $C_{r-1}$ (to be described later), it is guaranteed that $S_{r-1}=S\backslash C_{r-1}$.  Therefore, $\dec$ recovers exactly the same $s_r$ as $\enc$.  $\dec$ initially assigns $C_r\leftarrow C_{r-1}$.  If $b_r=1$, $\dec$ adds $s_r$ to both $A$ and $C_r$.  At the end of round $r$, $\dec$ inserts many random items from $B$ into $C_r$ so that $C_r=S\backslash S_r$.  $\dec$ can achieve this because of the shared random permutation $\pi$ when constructing $S_r$.  In the end, $\dec$ outputs $B\cup A$.  We present $\dec$ in Algorithm~\ref{algo:dec}.
 
-\begin{algorithm}[H] 
+\begin{algorithm}
   \caption{Variables shared by encoder $\enc$ and decoder $\dec$.} \label{algo:para}
   \begin{algorithmic}[1] 
     \State $m\leftarrow \lfloor \sqrt{n \log\frac{1}{\delta}} \rfloor$ 
@@ -27,7 +27,7 @@ The decoding process is symmetric.  Let $C_0=\emptyset$ and $A=\emptyset$.  $\de
   \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}[H] 
+\begin{algorithm}
   \caption{Encoder $\enc$.} \label{algo:enc}
   \begin{algorithmic}[1]
     \Procedure{$\enc$}{$S$}
@@ -60,7 +60,7 @@ The decoding process is symmetric.  Let $C_0=\emptyset$ and $A=\emptyset$.  $\de
 \end{algorithm}
 
 
-\begin{algorithm}[H] 
+\begin{algorithm}
   \caption{Decoder $\dec$.} \label{algo:dec}
   \begin{algorithmic}[1]
     \Procedure{$\dec$}{$M$, $B$, $b$}
@@ -112,21 +112,23 @@ By our setting of parameters, we have $\E b_r=\Omega(1)$ and thus $\E(|S|-|B|)=\
   Given the fact that $\{S_r, C_r\}$ is a partition of $S$, the $s_r$ are the same in \enc and \dec.  Furthermore, $A=\{s_r : b_r=1,r=1,\ldots, R\}$ are the same in \enc and \dec.  We know $A\subseteq S$.  Since \enc outputs $S\backslash A$, and \dec outputs $(S\backslash A)\cup A$, we have $\dec(\enc(S))=S$.
 \end{proof}
 
+The proof of the following lemma appears in the full version.
+
 \begin{lemma} \label{lemma:bits-saving}
 Let $W\in \mathbb{N}$ be a random variable with $W\le m$ and $\E W\le m-d$. Then $\E(\log {n \choose m}-\log {n \choose W})\ge d \log (\frac{n}{m}-1)$.
 \end{lemma}
 
-\begin{proof}
-  \begin{align*}
-  \log {n \choose m}-\log {n \choose W}
-  &= \log \frac{n!/(m!(n-m)!)}{n!/(W!(n-W)!)} \\
-  &= \sum_{i=1}^{m-W}\log \frac{n-W-i+1}{m-i+1} \\
-  &\ge (m-W)\cdot \log \frac{n-W}{m} \\
-  &\ge (m-W)\cdot \log \frac{n-m}{m}
-  \end{align*}
+% \begin{proof}
+%   \begin{align*}
+%   \log {n \choose m}-\log {n \choose W}
+%   &= \log \frac{n!/(m!(n-m)!)}{n!/(W!(n-W)!)} \\
+%   &= \sum_{i=1}^{m-W}\log \frac{n-W-i+1}{m-i+1} \\
+%   &\ge (m-W)\cdot \log \frac{n-W}{m} \\
+%   &\ge (m-W)\cdot \log \frac{n-m}{m}
+%   \end{align*}
   
-  Taking expectation on both sides, we have $\E(\log {n \choose m}-\log {n \choose W})\ge d \log (\frac{n}{m}-1)$. 
-\end{proof}
+%   Taking expectation on both sides, we have $\E(\log {n \choose m}-\log {n \choose W})\ge d \log (\frac{n}{m}-1)$. 
+% \end{proof}
 
 \noindent \textbf{Lemma~\ref{lem:information} (restated).}
   Consider $f$: $\{0,1\}^b\times \{0,1\}^q\rightarrow \{0,1\}$ and $X\in\{0,1\}^b$ uniformly random. If $\forall y\in \{0,1\}^q,\ \Pr(f(X,y)=1)\le \delta$ where $0<\delta<1$, then for any r.v.\ $Y$ supported on $\{0,1\}^q$,
@@ -158,98 +160,99 @@ H(X|Y)&\le H_2(\delta)+(1-\E(f(X,Y)))\cdot b+ \\
 \end{lemma}
 
 \begin{proof}
-  Note that $I(X;S_r)=H(S_r)-H(S_r|X)$. Since $|S_r|=n_r$ and $S_r\subseteq S$, $H(S_r)\le \log {m \choose n_r}$. Here is the main idea to lower bound $H(S_r|X)$: By definition of conditional entropy, $H(S_r|X)=\sum_x{p_x\cdot H(S_r|X=x)}$. We fix an arbitrary $x$. If we can prove that for any $T\subseteq S$ where $|T|=n_r$, $\Pr(S_r=T|X=x)\le p$, then by definition of entropy we have $H(S_r|X=x)\ge\log\frac{1}{p}$. 
+  Note that $I(X;S_r)=H(S_r)-H(S_r|X)$. Since $|S_r|=n_r$ and $S_r\subseteq S$, $H(S_r)\le \log {m \choose n_r}$. Here is the main idea to lower bound $H(S_r|X)$: By definition of conditional entropy, $H(S_r|X)=\sum_x{p_x\cdot H(S_r|X=x)}$. We fix an arbitrary $x$. If we can prove that for any $T\subseteq S$ where $|T|=n_r$, $\Pr(S_r=T|X=x)\le p$, then by definition of entropy we have $H(S_r|X=x)\ge\log\frac{1}{p}$. This is shown in the full version for $p={2^{6K}}/{{m\choose n_r}}$.
+\end{proof}
   
-  First we can prove for any fixed $T$,
+%   First we can prove for any fixed $T$,
   
-  \begin{align}
-    \Pr(S_r=T|X=x)\le \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}}.
-  \end{align}
+%   \begin{align}
+%     \Pr(S_r=T|X=x)\le \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}}.
+%   \end{align}
   
-  We have $\Pr(S_r=T|X=x)=\Pi_{i=1}^{r}{\Pr(T\subseteq S_i|T\subseteq S_{i-1})}$. 
-  On round $i$ ($1\le i \le r$), $\enc$ removes $n_{i-1}-n_i$ elements (at least $n_{i-1}-n_i-1$ of which are chosen all at random) from $S_{i-1}$ to obtain $S_i$. 
-  Conditioned on the event that $T\subseteq S_{i-1}$, the probability that $T\subseteq S_i$ is at most ${{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}/{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}$, where the equation achieves when $s_i\in S_{i-1}\backslash T$, and $\enc$ takes a uniformly random subset of $S_{i-1}\backslash \{s_i\}$ of size $n_{i-1}-n_i-1$, so that the subset does not intersect with $T$.
+%   We have $\Pr(S_r=T|X=x)=\Pi_{i=1}^{r}{\Pr(T\subseteq S_i|T\subseteq S_{i-1})}$. 
+%   On round $i$ ($1\le i \le r$), $\enc$ removes $n_{i-1}-n_i$ elements (at least $n_{i-1}-n_i-1$ of which are chosen all at random) from $S_{i-1}$ to obtain $S_i$. 
+%   Conditioned on the event that $T\subseteq S_{i-1}$, the probability that $T\subseteq S_i$ is at most ${{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}/{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}$, where the equation achieves when $s_i\in S_{i-1}\backslash T$, and $\enc$ takes a uniformly random subset of $S_{i-1}\backslash \{s_i\}$ of size $n_{i-1}-n_i-1$, so that the subset does not intersect with $T$.
   
-  Next we can prove 
+%   Next we can prove 
   
-  \begin{align}
-    \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}} \le \frac{2^{6K}}{{m \choose n_r}}. \label{eqn:prod-bound}
-  \end{align}
+%   \begin{align}
+%     \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}} \le \frac{2^{6K}}{{m \choose n_r}}. \label{eqn:prod-bound}
+%   \end{align}
     
-  For notational simplicity, let $n^{\underline{k}}$ denote $n\cdot (n-1)\ldots (n-k+1)$. We have 
-  \begin{align}
-  \begin{split}
-    \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}}
-    =\prod_{i=1}^{r}\frac{(n_{i-1}-n_r-1)!n_i!}{(n_{i-1}-1)!(n_i-n_r)!} \\
-    =\prod_{i=1}^{r}\frac{n_i^{\underline{n_r}}}{(n_{i-1}-1)^{\underline{n_r}}}
-    =\prod_{i=1}^{r} \left( \frac{n_i^{\underline{n_r}}}{n_{i-1}^{\underline{n_r}}}\cdot \frac{n_{i-1}}{n_{i-1}-n_r} \right).
-    \end{split}
-  \end{align}
+%   For notational simplicity, let $n^{\underline{k}}$ denote $n\cdot (n-1)\ldots (n-k+1)$. We have 
+%   \begin{align}
+%   \begin{split}
+%     \prod_{i=1}^{r}{\frac{{n_{i-1}-n_r-1 \choose n_{i-1}-n_i-1}}{{n_{i-1}-1 \choose n_{i-1}-n_i-1}}}
+%     =\prod_{i=1}^{r}\frac{(n_{i-1}-n_r-1)!n_i!}{(n_{i-1}-1)!(n_i-n_r)!} \\
+%     =\prod_{i=1}^{r}\frac{n_i^{\underline{n_r}}}{(n_{i-1}-1)^{\underline{n_r}}}
+%     =\prod_{i=1}^{r} \left( \frac{n_i^{\underline{n_r}}}{n_{i-1}^{\underline{n_r}}}\cdot \frac{n_{i-1}}{n_{i-1}-n_r} \right).
+%     \end{split}
+%   \end{align}
 
-  By telescoping,
-  \begin{align}
-    \prod_{i=1}^{r} \frac{n_i^{\underline{n_r}}}{n_{i-1}^{\underline{n_r}}}
-    =\frac{n_r^{\underline{n_r}}}{n_0^{\underline{n_r}}}
-    =\frac{n_r!(n_0-n_r)!}{n_0!}=\frac{1}{{n_0 \choose n_r}}
-    =\frac{1}{{m \choose n_r}}.
-    \label{eqn:telescoping}
-  \end{align}
+%   By telescoping,
+%   \begin{align}
+%     \prod_{i=1}^{r} \frac{n_i^{\underline{n_r}}}{n_{i-1}^{\underline{n_r}}}
+%     =\frac{n_r^{\underline{n_r}}}{n_0^{\underline{n_r}}}
+%     =\frac{n_r!(n_0-n_r)!}{n_0!}=\frac{1}{{n_0 \choose n_r}}
+%     =\frac{1}{{m \choose n_r}}.
+%     \label{eqn:telescoping}
+%   \end{align}
   
-  Moreover, 
-  \begin{align}
-  \begin{split}
-    \prod_{i=1}^{r} \frac{n_{i-1}}{n_{i-1}-n_r}
-    \le\prod_{i=1}^{r} \frac{1}{1-\frac{m\cdot 2^{-r/K}}{m\cdot 2^{-(i-1)/K}-1}}
-    \le \\
-    \prod_{i=1}^{r} \frac{1}{1-\frac{m\cdot 2^{-r/K}+1}{m\cdot 2^{-(i-1)/K}}}
-    =\prod_{j=1}^{r} \frac{1}{1-2^{-j/K}-\frac{2^{\frac{r-j}{K}}}m}.
-    \label{eqn:bound-with-floor}
-    \end{split}
-  \end{align}
+%   Moreover, 
+%   \begin{align}
+%   \begin{split}
+%     \prod_{i=1}^{r} \frac{n_{i-1}}{n_{i-1}-n_r}
+%     \le\prod_{i=1}^{r} \frac{1}{1-\frac{m\cdot 2^{-r/K}}{m\cdot 2^{-(i-1)/K}-1}}
+%     \le \\
+%     \prod_{i=1}^{r} \frac{1}{1-\frac{m\cdot 2^{-r/K}+1}{m\cdot 2^{-(i-1)/K}}}
+%     =\prod_{j=1}^{r} \frac{1}{1-2^{-j/K}-\frac{2^{\frac{r-j}{K}}}m}.
+%     \label{eqn:bound-with-floor}
+%     \end{split}
+%   \end{align}
   
-  By our setting of parameters 
-  $$\frac{2^{\frac rK}}m \le \frac{2^{\frac RK}}m \le \frac{1}{4K} .$$
+%   By our setting of parameters 
+%   $$\frac{2^{\frac rK}}m \le \frac{2^{\frac RK}}m \le \frac{1}{4K} .$$
   
-  Therefore, for $j\in \{1,\ldots, r\}$,
-  $$\frac{1}{1-2^{-\frac jK}-\frac{2^{\frac{r-j}{K}}}m}\le \frac{1}{1-(1+\frac{1}{4K})2^{-\frac jK}}.$$ 
+%   Therefore, for $j\in \{1,\ldots, r\}$,
+%   $$\frac{1}{1-2^{-\frac jK}-\frac{2^{\frac{r-j}{K}}}m}\le \frac{1}{1-(1+\frac{1}{4K})2^{-\frac jK}}.$$ 
   
-  By Taylor series $2^{1/K} = \sum_{n=0}^{\infty}{\frac{(\ln 2 )^n}{n!K^n}} >1+\frac{\ln 2}{K}>1+\frac{1}{4K}$, and thus $\frac{1}{1-(1+\frac{1}{4K})2^{-j/K}}\le \frac{1}{1-2^{(1-j)/K}}$, for $j=2,\ldots, r$. For $j=1$, we have $\frac{1}{1-(1+\frac{1}{4K})2^{-\frac 1K}} \le 2^K$.
+%   By Taylor series $2^{1/K} = \sum_{n=0}^{\infty}{\frac{(\ln 2 )^n}{n!K^n}} >1+\frac{\ln 2}{K}>1+\frac{1}{4K}$, and thus $\frac{1}{1-(1+\frac{1}{4K})2^{-j/K}}\le \frac{1}{1-2^{(1-j)/K}}$, for $j=2,\ldots, r$. For $j=1$, we have $\frac{1}{1-(1+\frac{1}{4K})2^{-\frac 1K}} \le 2^K$.
   
-  By Lemma~\ref{lemma:Pochhammer}, we have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. Therefore, the right hand side of \eqref{eqn:bound-with-floor} is upper bounded by $2^{6K}$. Together with \eqref{eqn:telescoping}, we prove \eqref{eqn:prod-bound} holds.  
+%   By Lemma~\ref{lemma:Pochhammer}, we have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$. Therefore, the right hand side of \eqref{eqn:bound-with-floor} is upper bounded by $2^{6K}$. Together with \eqref{eqn:telescoping}, we prove \eqref{eqn:prod-bound} holds.  
   
-  Finally, let $p={2^{6K}}/{{m\choose n_r}}$, we have $\Pr(S_r=T|X=x)\le p$ and thus $H(S_r|X=x)\ge \log\frac{1}{p}=\log{{m\choose n_r}}-6K$. Therefore, $H(S_r|X)\ge \log{{m\choose n_r}}-6K$ and so $I(X;S_r)=H(S_r)-H(S_r|X)\le 6K$.  
-\end{proof}
+%   Finally, let $p={2^{6K}}/{{m\choose n_r}}$, we have $\Pr(S_r=T|X=x)\le p$ and thus $H(S_r|X=x)\ge \log\frac{1}{p}=\log{{m\choose n_r}}-6K$. Therefore, $H(S_r|X)\ge \log{{m\choose n_r}}-6K$ and so $I(X;S_r)=H(S_r)-H(S_r|X)\le 6K$.  
+% \end{proof}
 
-\begin{lemma}\label{lemma:Pochhammer}
-  Let $K\in \mathbb{N}$ and $K\ge 1$. We have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$.
-\end{lemma}
+% \begin{lemma}\label{lemma:Pochhammer}
+%   Let $K\in \mathbb{N}$ and $K\ge 1$. We have $\prod_{j=1}^{\infty} \frac{1}{1-2^{-j/K}}\le 2^{5K}$.
+% \end{lemma}
 
-\begin{proof}
-  First, we bound the product of first $2K$ terms. Note that $\frac{1}{1-2^{-x}}\le \frac{8}{3x}$ for $0<x\le 2$. Therefore, 
-  \begin{align}
-  \begin{split}
-    \prod_{j=1}^{2K}\frac{1}{1-2^{-j/K}}
-    \le (8/3)^{2K}\cdot \frac{K^{2K}}{(2K)!}
-    \le \\
-    (8/3)^{2K}\cdot \frac{K^{2K}}{(2K/e)^{2K}}
-    = (4e/3)^{2K}
-    < 2^{4K}.
-    \end{split}
-  \end{align}
+% \begin{proof}
+%   First, we bound the product of first $2K$ terms. Note that $\frac{1}{1-2^{-x}}\le \frac{8}{3x}$ for $0<x\le 2$. Therefore, 
+%   \begin{align}
+%   \begin{split}
+%     \prod_{j=1}^{2K}\frac{1}{1-2^{-j/K}}
+%     \le (8/3)^{2K}\cdot \frac{K^{2K}}{(2K)!}
+%     \le \\
+%     (8/3)^{2K}\cdot \frac{K^{2K}}{(2K/e)^{2K}}
+%     = (4e/3)^{2K}
+%     < 2^{4K}.
+%     \end{split}
+%   \end{align}
   
-  Then, we bound the product of the rest terms
-  \begin{align}
-  \begin{split}
-    \prod_{j=2K+1}^{\infty}\frac{1}{1-2^{-j/K}} 
-    \le \prod_{j=2K+1}^{\infty}\frac{1}{1-2^{-\lfloor j/K \rfloor}} \\
-    \le \prod_{i=2}^{\infty}\left( \frac{1}{1-2^{-i}}\right)^K 
-    \le \left( \frac{1}{1-\sum_{i=2}^{\infty}2^{-i}}\right)^K
-    = 2^K.
-    \end{split}
-  \end{align}
+%   Then, we bound the product of the rest terms
+%   \begin{align}
+%   \begin{split}
+%     \prod_{j=2K+1}^{\infty}\frac{1}{1-2^{-j/K}} 
+%     \le \prod_{j=2K+1}^{\infty}\frac{1}{1-2^{-\lfloor j/K \rfloor}} \\
+%     \le \prod_{i=2}^{\infty}\left( \frac{1}{1-2^{-i}}\right)^K 
+%     \le \left( \frac{1}{1-\sum_{i=2}^{\infty}2^{-i}}\right)^K
+%     = 2^K.
+%     \end{split}
+%   \end{align}
   
-  Multiplying two parts proves the lemma.
-\end{proof}
+%   Multiplying two parts proves the lemma.
+% \end{proof}
 
 \begin{theorem}
   $\randcom^{\rightarrow,pub}_\delta(\ur^\subset) = \Omega(\log \frac{1}{\delta}\log^2 \frac{n}{\log (1/\delta)} )$, given that $64 \le \log \frac{1}{\delta} \le \frac{n}{64}$.

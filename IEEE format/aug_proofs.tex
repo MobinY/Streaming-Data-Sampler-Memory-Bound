@@ -60,10 +60,10 @@ We describe how Diane uses $M$ to solve $\aug_N$. Diane's input $j^*\in[N]$ lies
 
 In Algorithm~\ref{algo:diane1} Diane is building up a subset $T_{i^*}$ of $S_{i^*}$. Once $|T_{i^*}| \ge |S_{i^*}|/2 = m/2$, Diane can uniquely recover $S_{i^*}$ by the limited intersection property of $\mathcal{S}_{u_i,m}$ guaranteed by Lemma~\ref{lem:code}. Until then, she uses $\mathcal P$ to recover elements of $S\backslash T$, which, as we now show, are chosen uniformly at random from $S\setminus T$. 
 
+The  proof of the following claim is deferred to the full version.
 \begin{claim}\label{cl:uniform}
 For every protocol for Alice and Bob that uses shared randomness with Bob's behaviour given by $\query(\cdot)$, for every choice of shared random string $R$ of Alice and Bob, for every $S, T\subset S$, the following conditions hold. If $\pi$ is a uniformly random permutation, the success or failure of $\query(M, \mathbf{1}_{\pi(T)})$ is determined by $\{\pi(j)\}_{j\in T}$ and the image $\pi(S\setminus T)$ of $S\setminus T$ under $\pi$. Conditioned on a choice of $R$, $\{\pi(j)\}_{j\in T}$ and $\pi(S\setminus T)$ such that $\query(M, \mathbf{1}_{\pi(T)})$ succeeds, one has that $\pi^{-1}(\query(M, \mathbf{1}_{\pi(T)}))$ is a uniformly random element of $S\setminus T$.
 \end{claim}
-The (simple) proof is deferred to the full version~\cite{KapralovNPWWY17} due to space constraints.
 
 \if 0 \begin{proof}
 The first claim follows by noting that the message $M$ that Alice sends to Bob is solely a function of $R$ and $\pi(S)$. The behaviour of Bob is determined by $M$ and $\pi(T)$ (and the latter is determined by $\{\pi(j)\}_{j\in T}$).
@@ -86,30 +86,31 @@ where the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\
 \fi
 
 
-\paragraph{Elements in $S_{j}, j<i^*,$ are unlikely to be recovered.} Given Claim~\ref{cl:uniform}, since the elements of $S_j$ appear with frequency $100^j$ in $S\backslash T$, they are less likely to be returned by $\pi^{-1}(\widetilde{\query}(M, \mathbf{1}_{\pi(T)}))$ when $j$ is small.  More precisely, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, for any $1\le j< i^*$
+\textbf{Elements in $S_{j}, j<i^*,$ are unlikely to be recovered.} Given Claim~\ref{cl:uniform}, since the elements of $S_j$ appear with frequency $100^j$ in $S\backslash T$, they are less likely to be returned by $\pi^{-1}(\widetilde{\query}(M, \mathbf{1}_{\pi(T)}))$ for small $j$.  Specifically, as long as $|S_{i^*}\cap T_{i^*}|\geq m/2$, for any $j< i^*$
 \begin{equation}
 \begin{split}
-\Pr(i = j | (R, \{\pi(j)\}_{j\in T}, \pi(S\setminus T)) \\ \text{~s.t.~}\widetilde{\query}(M, \mathbf{1}_{\pi(T)})\text{~succeeds})& \le \frac{m\cdot 100^j}{\frac m2\cdot 100^{i^*}}\\
+ \Pr(i = j | (R, \{\pi(j)\}_{j\in T}, \pi(S\setminus T)) \\ \text{~s.t.~}\widetilde{\query}(M, \mathbf{1}_{\pi(T)})\text{~succeeds})& \le \frac{m\cdot 100^j}{\frac m2\cdot 100^{i^*}}\\
 & \le 2\cdot 100^{-(i^*-j)} \\
 &\le 50^{-(i^*-j)} . \label{eqn:others-unlikely}
 \end{split}
 \end{equation}
 Here again the probability is over the choice of $\pi|_{S\setminus T}:(S\setminus T)\to \pi(S\setminus T)$ (recall that we condition on the image $\pi(S\setminus T)$ under $\pi$, but not on the actual mapping).
 
-We now define the set $\mathcal{T}$ of {\bf typical intermediate sets}, which plays a crucial role in our analysis.  Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/4^{i^*-i}$, such that if $T$ contains $\{(i, a, b)\}$ for some $a\in S_i$ and $b\in [100^i]$, then $T$ contains $\{(i, b)\times [100^i]\}$.  The following claim will be useful:
+We now define the set $\mathcal{T}$ of {\bf typical intermediate sets}, which plays a crucial role in our analysis.  Let $Q_i$ for $i\in [L]$ denote $\{i\} \times S_i \times [100^i]$. Let $\mathcal{T}$ be the collection of all $T\subset S$ such that (1) $Q_i\subset T$ for all $i>i^*$, and (2) for each $i < i^*$, $|T\cap Q_i| \le 100^i\cdot  m/4^{i^*-i}$, such that if $T$ contains $\{(i, a, b)\}$ for some $a\in S_i$ and $b\in [100^i]$, then $T$ contains $\{(i, b)\times [100^i]\}$.  The following claim is proven in the full version:
 \begin{claim}\label{cl:size-of-t}
 For the set $\mathcal{T}$ defined above one has $|\mathcal{T}|=2^{O(m)}$.
 \end{claim}
-\begin{proof}
-\begin{align*}
-|\mathcal T| &\le 2^m \cdot \prod_{i=1}^{i^*-1}\left(\sum_{r=0}^{\frac m{4^{i^*-i}}} \binom mr\right) \\
-{}&\text{ (the }2^m\text{ term comes from }S_{i^*}\text{)}\\
-{}&\le 2^m \cdot \prod_{i=1}^{i^*-1} \binom{m + \frac m{4^{i^* - i}}}{\frac m{2^{i^* - i}}}\\
-{}&\le 2^m \cdot \prod_{i=1}^{i^*-1} (2e\cdot 4^{i^*-i})^{\frac m{4^{i^* - i}}}\text{ (using }\binom nk \le (en/k)^k\textrm{)}\\
-{}&\le 2^{O(m)} \cdot 2^{m\cdot O(\sum_{j=1}^\infty j 4^{-j})} \\
-{}& \le 2^{O(m)}
-\end{align*}
-\end{proof}
+% \begin{proof}
+% \allowdisplaybreaks
+% \begin{align*}
+% |\mathcal T| &\le 2^m \cdot \prod_{i=1}^{i^*-1}\left(\sum_{r=0}^{\frac m{4^{i^*-i}}} \binom mr\right) \\
+% {}&\text{ (the }2^m\text{ term comes from }S_{i^*}\text{)}\\
+% {}&\le 2^m \cdot \prod_{i=1}^{i^*-1} \binom{m + \frac m{4^{i^* - i}}}{\frac m{2^{i^* - i}}}\\
+% {}&\le 2^m \cdot \prod_{i=1}^{i^*-1} (2e\cdot 4^{i^*-i})^{\frac m{4^{i^* - i}}}\text{ (using }\binom nk \le (en/k)^k\textrm{)}\\
+% {}&\le 2^{O(m)} \cdot 2^{m\cdot O(\sum_{j=1}^\infty j 4^{-j})} \\
+% {}& \le 2^{O(m)}
+% \end{align*}
+% \end{proof}
 
 
 We will show that for most choices of $\pi$ and shared random string $R$ Algorithm~\ref{algo:diane1} {\bf (a)} never leaves the set $\mathcal{T}$ and {\bf (b)} successfully terminates.  Note that Algorithm~\ref{algo:diane1} is a random process whose sample space is the product of the set of all possible permutations $\pi$ and shared random strings $R$. As before, we denote this process by $\mathcal{P}'$. It is useful for analysis purposes to define another process $\widetilde{\mathcal{P}}$, which is an idealized version of $\mathcal{P}'$. In this process instead of running  $\query(M, \mathbf{1}_{\pi(T)})$ Alice runs  $\widetilde{\query}(M, \mathbf{1}_{\pi(T)})$, which is guaranteed to output an element of $\pi(S\setminus T)$ for every choice of  $T\subset S$, shared random string $R$, $\{\pi(j)\}_{j\in T}$, and $\pi(S\setminus T)$. The proof proceeds in three steps.
@@ -154,4 +155,4 @@ For any $0<\delta<1/2$ and integer $n\ge 1$, $\randcom^{\rightarrow,pub}_\delta(
 \end{corollary}
 
 
-In the full version~\cite{KapralovNPWWY17} we use similar, but slightly simpler, ideas to lower bounding $\randcom^{\rightarrow,pub}_{\frac 15}(\ur_k^\subset)$. The details are omitted due to space constraints and are given in~\cite{KapralovNPWWY17}.
+In the full version~\cite{KapralovNPWWY17} we use similar, but slightly simpler, ideas to lower bound $\randcom^{\rightarrow,pub}_{\frac 15}(\ur_k^\subset)$. 
